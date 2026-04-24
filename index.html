@@ -158,6 +158,35 @@ header {
   transition: transform 400ms var(--ease-bloom),
               opacity   500ms var(--ease-bloom);
   /* no border, no shadow, no radius per spec */
+  overflow: hidden; /* clip the title scrim (::before) to the chip box */
+}
+/* Title readability scrim: a soft diagonal dark gradient behind the title
+   zone only. On light/mixed chip backgrounds (where white 65% title text
+   fades out) the scrim restores legibility without touching the rest of
+   the chip body. Dark pure-theme chips already have enough contrast and
+   the low-opacity gradient sits quietly on them. */
+.chip::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+.chip.title-scrim-left::before {
+  left: 0;
+  width: 62%;
+  height: 38%;
+  background: linear-gradient(135deg,
+    rgba(0,0,0,0.28) 0%,
+    rgba(0,0,0,0)   78%);
+}
+.chip.title-scrim-right::before {
+  right: 0;
+  width: 32%;
+  height: 72%;
+  background: linear-gradient(225deg,
+    rgba(0,0,0,0.28) 0%,
+    rgba(0,0,0,0)   78%);
 }
 .chip:focus { outline: none; }
 /* tap-selected state: subtle scale to indicate preview is open for this chip */
@@ -2330,6 +2359,9 @@ function buildChipEl(chip, x, y, chipW, chipH, sz, placedIdx, animIdx, isClone) 
     titleEl.dataset.mt = chip.mediaType;
     titleEl.textContent = chip.title;
     el.appendChild(titleEl);
+    /* B: tag the chip so .chip::before paints the title-readability scrim
+       in the correct corner (top-left for horizontal, top-right for tategaki) */
+    el.classList.add(isVertical ? 'title-scrim-right' : 'title-scrim-left');
   }
 
   /* E3 — source dots for multi-theme chips only */
