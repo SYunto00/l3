@@ -19,6 +19,11 @@ export default {
     const url = new URL(request.url);
     const path = url.pathname;
 
+    /* ── OPTIONS preflight ── */
+    if (request.method === 'OPTIONS') {
+      return new Response(null, { status: 204, headers: CORS_HEADERS });
+    }
+
     /* ── /api/content ── */
     if (path === '/api/content' && request.method === 'GET') {
       return handleGetContent(env);
@@ -42,6 +47,27 @@ export default {
     if (mediaReplaceMatch && request.method === 'PUT') {
       const id = mediaReplaceMatch[1];
       return handleReplaceMedia(request, env, id);
+    }
+
+    /* ── /api/comments ── */
+    if (path === '/api/comments' && request.method === 'GET') {
+      return handleGetComments(request, env);
+    }
+    if (path === '/api/comments' && request.method === 'POST') {
+      return handlePostComment(request, env);
+    }
+
+    /* ── /api/admin/comments ── */
+    if (path === '/api/admin/comments' && request.method === 'GET') {
+      return handleAdminGetComments(request, env);
+    }
+
+    /* ── /api/comments/:id ── */
+    const commentMatch = path.match(/^\/api\/comments\/([^/]+)$/);
+    if (commentMatch) {
+      const id = commentMatch[1];
+      if (request.method === 'DELETE') return handleDeleteComment(request, env, id);
+      if (request.method === 'PATCH')  return handlePatchComment(request, env, id);
     }
 
     /* ── /media/<key> ── */
@@ -822,6 +848,267 @@ async function handleReplaceMedia(request, env, id) {
   return corsResponse(JSON.stringify({ ok: true, entry: updated }), {
     status: 200,
     headers: { 'Content-Type': 'application/json' },
+  });
+}
+
+/* ==========================================================================
+   COMMENTS — helpers
+   ========================================================================== */
+
+const NG_WORDS = ['fuck', 'shit', 'bitch', 'asshole', 'クソ', '氏ね', '死ね', 'ばか死', 'カス', '消えろ'];
+
+async function readComments(env) {
+  try {
+    const obj = await env.MEDIA.get('comments.json');
+    if (!obj) return [];
+    return JSON.parse(await obj.text());
+  } catch (_) {
+    return [];
+  }
+}
+
+async function writeComments(env, comments) {
+  await env.MEDIA.put('comments.json', JSON.stringify(comments), {
+    httpMetadata: { contentType: 'application/json' },
+  });
+}
+
+function stripIp(comment) {
+  const { ip: _ip, ...rest } = comment;
+  return rest;
+}
+
+/* ==========================================================================
+   GET /api/comments?workId=X  (public)
+   ========================================================================== */
+async function handleGetComments(request, env) {
+  const url = new URL(request.url);
+  const workId = url.searchParams.get('workId') || '';
+
+  const all = await readComments(env);
+
+  const filtered = all
+    .filter(c => c.workId === workId && c.status === 'approved')
+    .sort((a, b) => (b.createdAt > a.createdAt ? 1 : b.createdAt < a.createdAt ? -1 : 0))
+    .map(stripIp);
+
+  return corsResponse(JSON.stringify(filtered), {
+    headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' },
+  });
+}
+
+/* ==========================================================================
+   POST /api/comments  (public, rate-limited)
+   ========================================================================== */
+async function handlePostComment(request, env) {
+  /* ── Rate limit ── */
+  const IP_LIMITS = globalThis.__ipLimits || (globalThis.__ipLimits = new Map());
+  const ip = request.headers.get('cf-connecting-ip') || 'unknown';
+  const now = Date.now();
+  const last = IP_LIMITS.get(ip) || 0;
+  if (now - last < 30000) {
+    return corsResponse(JSON.stringify({ ok: false, error: '投稿間隔が短すぎます（30秒待ってください）' }), {
+      status: 429,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  /* ── Parse body ── */
+  let body;
+  try {
+    body = await request.json();
+  } catch (_) {
+    return corsResponse(JSON.stringify({ ok: false, error: 'Invalid JSON' }), {
+      status: 400, headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  const { workId, color, text: rawText } = body || {};
+  const text = typeof rawText === 'string' ? rawText.trim() : '';
+
+  /* ── Validate workId ── */
+  if (!workId || typeof workId !== 'string') {
+    return corsResponse(JSON.stringify({ ok: false, error: 'workId is required' }), {
+      status: 400, headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  /* Check workId exists in content.json */
+  try {
+    const contentObj = await env.MEDIA.get('content.json');
+    const entries = contentObj ? JSON.parse(await contentObj.text()) : [...INITIAL_CONTENT];
+    if (!entries.find(e => e.id === workId)) {
+      return corsResponse(JSON.stringify({ ok: false, error: 'workId not found' }), {
+        status: 400, headers: { 'Content-Type': 'application/json' },
+      });
+    }
+  } catch (_) {
+    /* If content.json unreadable, fall back to INITIAL_CONTENT check */
+    if (!INITIAL_CONTENT.find(e => e.id === workId)) {
+      return corsResponse(JSON.stringify({ ok: false, error: 'workId not found' }), {
+        status: 400, headers: { 'Content-Type': 'application/json' },
+      });
+    }
+  }
+
+  /* ── Validate color ── */
+  if (!color || !/^#[0-9A-Fa-f]{6}$/.test(color)) {
+    return corsResponse(JSON.stringify({ ok: false, error: 'color must be #RRGGBB' }), {
+      status: 400, headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  /* ── Validate text length ── */
+  if (text.length < 2 || text.length > 140) {
+    return corsResponse(JSON.stringify({ ok: false, error: 'テキストは2〜140文字で入力してください' }), {
+      status: 400, headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  /* ── NG word filter ── */
+  const lower = text.toLowerCase();
+  const ngHit = NG_WORDS.find(w => lower.includes(w.toLowerCase()));
+  if (ngHit) {
+    return corsResponse(JSON.stringify({ ok: false, error: '使用できない言葉が含まれています' }), {
+      status: 400, headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  /* ── Record rate limit ── */
+  IP_LIMITS.set(ip, now);
+
+  /* ── Build comment ── */
+  const comment = {
+    id: crypto.randomUUID(),
+    workId,
+    color,
+    text,
+    createdAt: new Date().toISOString(),
+    ip,
+    status: 'approved',
+  };
+
+  /* ── Append to comments.json ── */
+  const comments = await readComments(env);
+  comments.push(comment);
+  try {
+    await writeComments(env, comments);
+  } catch (err) {
+    console.error('writeComments error:', err);
+    return corsResponse(JSON.stringify({ ok: false, error: '保存に失敗しました' }), {
+      status: 500, headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  return corsResponse(JSON.stringify({ ok: true, comment: stripIp(comment) }), {
+    status: 201, headers: { 'Content-Type': 'application/json' },
+  });
+}
+
+/* ==========================================================================
+   GET /api/admin/comments  (auth)
+   Returns full list including ip and all statuses.
+   ========================================================================== */
+async function handleAdminGetComments(request, env) {
+  const authHeader = request.headers.get('Authorization') || '';
+  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
+  if (!env.ADMIN_TOKEN || token !== env.ADMIN_TOKEN) {
+    return corsResponse(JSON.stringify({ ok: false, error: 'Unauthorized' }), {
+      status: 401, headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  const comments = await readComments(env);
+  /* Sort newest first */
+  comments.sort((a, b) => (b.createdAt > a.createdAt ? 1 : b.createdAt < a.createdAt ? -1 : 0));
+
+  return corsResponse(JSON.stringify(comments), {
+    headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' },
+  });
+}
+
+/* ==========================================================================
+   DELETE /api/comments/:id  (auth)
+   ========================================================================== */
+async function handleDeleteComment(request, env, id) {
+  const authHeader = request.headers.get('Authorization') || '';
+  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
+  if (!env.ADMIN_TOKEN || token !== env.ADMIN_TOKEN) {
+    return corsResponse(JSON.stringify({ ok: false, error: 'Unauthorized' }), {
+      status: 401, headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  const comments = await readComments(env);
+  const idx = comments.findIndex(c => c.id === id);
+  if (idx === -1) {
+    return corsResponse(JSON.stringify({ ok: false, error: 'Not found' }), {
+      status: 404, headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  comments.splice(idx, 1);
+  try {
+    await writeComments(env, comments);
+  } catch (err) {
+    return corsResponse(JSON.stringify({ ok: false, error: '保存に失敗しました' }), {
+      status: 500, headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  return corsResponse(JSON.stringify({ ok: true }), {
+    status: 200, headers: { 'Content-Type': 'application/json' },
+  });
+}
+
+/* ==========================================================================
+   PATCH /api/comments/:id  (auth)
+   Body: { status: 'approved' | 'rejected' }
+   ========================================================================== */
+async function handlePatchComment(request, env, id) {
+  const authHeader = request.headers.get('Authorization') || '';
+  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
+  if (!env.ADMIN_TOKEN || token !== env.ADMIN_TOKEN) {
+    return corsResponse(JSON.stringify({ ok: false, error: 'Unauthorized' }), {
+      status: 401, headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  let patch;
+  try {
+    patch = await request.json();
+  } catch (_) {
+    return corsResponse(JSON.stringify({ ok: false, error: 'Invalid JSON' }), {
+      status: 400, headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  const { status } = patch || {};
+  if (!['approved', 'rejected'].includes(status)) {
+    return corsResponse(JSON.stringify({ ok: false, error: 'status must be "approved" or "rejected"' }), {
+      status: 400, headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  const comments = await readComments(env);
+  const idx = comments.findIndex(c => c.id === id);
+  if (idx === -1) {
+    return corsResponse(JSON.stringify({ ok: false, error: 'Not found' }), {
+      status: 404, headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  comments[idx] = { ...comments[idx], status };
+  try {
+    await writeComments(env, comments);
+  } catch (err) {
+    return corsResponse(JSON.stringify({ ok: false, error: '保存に失敗しました' }), {
+      status: 500, headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  return corsResponse(JSON.stringify({ ok: true, comment: comments[idx] }), {
+    status: 200, headers: { 'Content-Type': 'application/json' },
   });
 }
 

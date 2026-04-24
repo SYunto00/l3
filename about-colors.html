@@ -65,7 +65,7 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(253,252,249,0.92);
+  background: rgba(227,219,209,0.92);  /* #E3DBD1 — matches index.html header */
   border-bottom: 1px solid var(--line);
 }
 
@@ -1521,20 +1521,22 @@ function renderMixingZone() {
 /* ── PENTAGON PHYSICS SIMULATION (Section 1) ── */
 
 /* Physics constants */
-const SPRING_CENTER = 0.12;  // spring stiffness for center body (anchor-like)
+const SPRING_CENTER = 0.08;  // spring stiffness for center body (softly anchored)
 const SPRING_OUTER  = 0;     // no return spring for outer bodies — free drift
-const COUPLING_K  = 0.03;   // stronger coupling so ropes pull balls back when stretched
-const DAMPING     = 0.97;   // velocity damping per frame (more viscous, slower decay)
-const BROWNIAN_F  = 0.04;   // random ambient force magnitude (gentler water currents)
+const COUPLING_K  = 0.01;   // loose ropes, less restoring pull
+const DAMPING     = 0.99;   // nearly frictionless — velocity persists long
+const BROWNIAN_F  = 0.015;  // extremely subtle water current
 const CENTER_MASS = 3.0;    // center acts as anchor
 const OUTER_MASS  = 1.0;
 const OUTER_COLLISION_K = 0.15; // outer-outer soft contact repulsion
-const IMPULSE_MAG = 8;      // tap impulse magnitude
+const IMPULSE_MAG = 4;      // soft push
 
 /* Bodies: 0-4 = outer circles, 5 = center circle */
 let bodies = [];
 /* SVG path elements (curved ropes), one per outer circle (center→outer) */
 let svgLines = [];
+/* Rope midpoint physics bodies — one per rope, for chain-like water behavior */
+let ropeMids = [];
 /* rAF handle */
 let _physicsRafId = null;
 /* Whether the opening section is in viewport */
@@ -1625,6 +1627,18 @@ function initBodies() {
       svgLines.push(path);
     });
   }
+
+  /* Rope midpoints — each has independent physics for dramatic chain-like sag */
+  ropeMids = [];
+  const centerBody = bodies[5];
+  for (let i = 0; i < 5; i++) {
+    const outer = bodies[i];
+    ropeMids.push({
+      x: (centerBody.x + outer.x) / 2,
+      y: (centerBody.y + outer.y) / 2,
+      vx: 0, vy: 0,
+    });
+  }
 }
 
 function physicsStep() {
@@ -1707,7 +1721,7 @@ function physicsStep() {
   }
 
   /* Integrate */
-  const MAX_V = 4;
+  const MAX_V = 1.5;
   for (let i = 0; i < N; i++) {
     const b = bodies[i];
     b.vx = (b.vx + fx[i] / b.mass) * DAMPING;
@@ -1734,30 +1748,45 @@ function physicsStep() {
         b.el.style.transform = `translate(${dx.toFixed(2)}px, ${dy.toFixed(2)}px)`;
       }
     }
-    /* Update SVG rope paths (outer circles only, index 0-4) with curved Bezier */
-    if (i < 5 && svgLines[i]) {
-      const ox = b.x;
-      const oy = b.y;
+  }
+
+  /* Update each rope midpoint as independent physics body (chain/ocean wave behavior) */
+  for (let i = 0; i < 5; i++) {
+    const rm = ropeMids[i];
+    const outer = bodies[i];
+
+    // Target is the geometric midpoint
+    const targetX = (centerBody.x + outer.x) / 2;
+    const targetY = (centerBody.y + outer.y) / 2;
+
+    // Weak spring toward target (rope resists extreme stretching)
+    const ROPE_MID_SPRING = 0.025;
+    rm.vx += (targetX - rm.x) * ROPE_MID_SPRING;
+    rm.vy += (targetY - rm.y) * ROPE_MID_SPRING;
+
+    // Gravity (constant downward pull)
+    rm.vy += 0.12;
+
+    // Subtle Brownian (water currents)
+    rm.vx += (Math.random() * 2 - 1) * 0.04;
+    rm.vy += (Math.random() * 2 - 1) * 0.04;
+
+    // Heavy damping (viscous water)
+    rm.vx *= 0.97;
+    rm.vy *= 0.97;
+
+    // Integrate
+    rm.x += rm.vx;
+    rm.y += rm.vy;
+
+    // Render Bezier curve using rm as control point
+    if (svgLines[i]) {
       const cBx = centerBody.x;
       const cBy = centerBody.y;
-      /* Midpoint between center and outer */
-      const midX = (cBx + ox) / 2;
-      const midY = (cBy + oy) / 2;
-      /* Perpendicular direction to the line */
-      const lineDx = ox - cBx;
-      const lineDy = oy - cBy;
-      const len = Math.hypot(lineDx, lineDy) || 1;
-      const perpX = -lineDy;
-      const perpY =  lineDx;
-      /* Physics-influenced control point: trails behind ball motion + gravity droop + idle oscillation */
-      const velDragX = -b.vx * 4;  // control lags behind ball motion
-      const velDragY = -b.vy * 4;
-      const gravityDroop = 5;       // always droop down a bit
-      const sagOscillation = Math.sin(now / 1200 + i * Math.PI / 3) * 2; // subtle idle oscillation
-      const qcX = midX + perpX / len * (sagOscillation) + velDragX;
-      const qcY = midY + perpY / len * (sagOscillation) + velDragY + gravityDroop;
+      const ox = outer.x;
+      const oy = outer.y;
       svgLines[i].setAttribute('d',
-        `M${cBx.toFixed(2)} ${cBy.toFixed(2)} Q${qcX.toFixed(2)} ${qcY.toFixed(2)} ${ox.toFixed(2)} ${oy.toFixed(2)}`
+        `M${cBx.toFixed(2)} ${cBy.toFixed(2)} Q${rm.x.toFixed(2)} ${rm.y.toFixed(2)} ${ox.toFixed(2)} ${oy.toFixed(2)}`
       );
     }
   }

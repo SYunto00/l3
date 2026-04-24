@@ -1090,6 +1090,153 @@ body.is-scrolling .chip { pointer-events: none; }
   transform: translateY(0) !important;
 }
 
+/* ── DETAIL COMMENTS ── */
+.detail-comments {
+  max-width: min(640px, 92vw);
+  margin: 48px auto 0;
+  padding: 32px 16px 0;
+  border-top: 1px solid rgba(26,26,26,0.08);
+  text-align: left;
+}
+.detail-comments-title {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(26,26,26,0.55);
+  margin-bottom: 20px;
+}
+#detail-comments-list .comment-item {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 400ms cubic-bezier(0.22,1,0.36,1),
+              padding 400ms cubic-bezier(0.22,1,0.36,1),
+              margin 400ms cubic-bezier(0.22,1,0.36,1);
+}
+#detail-comments-list .comment-item .comment-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 3px;
+  border: 1px solid rgba(26,26,26,0.12);
+}
+#detail-comments-list .comment-item .comment-text {
+  font-family: "Zen Kaku Gothic New", sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#detail-comments-list .comment-item.expanded .comment-text {
+  white-space: normal;
+}
+#detail-comments-list .comment-item.expanded {
+  background: rgba(0,0,0,0.02);
+  padding: 8px 12px;
+  margin-left: -12px;
+  margin-right: -12px;
+}
+.detail-comments-empty {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: rgba(26,26,26,0.35);
+  padding: 8px 0;
+}
+.detail-comments-form {
+  margin-top: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+#detail-comments-label {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(26,26,26,0.55);
+}
+#detail-color-picker {
+  border: 1px solid rgba(26,26,26,0.08);
+  cursor: crosshair;
+  border-radius: 4px;
+  touch-action: none;
+  display: block;
+}
+#detail-color-preview {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: rgba(26,26,26,0.55);
+}
+#detail-color-dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid rgba(0,0,0,0.15);
+  flex-shrink: 0;
+  background: #ccc;
+}
+.detail-comments-input-row {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+}
+#detail-comment-text {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid rgba(26,26,26,0.08);
+  border-radius: 4px;
+  font-family: "Zen Kaku Gothic New", sans-serif;
+  font-size: 14px;
+  background: transparent;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 150ms ease;
+  -webkit-appearance: none;
+  appearance: none;
+}
+#detail-comment-text:focus {
+  border-color: rgba(26,26,26,0.3);
+}
+#detail-comment-submit {
+  background: #1A1A1A;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition: opacity 150ms ease;
+  flex-shrink: 0;
+}
+#detail-comment-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+#detail-comment-submit:not(:disabled):hover { opacity: 0.75; }
+#detail-comment-status {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: rgba(26,26,26,0.55);
+  min-height: 18px;
+}
+
 /* P9 — rise overlay kept for close-reverse animation */
 #rise-overlay {
   position: fixed;
@@ -2399,6 +2546,31 @@ function buildDetailContent(chip, idx) {
   /* Media first (photo/video/audio at top), body caption text below */
   if (mediaEl) detailBody.appendChild(mediaEl);
   detailBody.appendChild(textWrap);
+
+  /* ── Comment section ── */
+  const commentSection = document.createElement('section');
+  commentSection.className = 'detail-comments';
+  commentSection.innerHTML = `
+    <h3 class="detail-comments-title">COMMENTS <span id="detail-comments-count">—</span></h3>
+    <div id="detail-comments-list"></div>
+    <div class="detail-comments-form">
+      <div id="detail-comments-label">YOUR MARK</div>
+      <canvas id="detail-color-picker" width="240" height="160"></canvas>
+      <div id="detail-color-preview">
+        <span id="detail-color-dot"></span>
+        <span id="detail-color-hex">#—</span>
+      </div>
+      <div class="detail-comments-input-row">
+        <input id="detail-comment-text" placeholder="一言" maxlength="140" autocomplete="off">
+        <button id="detail-comment-submit" disabled>投稿</button>
+      </div>
+      <div id="detail-comment-status"></div>
+    </div>`;
+  detailBody.appendChild(commentSection);
+
+  /* Init color picker (draws on new canvas) and load comments */
+  initColorPicker();
+  loadComments(chip.id);
 }
 
 /* ===================================================================
@@ -2589,6 +2761,16 @@ function closeDetail() {
   if (backdrop) backdrop.classList.remove('active');
   /* Also clean up any lingering preview state */
   if (typeof onLeave === 'function') onLeave();
+  /* Task 1 fix: reset drift-pause flags so horizontal drift resumes on mobile
+     after chip → detail → close sequence. wheelScrolling may have been set true
+     by the touch handler that triggered the tap and never cleared, because the
+     momentum RAF either never ran (short tap) or still holds the flag. */
+  wheelScrolling = false;
+  if (typeof _momentumRafId !== 'undefined' && _momentumRafId) {
+    cancelAnimationFrame(_momentumRafId);
+    _momentumRafId = null;
+  }
+  driftPaused = false;
 
   /* t=0: fade content stacks simultaneously over 500ms */
   [
@@ -3098,6 +3280,242 @@ document.addEventListener('keydown', (e) => {
     closeDrawer();
   }
 });
+
+/* ===================================================================
+   DETAIL COMMENTS
+   =================================================================== */
+
+/* Track the currently picked color (#RRGGBB or null) */
+let _pickedColor = null;
+
+/* ── initColorPicker ── */
+/* Called each time a detail opens; re-draws on the freshly created canvas. */
+function initColorPicker() {
+  const canvas = document.getElementById('detail-color-picker');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width;
+  const H = canvas.height;
+
+  /* 1. horizontal hue gradient */
+  const hueGrad = ctx.createLinearGradient(0, 0, W, 0);
+  hueGrad.addColorStop(0,    '#ff0000');
+  hueGrad.addColorStop(0.17, '#ff8800');
+  hueGrad.addColorStop(0.33, '#ffee00');
+  hueGrad.addColorStop(0.5,  '#00cc00');
+  hueGrad.addColorStop(0.67, '#00cccc');
+  hueGrad.addColorStop(0.83, '#0088ff');
+  hueGrad.addColorStop(1,    '#aa00ff');
+  ctx.fillStyle = hueGrad;
+  ctx.fillRect(0, 0, W, H);
+
+  /* 2. top-to-bottom darkness gradient (black at top) */
+  const darkGrad = ctx.createLinearGradient(0, 0, 0, H);
+  darkGrad.addColorStop(0, 'rgba(0,0,0,1)');
+  darkGrad.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = darkGrad;
+  ctx.fillRect(0, 0, W, H);
+
+  /* Reset picked color; reset dot/hex display */
+  _pickedColor = null;
+  const dotEl = document.getElementById('detail-color-dot');
+  const hexEl = document.getElementById('detail-color-hex');
+  if (dotEl) dotEl.style.background = '#ccc';
+  if (hexEl) hexEl.textContent = '#—';
+
+  /* Update submit button state */
+  updateSubmitBtn();
+
+  /* Bind pick events */
+  function pickAt(evt) {
+    evt.preventDefault();
+    const rect = canvas.getBoundingClientRect();
+    let cx, cy;
+    if (evt.touches) {
+      cx = evt.touches[0].clientX - rect.left;
+      cy = evt.touches[0].clientY - rect.top;
+    } else {
+      cx = evt.clientX - rect.left;
+      cy = evt.clientY - rect.top;
+    }
+    /* Clamp */
+    const px = Math.max(0, Math.min(W - 1, Math.round(cx * (W / rect.width))));
+    const py = Math.max(0, Math.min(H - 1, Math.round(cy * (H / rect.height))));
+
+    /* Read pixel */
+    const [r, g, b] = ctx.getImageData(px, py, 1, 1).data;
+    const hex = '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('').toUpperCase();
+    _pickedColor = hex;
+
+    /* Update preview */
+    if (dotEl) dotEl.style.background = hex;
+    if (hexEl) hexEl.textContent = hex;
+
+    /* Draw ring indicator */
+    ctx.clearRect(0, 0, W, H);
+    /* Re-draw base */
+    ctx.fillStyle = hueGrad;
+    ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = darkGrad;
+    ctx.fillRect(0, 0, W, H);
+    /* Ring */
+    ctx.beginPath();
+    ctx.arc(px, py, 6, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(px, py, 6, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(0,0,0,0.4)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    updateSubmitBtn();
+  }
+
+  canvas.addEventListener('click', pickAt);
+  canvas.addEventListener('touchstart', pickAt, { passive: false });
+}
+
+function updateSubmitBtn() {
+  const btn = document.getElementById('detail-comment-submit');
+  const txt = document.getElementById('detail-comment-text');
+  if (!btn || !txt) return;
+  const hasColor = !!_pickedColor;
+  const hasText  = txt.value.trim().length >= 2;
+  btn.disabled = !(hasColor && hasText);
+}
+
+/* Bind text input live validation (once; re-binding after each openDetail is fine
+   because the element is recreated each time via innerHTML) */
+document.addEventListener('input', (e) => {
+  if (e.target && e.target.id === 'detail-comment-text') {
+    updateSubmitBtn();
+  }
+});
+
+/* ── loadComments ── */
+async function loadComments(workId) {
+  if (!workId) return;
+  const listEl   = document.getElementById('detail-comments-list');
+  const countEl  = document.getElementById('detail-comments-count');
+  if (!listEl) return;
+
+  listEl.innerHTML = '<span class="detail-comments-empty">読み込み中…</span>';
+  if (countEl) countEl.textContent = '—';
+
+  try {
+    const res = await fetch(`/api/comments?workId=${encodeURIComponent(workId)}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const comments = await res.json();
+    renderComments(comments, workId);
+  } catch (err) {
+    if (listEl) listEl.innerHTML = `<span class="detail-comments-empty">読み込みエラー</span>`;
+    console.warn('[L3 comments] load error:', err);
+  }
+}
+
+/* ── renderComments ── */
+function renderComments(comments, workId) {
+  const listEl  = document.getElementById('detail-comments-list');
+  const countEl = document.getElementById('detail-comments-count');
+  if (!listEl) return;
+
+  if (countEl) countEl.textContent = comments.length || '0';
+
+  if (!comments.length) {
+    listEl.innerHTML = '<span class="detail-comments-empty">まだコメントはありません</span>';
+  } else {
+    listEl.innerHTML = '';
+    comments.forEach(c => listEl.appendChild(buildCommentItem(c)));
+  }
+
+  /* Bind submit button for this workId (always — even for empty list) */
+  const submitBtn = document.getElementById('detail-comment-submit');
+  if (submitBtn) {
+    /* Remove previous listeners by cloning */
+    const fresh = submitBtn.cloneNode(true);
+    submitBtn.replaceWith(fresh);
+    fresh.addEventListener('click', () => submitComment(workId));
+  }
+}
+
+/* ── buildCommentItem ── */
+function buildCommentItem(c) {
+  const item = document.createElement('div');
+  item.className = 'comment-item';
+
+  const dot = document.createElement('span');
+  dot.className = 'comment-dot';
+  dot.style.background = c.color || '#ccc';
+
+  const txt = document.createElement('span');
+  txt.className = 'comment-text';
+  txt.textContent = c.text || '';
+
+  item.appendChild(dot);
+  item.appendChild(txt);
+
+  /* Expand / collapse on click */
+  item.addEventListener('click', () => {
+    const isExpanded = item.classList.contains('expanded');
+    /* Collapse all others */
+    const list = document.getElementById('detail-comments-list');
+    if (list) list.querySelectorAll('.comment-item.expanded').forEach(el => el.classList.remove('expanded'));
+    if (!isExpanded) item.classList.add('expanded');
+  });
+
+  return item;
+}
+
+/* ── submitComment ── */
+async function submitComment(workId) {
+  if (!_pickedColor) return;
+  const textEl   = document.getElementById('detail-comment-text');
+  const statusEl = document.getElementById('detail-comment-status');
+  const submitBtn = document.getElementById('detail-comment-submit');
+  if (!textEl || !statusEl || !submitBtn) return;
+
+  const text = textEl.value.trim();
+  if (text.length < 2 || text.length > 140) {
+    if (statusEl) statusEl.textContent = '2〜140文字で入力してください';
+    return;
+  }
+
+  submitBtn.disabled = true;
+  if (statusEl) statusEl.textContent = '投稿中…';
+
+  try {
+    const res = await fetch('/api/comments', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ workId, color: _pickedColor, text }),
+    });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || `HTTP ${res.status}`);
+
+    /* Clear input */
+    textEl.value = '';
+    _pickedColor = null;
+    const dotEl = document.getElementById('detail-color-dot');
+    const hexEl = document.getElementById('detail-color-hex');
+    if (dotEl) dotEl.style.background = '#ccc';
+    if (hexEl) hexEl.textContent = '#—';
+    /* Re-init picker to reset ring */
+    initColorPicker();
+
+    if (statusEl) statusEl.textContent = 'コメントを投稿しました';
+    setTimeout(() => { if (statusEl) statusEl.textContent = ''; }, 3000);
+
+    /* Reload comments */
+    await loadComments(workId);
+  } catch (err) {
+    const msg = err.message || '投稿に失敗しました';
+    if (statusEl) statusEl.textContent = msg;
+    submitBtn.disabled = false;
+    updateSubmitBtn();
+  }
+}
 </script>
 </body>
 </html>

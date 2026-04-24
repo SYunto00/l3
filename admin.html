@@ -799,6 +799,94 @@ select {
   letter-spacing: 0.04em;
   color: var(--c-nature);
 }
+
+/* ── COMMENT ROWS ── */
+.comment-row {
+  border-bottom: 1px solid var(--line-solid);
+  padding: 12px 0;
+}
+.comment-row:first-child { border-top: 1px solid var(--line-solid); }
+.comment-row-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.comment-color-dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 1px solid rgba(26,26,26,0.12);
+  margin-top: 2px;
+}
+.comment-text-wrap { flex: 1; min-width: 0; }
+.comment-text-full {
+  font-family: "Noto Sans JP", sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink);
+  word-break: break-all;
+  margin-bottom: 4px;
+}
+.comment-meta-line {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: var(--ink-mute);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.comment-status-badge {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: var(--radius);
+  display: inline-block;
+  margin-left: 6px;
+}
+.comment-status-badge.approved { background: rgba(135,169,107,0.15); color: var(--c-nature); }
+.comment-status-badge.rejected { background: rgba(217,122,74,0.12); color: var(--c-system); }
+.comment-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+  align-items: flex-start;
+}
+.btn-comment-delete {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  background: none;
+  border: 1px solid var(--line-solid);
+  border-radius: var(--radius);
+  padding: 4px 9px;
+  cursor: pointer;
+  color: var(--ink-mute);
+  transition: color 120ms, border-color 120ms, background 120ms;
+  white-space: nowrap;
+}
+.btn-comment-delete:hover { color: #C0392B; border-color: #C0392B; background: rgba(192,57,43,0.05); }
+.btn-comment-toggle {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  background: none;
+  border: 1px solid var(--line-solid);
+  border-radius: var(--radius);
+  padding: 4px 9px;
+  cursor: pointer;
+  color: var(--ink-mute);
+  transition: color 120ms, border-color 120ms;
+  white-space: nowrap;
+}
+.btn-comment-toggle:hover { color: var(--ink); border-color: var(--accent); }
+.btn-comment-toggle.is-approved { border-color: rgba(135,169,107,0.5); color: var(--c-nature); }
+.btn-comment-toggle.is-rejected { border-color: rgba(217,122,74,0.5); color: var(--c-system); }
 </style>
 </head>
 <body>
@@ -811,8 +899,9 @@ select {
 
 <!-- ── TAB BAR ── -->
 <nav class="tab-bar" role="tablist">
-  <button class="tab-btn" role="tab" aria-selected="true"  aria-controls="panel-post"  id="tab-post">投稿</button>
-  <button class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-list"  id="tab-list">一覧</button>
+  <button class="tab-btn" role="tab" aria-selected="true"  aria-controls="panel-post"     id="tab-post">投稿</button>
+  <button class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-list"     id="tab-list">一覧</button>
+  <button class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-comments" id="tab-comments">コメント</button>
 </nav>
 
 <!-- ── TAB: 投稿 ── -->
@@ -1016,6 +1105,24 @@ select {
     </div>
   </div>
 </div><!-- /panel-list -->
+
+<!-- ── TAB: コメント ── -->
+<div class="tab-panel" id="panel-comments" role="tabpanel" aria-labelledby="tab-comments">
+  <div class="list-container">
+    <div class="list-toolbar">
+      <span class="list-count" id="comments-count">— 件</span>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <select id="comments-filter-work" style="width:auto;min-width:120px;font-size:11px;padding:5px 28px 5px 8px;">
+          <option value="all">すべて</option>
+        </select>
+        <button class="btn-reload" id="btn-reload-comments">再読込</button>
+      </div>
+    </div>
+    <div id="comments-body">
+      <div class="list-loading">コメント タブを開くと読み込みます</div>
+    </div>
+  </div>
+</div><!-- /panel-comments -->
 
 <div id="toast"></div>
 
@@ -1784,6 +1891,190 @@ function escAttr(str) { return escHtml(str); }
 
 /* Reload button */
 document.getElementById('btn-reload').addEventListener('click', loadList);
+
+/* ==========================================================================
+   COMMENTS TAB
+   ========================================================================== */
+
+let _commentsData = [];
+let _commentsLoaded = false;
+
+/* lazy-load when tab opened */
+tabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    const panelId = tab.getAttribute('aria-controls');
+    if (panelId === 'panel-comments' && !_commentsLoaded) {
+      loadComments();
+    }
+  });
+});
+document.getElementById('btn-reload-comments').addEventListener('click', () => loadComments());
+
+document.getElementById('comments-filter-work').addEventListener('change', () => {
+  renderCommentsList();
+});
+
+async function loadComments() {
+  _commentsLoaded = true;
+  const body    = document.getElementById('comments-body');
+  const counter = document.getElementById('comments-count');
+  body.innerHTML = '<div class="list-loading">読み込み中…</div>';
+  counter.textContent = '— 件';
+
+  const token = getActiveToken();
+  if (!token) {
+    body.innerHTML = '<div class="list-error">トークン未入力 — 投稿タブで設定してください</div>';
+    return;
+  }
+
+  try {
+    /* Fetch all comments via admin endpoint */
+    const res = await fetch('/api/admin/comments', {
+      headers: { 'Authorization': `Bearer ${token}` },
+    });
+    if (!res.ok) {
+      if (res.status === 401) throw new Error('認証エラー — トークンを確認してください');
+      throw new Error(`HTTP ${res.status}`);
+    }
+    _commentsData = await res.json();
+    counter.textContent = `${_commentsData.length} 件`;
+
+    /* Populate work-filter dropdown from content */
+    await populateWorkFilter();
+
+    renderCommentsList();
+  } catch (err) {
+    body.innerHTML = `<div class="list-error">読み込みエラー: ${escHtml(err.message)}</div>`;
+  }
+}
+
+async function populateWorkFilter() {
+  const sel = document.getElementById('comments-filter-work');
+  /* Keep first "すべて" option, remove others */
+  while (sel.options.length > 1) sel.remove(1);
+
+  try {
+    const res = await fetch('/api/content');
+    if (!res.ok) return;
+    const entries = await res.json();
+    entries.forEach(e => {
+      const opt = document.createElement('option');
+      opt.value = e.id;
+      opt.textContent = e.title || e.id;
+      sel.appendChild(opt);
+    });
+  } catch (_) { /* ignore */ }
+}
+
+function renderCommentsList() {
+  const body = document.getElementById('comments-body');
+  const sel  = document.getElementById('comments-filter-work');
+  const filterVal = sel.value;
+
+  const filtered = filterVal === 'all'
+    ? _commentsData
+    : _commentsData.filter(c => c.workId === filterVal);
+
+  if (!filtered.length) {
+    body.innerHTML = '<div class="list-loading">コメントがありません</div>';
+    return;
+  }
+
+  body.innerHTML = '';
+  filtered.forEach(c => body.appendChild(buildCommentRow(c)));
+}
+
+function buildCommentRow(c) {
+  const row = document.createElement('div');
+  row.className = 'comment-row';
+  row.dataset.id = c.id;
+
+  const dateStr  = c.createdAt ? new Date(c.createdAt).toLocaleString('ja-JP') : '—';
+  const statusCls = c.status === 'approved' ? 'approved' : 'rejected';
+  const statusLabel = c.status === 'approved' ? '承認' : '非承認';
+
+  /* Find work title from filter dropdown */
+  const sel = document.getElementById('comments-filter-work');
+  const matchOpt = [...sel.options].find(o => o.value === c.workId);
+  const workTitle = matchOpt ? matchOpt.textContent : (c.workId || '?');
+
+  const toggleClass = c.status === 'approved' ? 'is-approved' : 'is-rejected';
+  const toggleLabel = c.status === 'approved' ? '→ 非承認' : '→ 承認';
+
+  row.innerHTML = `
+    <div class="comment-row-main">
+      <span class="comment-color-dot" style="background:${escHtml(c.color || '#ccc')};"></span>
+      <div class="comment-text-wrap">
+        <div class="comment-text-full">${escHtml(c.text || '')}</div>
+        <div class="comment-meta-line">
+          ${escHtml(dateStr)}
+          <span class="work-meta-dot">·</span>${escHtml(workTitle)}
+          <span class="work-meta-dot">·</span>${escHtml(c.ip || '—')}
+          <span class="comment-status-badge ${statusCls}">${statusLabel}</span>
+        </div>
+      </div>
+      <div class="comment-actions">
+        <button class="btn-comment-toggle ${toggleClass}" type="button">${escHtml(toggleLabel)}</button>
+        <button class="btn-comment-delete" type="button">削除</button>
+      </div>
+    </div>`;
+
+  row.querySelector('.btn-comment-delete').addEventListener('click', () => deleteComment(c.id, row));
+  row.querySelector('.btn-comment-toggle').addEventListener('click', () => {
+    const newStatus = c.status === 'approved' ? 'rejected' : 'approved';
+    toggleCommentStatus(c.id, newStatus, row, c);
+  });
+
+  return row;
+}
+
+async function deleteComment(id, row) {
+  const token = getActiveToken();
+  if (!token) { showToast('トークン未入力', true); return; }
+  if (!confirm('このコメントを削除しますか？')) return;
+
+  try {
+    const res = await fetch(`/api/comments/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${token}` },
+    });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || `HTTP ${res.status}`);
+
+    row.remove();
+    _commentsData = _commentsData.filter(c => c.id !== id);
+    document.getElementById('comments-count').textContent = `${_commentsData.length} 件`;
+    showToast('削除しました');
+  } catch (err) {
+    showToast(err.message || '削除に失敗しました', true);
+  }
+}
+
+async function toggleCommentStatus(id, newStatus, row, c) {
+  const token = getActiveToken();
+  if (!token) { showToast('トークン未入力', true); return; }
+
+  try {
+    const res = await fetch(`/api/comments/${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ status: newStatus }),
+    });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || `HTTP ${res.status}`);
+
+    /* Update in-memory and re-render row */
+    const idx = _commentsData.findIndex(x => x.id === id);
+    if (idx !== -1) {
+      _commentsData[idx] = data.comment;
+      const newRow = buildCommentRow(data.comment);
+      row.replaceWith(newRow);
+    }
+    showToast('ステータスを更新しました');
+  } catch (err) {
+    showToast(err.message || '更新に失敗しました', true);
+  }
+}
 </script>
 </body>
 </html>
