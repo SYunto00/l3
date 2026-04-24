@@ -183,21 +183,23 @@ header {
 }
 
 /* ── CHIP TITLE (inside chip) ──
-   Shape-aware:
-     - horizontal (W > H): top-left, horizontal text
-     - vertical   (H > W): top-right, vertical-rl (Japanese tategaki)
-     - square     (W === H): top-left, horizontal text
-   Color is white-ish with text-shadow for legibility across all theme colors. */
+   Font matches .chip-glyph (IBM Plex Mono + Noto Sans JP fallback) so the
+   glyph word at bottom-right and the title form a unified type family.
+   Shape-aware placement:
+     - horizontal (W >= H): top-left, horizontal text
+     - vertical   (H > W):  top-right, vertical-rl (Japanese tategaki)
+   The decorative stripe that used to sit at the bottom of the chip has been
+   moved to serve as this title's underline via ::after. */
 .chip-title {
   position: absolute;
   pointer-events: none;
   user-select: none;
-  color: rgba(255, 255, 255, 0.94);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.22), 0 0 4px rgba(0, 0, 0, 0.12);
-  font-family: "Noto Sans JP", sans-serif;
-  font-weight: 500;
+  color: rgba(255, 255, 255, 0.88);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.22), 0 0 4px rgba(0, 0, 0, 0.10);
+  font-family: "IBM Plex Mono", "Noto Sans JP", monospace;
+  font-weight: 400;
   font-size: 13px;
-  line-height: 1.35;
+  line-height: 1.4;
   letter-spacing: 0.02em;
   overflow: hidden;
   z-index: 1;
@@ -207,12 +209,13 @@ header {
   top: 12px;
   left: 12px;
   right: 12px;
-  max-height: 2.7em; /* ~2 lines */
+  max-height: 2.8em; /* ~2 lines */
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   white-space: normal;
   word-break: break-word;
+  padding-bottom: 6px; /* reserve space for ::after underline */
 }
 /* vertical: top-right, tategaki */
 .chip-title.title-vertical {
@@ -224,6 +227,7 @@ header {
   max-width: 2.8em; /* up to ~2 columns */
   white-space: nowrap;
   text-overflow: ellipsis;
+  padding-left: 6px; /* reserve space for ::after left-line in tategaki */
 }
 /* Shrink title on small chips so it stays readable without overflow */
 .chip-title.title-size-s {
@@ -232,6 +236,55 @@ header {
 }
 .chip-title.title-size-m {
   font-size: 12px;
+}
+
+/* Decorative underline under the title — inherits the old .chip-stripe
+   media-type patterns so the existing visual language survives the move. */
+.chip-title::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+}
+.chip-title.title-horizontal::after {
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+}
+.chip-title.title-vertical::after {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 2px;
+}
+
+/* Horizontal stripe patterns (linear-gradient direction = 90deg) */
+.chip-title.title-horizontal[data-mt="text"]::after  { background: rgba(255,255,255,0.4); }
+.chip-title.title-horizontal[data-mt="video"]::after { background: rgba(255,255,255,0.4); height: 3px; }
+.chip-title.title-horizontal[data-mt="photo"]::after {
+  background: repeating-linear-gradient(90deg,
+    rgba(255,255,255,0.4) 0, rgba(255,255,255,0.4) 6px,
+    transparent 6px, transparent 10px);
+}
+.chip-title.title-horizontal[data-mt="audio"]::after {
+  background: repeating-linear-gradient(90deg,
+    rgba(255,255,255,0.4) 0, rgba(255,255,255,0.4) 2px,
+    transparent 2px, transparent 6px);
+}
+
+/* Vertical stripe patterns (rotated: direction = 0deg so the pattern repeats
+   along the vertical axis of the tategaki column). */
+.chip-title.title-vertical[data-mt="text"]::after  { background: rgba(255,255,255,0.4); }
+.chip-title.title-vertical[data-mt="video"]::after { background: rgba(255,255,255,0.4); width: 3px; }
+.chip-title.title-vertical[data-mt="photo"]::after {
+  background: repeating-linear-gradient(0deg,
+    rgba(255,255,255,0.4) 0, rgba(255,255,255,0.4) 6px,
+    transparent 6px, transparent 10px);
+}
+.chip-title.title-vertical[data-mt="audio"]::after {
+  background: repeating-linear-gradient(0deg,
+    rgba(255,255,255,0.4) 0, rgba(255,255,255,0.4) 2px,
+    transparent 2px, transparent 6px);
 }
 
 /* caption + trail wrapper — sits outside the chip, below it */
@@ -823,31 +876,9 @@ header {
   display: none;
 }
 
-/* ── P3 — bottom stripe ──
-   left-aligned so it sits to the LEFT of the .chip-glyph word without overlap.
-   `right` leaves clearance for the longest glyph ("photo"/"video"/"audio" ≈ 48px
-   at 16px mono + 8px right padding + ~6px breathing room). */
-.chip-stripe {
-  position: absolute;
-  bottom: 10px;
-  left: 10px;
-  right: 62px;
-  height: 2px;
-  pointer-events: none;
-}
-.chip-stripe[data-mt="text"]  { background: rgba(255,255,255,0.35); }
-.chip-stripe[data-mt="photo"] {
-  background: repeating-linear-gradient(90deg,
-    rgba(255,255,255,0.35) 0, rgba(255,255,255,0.35) 6px,
-    transparent 6px, transparent 10px);
-}
-.chip-stripe[data-mt="video"] { background: rgba(255,255,255,0.35); height: 3px; }
-.chip-stripe[data-mt="audio"] {
-  background: repeating-linear-gradient(90deg,
-    rgba(255,255,255,0.35) 0, rgba(255,255,255,0.35) 2px,
-    transparent 2px, transparent 6px);
-}
-/* music stripe removed — music collapsed into audio */
+/* Note: the old `.chip-stripe` bottom decoration has been removed. Its
+   media-type patterns now serve as the underline under .chip-title via
+   ::after (see CHIP TITLE section). */
 
 /* ── P6 — left sidebar legend ── */
 #theme-sidebar {
@@ -2257,23 +2288,19 @@ function buildChipEl(chip, x, y, chipW, chipH, sz, placedIdx, animIdx, isClone) 
   el.appendChild(glyph);
 
   /* Title inside chip — orientation follows chip shape.
-     - horizontal (W > H): horizontal text, top-left, 2-line clamp
-     - vertical   (H > W): tategaki (vertical-rl), top-right
-     - square     (W === H): horizontal, top-left */
+     - horizontal (W >= H): horizontal text, top-left, 2-line clamp
+     - vertical   (H > W):  tategaki (vertical-rl), top-right
+     The former bottom stripe has been removed; its media-type pattern now
+     lives as the title's underline (::after in CSS). */
   if (chip.title) {
     const titleEl = document.createElement('div');
     const isVertical = chipH > chipW;
     const sizeClass = chip.size === 'S' ? ' title-size-s' : (chip.size === 'M' ? ' title-size-m' : '');
     titleEl.className = 'chip-title ' + (isVertical ? 'title-vertical' : 'title-horizontal') + sizeClass;
+    titleEl.dataset.mt = chip.mediaType;
     titleEl.textContent = chip.title;
     el.appendChild(titleEl);
   }
-
-  /* P3 — bottom stripe */
-  const stripe = document.createElement('div');
-  stripe.className = 'chip-stripe';
-  stripe.dataset.mt = chip.mediaType;
-  el.appendChild(stripe);
 
   /* E3 — source dots for multi-theme chips only */
   const srcColors = getChipSourceColors(chip.theme);
@@ -2980,7 +3007,7 @@ function closeDetail() {
     setTimeout(() => {
       chipEl.style.transition = '';
       chipEl.style.zIndex     = '';
-      chipEl.querySelectorAll('.chip-glyph,.chip-stripe,.chip-caption').forEach(el => {
+      chipEl.querySelectorAll('.chip-glyph,.chip-title,.chip-caption').forEach(el => {
         el.style.transition = '';
         el.style.opacity    = '';
       });
