@@ -1131,26 +1131,44 @@ select {
    L3 Admin — client-side JS
    ========================================================================== */
 
-/* ── Token management ── */
+/* ── Token management ──
+   Mobile Safari / ITP can wipe localStorage or clear a `type=password`
+   input's .value once its tab-panel toggles display:none. To keep the
+   token available across tabs on mobile, we keep a JS-scope variable
+   (`_activeToken`) as the authoritative source of truth. localStorage
+   and the input are still used for persistence + UX, but reads tolerate
+   failures (private mode, quota, etc). */
 const TOKEN_KEY = 'l3_admin_token';
 const tokenInput  = document.getElementById('field-token');
 const tokenStatus = document.getElementById('token-status');
+let _activeToken = '';
+
+function safeLocalGet(key) {
+  try { return localStorage.getItem(key); } catch { return null; }
+}
+function safeLocalSet(key, val) {
+  try { localStorage.setItem(key, val); } catch { /* private mode / quota */ }
+}
+function safeLocalRemove(key) {
+  try { localStorage.removeItem(key); } catch { /* noop */ }
+}
 
 function loadToken() {
-  /* Also accept ?token= URL param (one-time convenience; does NOT save) */
+  /* Also accept ?token= URL param (one-time convenience) */
   const params = new URLSearchParams(window.location.search);
   const urlToken = params.get('token');
   if (urlToken) {
+    _activeToken = urlToken;
     tokenInput.value = urlToken;
-    /* Save it to localStorage and strip from URL */
-    localStorage.setItem(TOKEN_KEY, urlToken);
+    safeLocalSet(TOKEN_KEY, urlToken);
     const cleanUrl = window.location.pathname;
     history.replaceState(null, '', cleanUrl);
     setTokenStatus('ok', 'URLパラメータから読み込み、保存しました');
     return;
   }
-  const saved = localStorage.getItem(TOKEN_KEY);
+  const saved = safeLocalGet(TOKEN_KEY);
   if (saved) {
+    _activeToken = saved;
     tokenInput.value = saved;
     setTokenStatus('ok', 'localstorage から自動ロード済み');
   }
@@ -1164,12 +1182,14 @@ function setTokenStatus(state, msg) {
 document.getElementById('btn-save-token').addEventListener('click', () => {
   const val = tokenInput.value.trim();
   if (!val) { setTokenStatus('error', 'トークンが空です'); return; }
-  localStorage.setItem(TOKEN_KEY, val);
+  _activeToken = val;
+  safeLocalSet(TOKEN_KEY, val);
   setTokenStatus('ok', '保存しました');
 });
 
 document.getElementById('btn-clear-token').addEventListener('click', () => {
-  localStorage.removeItem(TOKEN_KEY);
+  _activeToken = '';
+  safeLocalRemove(TOKEN_KEY);
   tokenInput.value = '';
   setTokenStatus('', '消去しました');
 });
@@ -1396,7 +1416,8 @@ function uploadWithProgress(formData, token) {
     xhr.addEventListener('load', () => {
       if (xhr.status >= 200 && xhr.status < 300) {
         /* Also save token now that we know it works */
-        localStorage.setItem(TOKEN_KEY, token);
+        _activeToken = token;
+        safeLocalSet(TOKEN_KEY, token);
         setTokenStatus('ok', '認証成功 — localstorage に保存しました');
         resolve(JSON.parse(xhr.responseText));
       } else {
@@ -1866,13 +1887,26 @@ function hideEditError(panel) {
   if (el) el.style.display = 'none';
 }
 
-/* ── Token retrieval (robust: falls back to localStorage if input is empty) ── */
+/* ── Token retrieval (robust for mobile Safari) ──
+   Priority:
+     1. JS module var `_activeToken` (survives display:none / autofill wipes)
+     2. input field .value
+     3. localStorage (tolerates private-mode / ITP failures)
+   First non-empty wins; writes back to all layers so later calls hit layer 1. */
 function getActiveToken() {
   const fromInput = (tokenInput.value || '').trim();
-  if (fromInput) return fromInput;
-  const fromStorage = (localStorage.getItem(TOKEN_KEY) || '').trim();
+  if (fromInput) {
+    _activeToken = fromInput;
+    return fromInput;
+  }
+  if (_activeToken) {
+    tokenInput.value = _activeToken; /* restore input if wiped */
+    return _activeToken;
+  }
+  const fromStorage = (safeLocalGet(TOKEN_KEY) || '').trim();
   if (fromStorage) {
-    tokenInput.value = fromStorage; /* sync back to input */
+    _activeToken = fromStorage;
+    tokenInput.value = fromStorage;
     return fromStorage;
   }
   return '';

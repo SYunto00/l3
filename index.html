@@ -771,13 +771,15 @@ header {
   display: none;
 }
 
-/* ── P3 — bottom stripe ── */
+/* ── P3 — bottom stripe ──
+   left-aligned so it sits to the LEFT of the .chip-glyph word without overlap.
+   `right` leaves clearance for the longest glyph ("photo"/"video"/"audio" ≈ 48px
+   at 16px mono + 8px right padding + ~6px breathing room). */
 .chip-stripe {
   position: absolute;
   bottom: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 60%;
+  left: 10px;
+  right: 62px;
   height: 2px;
   pointer-events: none;
 }
@@ -1290,20 +1292,27 @@ body.is-scrolling .chip { pointer-events: none; }
   min-height: 18px;
 }
 
-/* ── CHIP COMMENT TRAILS ── */
+/* ── CHIP COMMENT TRAILS ──
+   inside chip, bottom-right, stacked just above the .chip-glyph word
+   (glyph occupies bottom 6px → 22px; trail sits at bottom 28px, same right edge) */
 .chip-comment-trail {
-  position: static;
+  position: absolute;
+  bottom: 28px;
+  right: 8px;
   display: flex;
-  gap: 2px;
-  margin-top: 4px;
-  justify-content: flex-end;
+  gap: 3px;
   pointer-events: none;
+  z-index: 2;
+  max-width: calc(100% - 16px);
+  flex-wrap: wrap-reverse;
+  justify-content: flex-end;
 }
 .chip-trail-dot {
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  box-shadow: 0 0 0 0.5px rgba(0,0,0,0.15);
+  box-shadow: 0 0 0 0.5px rgba(0,0,0,0.22), 0 0 0 1px rgba(255,255,255,0.35);
+  flex-shrink: 0;
 }
 
 /* P9 — rise overlay kept for close-reverse animation */
@@ -3310,11 +3319,12 @@ async function loadAllChipComments() {
   }
 }
 
-/* Inject trail dots into all currently-rendered primary chips (below caption in wrap) */
+/* Inject trail dots into all currently-rendered primary chips
+   (placed inside the chip at bottom-right, above the glyph) */
 function injectChipTrails() {
-  allPlaced.forEach(({ chip, wrap }) => {
+  allPlaced.forEach(({ chip, el }) => {
     /* remove any existing trail (idempotent) */
-    const existing = wrap ? wrap.querySelector('.chip-comment-trail') : null;
+    const existing = el ? el.querySelector('.chip-comment-trail') : null;
     if (existing) existing.remove();
 
     const colors = commentsByWork[chip.id] || [];
@@ -3328,7 +3338,7 @@ function injectChipTrails() {
       dot.style.background = color;
       trail.appendChild(dot);
     });
-    if (wrap) wrap.appendChild(trail);
+    if (el) el.appendChild(trail);
   });
 }
 
@@ -3339,10 +3349,10 @@ function updateChipTrail(workId, newColor) {
   /* prepend new color (most-recent first), cap at 7 */
   commentsByWork[workId] = [newColor, ...existing].slice(0, 7);
   /* re-inject only the chip(s) matching this workId */
-  allPlaced.forEach(({ chip, wrap }) => {
+  allPlaced.forEach(({ chip, el }) => {
     if (chip.id !== workId) return;
-    if (!wrap) return;
-    const old = wrap.querySelector('.chip-comment-trail');
+    if (!el) return;
+    const old = el.querySelector('.chip-comment-trail');
     if (old) old.remove();
     const colors = commentsByWork[workId];
     if (!colors.length) return;
@@ -3354,7 +3364,7 @@ function updateChipTrail(workId, newColor) {
       dot.style.background = color;
       trail.appendChild(dot);
     });
-    wrap.appendChild(trail);
+    el.appendChild(trail);
   });
 }
 
