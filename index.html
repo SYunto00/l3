@@ -194,10 +194,12 @@ header {
   position: absolute;
   pointer-events: none;
   user-select: none;
-  color: rgba(255, 255, 255, 0.88);
-  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.18);
-  /* Match .chip-caption exactly (IBM Plex Mono + JP system fallback) for a
-     unified thin, airy feel with the date/tag line below the chip. */
+  /* Match .chip-glyph exactly: same alpha (0.65) and no text-shadow so the
+     title inherits the faded, "半紙 (hanshi)" washed-ink texture that the
+     bottom-right media-type word already carries. */
+  color: rgba(255, 255, 255, 0.65);
+  /* Match .chip-caption (IBM Plex Mono + JP system fallback) for a unified
+     thin, airy feel with the date/tag line below the chip. */
   font-family: "IBM Plex Mono", monospace;
   font-weight: 400;
   font-size: 13px;
