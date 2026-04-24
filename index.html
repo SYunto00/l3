@@ -66,7 +66,7 @@ header {
   justify-content: space-between;
   align-items: flex-start;
   pointer-events: none;
-  background: rgba(253,252,249,0.92);
+  background: rgba(227,219,209,0.92); /* #E3DBD1 */
   backdrop-filter: none; /* no glassmorphism */
 }
 .wordmark {
@@ -802,7 +802,7 @@ header {
   gap: 28px;
   max-width: 160px;
   pointer-events: all;
-  background: rgba(253, 252, 249, 0.78);
+  background: rgba(227, 219, 209, 0.78); /* #E3DBD1 */
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   padding: 120px 16px 20px 24px;
@@ -978,7 +978,7 @@ body.is-scrolling .chip { pointer-events: none; }
     width: min(280px, 80vw);
     max-width: none;
     padding: 80px 16px 32px 24px;
-    background: rgba(253, 252, 249, 0.98);
+    background: rgba(227, 219, 209, 0.98); /* #E3DBD1 */
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-right: 1px solid rgba(26, 26, 26, 0.08);
@@ -2582,6 +2582,13 @@ function closeDetail() {
 
   detailClose.classList.remove('visible');
   detailClose.style.display = 'none'; /* belt-and-suspenders: force hide immediately */
+
+  /* Fix: dismiss mobile preview backdrop that may have been left active when preview
+     auto-upgraded to detail view (openDetail clears preview state but not backdrop) */
+  const backdrop = document.getElementById('preview-backdrop');
+  if (backdrop) backdrop.classList.remove('active');
+  /* Also clean up any lingering preview state */
+  if (typeof onLeave === 'function') onLeave();
 
   /* t=0: fade content stacks simultaneously over 500ms */
   [

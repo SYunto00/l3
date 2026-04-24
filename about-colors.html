@@ -1524,12 +1524,12 @@ function renderMixingZone() {
 const SPRING_CENTER = 0.12;  // spring stiffness for center body (anchor-like)
 const SPRING_OUTER  = 0;     // no return spring for outer bodies — free drift
 const COUPLING_K  = 0.03;   // stronger coupling so ropes pull balls back when stretched
-const DAMPING     = 0.95;   // velocity damping per frame (more viscous, slower decay)
-const BROWNIAN_F  = 0.10;   // random ambient force magnitude (gentler water currents)
+const DAMPING     = 0.97;   // velocity damping per frame (more viscous, slower decay)
+const BROWNIAN_F  = 0.04;   // random ambient force magnitude (gentler water currents)
 const CENTER_MASS = 3.0;    // center acts as anchor
 const OUTER_MASS  = 1.0;
 const OUTER_COLLISION_K = 0.15; // outer-outer soft contact repulsion
-const IMPULSE_MAG = 20;     // tap impulse magnitude
+const IMPULSE_MAG = 8;      // tap impulse magnitude
 
 /* Bodies: 0-4 = outer circles, 5 = center circle */
 let bodies = [];
@@ -1707,7 +1707,7 @@ function physicsStep() {
   }
 
   /* Integrate */
-  const MAX_V = 8;
+  const MAX_V = 4;
   for (let i = 0; i < N; i++) {
     const b = bodies[i];
     b.vx = (b.vx + fx[i] / b.mass) * DAMPING;
@@ -1749,10 +1749,13 @@ function physicsStep() {
       const len = Math.hypot(lineDx, lineDy) || 1;
       const perpX = -lineDy;
       const perpY =  lineDx;
-      /* Animated sag: oscillates gently per rope */
-      const sag = 8 + Math.sin(now / 1000 + i * Math.PI / 3) * 4;
-      const qcX = midX + perpX / len * sag;
-      const qcY = midY + perpY / len * sag;
+      /* Physics-influenced control point: trails behind ball motion + gravity droop + idle oscillation */
+      const velDragX = -b.vx * 4;  // control lags behind ball motion
+      const velDragY = -b.vy * 4;
+      const gravityDroop = 5;       // always droop down a bit
+      const sagOscillation = Math.sin(now / 1200 + i * Math.PI / 3) * 2; // subtle idle oscillation
+      const qcX = midX + perpX / len * (sagOscillation) + velDragX;
+      const qcY = midY + perpY / len * (sagOscillation) + velDragY + gravityDroop;
       svgLines[i].setAttribute('d',
         `M${cBx.toFixed(2)} ${cBy.toFixed(2)} Q${qcX.toFixed(2)} ${qcY.toFixed(2)} ${ox.toFixed(2)} ${oy.toFixed(2)}`
       );
