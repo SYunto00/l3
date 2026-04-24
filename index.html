@@ -195,44 +195,60 @@ header {
   pointer-events: none;
   user-select: none;
   color: rgba(255, 255, 255, 0.88);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.22), 0 0 4px rgba(0, 0, 0, 0.10);
-  font-family: "IBM Plex Mono", "Noto Sans JP", monospace;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.18);
+  /* Match .chip-caption exactly (IBM Plex Mono + JP system fallback) for a
+     unified thin, airy feel with the date/tag line below the chip. */
+  font-family: "IBM Plex Mono", monospace;
   font-weight: 400;
   font-size: 13px;
   line-height: 1.4;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   overflow: hidden;
   z-index: 1;
 }
-/* horizontal + square: top-left, two-line ellipsis */
+/* horizontal + square: top-left, underline sized to text width (max-content)
+   so the stripe hugs the title length rather than spanning the whole chip. */
 .chip-title.title-horizontal {
-  top: 12px;
-  left: 12px;
-  right: 12px;
+  top: 6px;
+  left: 6px;
+  max-width: calc(100% - 12px);
+  width: max-content;
   max-height: 2.8em; /* ~2 lines */
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   white-space: normal;
   word-break: break-word;
-  padding-bottom: 6px; /* reserve space for ::after underline */
+  padding-bottom: 2px; /* tight gap between text and ::after underline */
 }
-/* vertical: top-right, tategaki */
+/* vertical: top-right, tategaki; height sized to text length */
 .chip-title.title-vertical {
-  top: 12px;
-  right: 12px;
-  bottom: 40px; /* leave clearance for glyph + trail at bottom-right */
+  top: 6px;
+  right: 6px;
+  max-height: calc(100% - 48px); /* keep clearance for glyph + trail */
+  height: max-content;
   writing-mode: vertical-rl;
   -webkit-writing-mode: vertical-rl;
   max-width: 2.8em; /* up to ~2 columns */
   white-space: nowrap;
   text-overflow: ellipsis;
-  padding-left: 6px; /* reserve space for ::after left-line in tategaki */
+  padding-left: 2px; /* tight gap between text and ::after left-line */
 }
-/* Shrink title on small chips so it stays readable without overflow */
+/* Shrink title on small chips + give them a touch more breathing room
+   from the chip edge (S chips are tight, extra 4px avoids visual crowding). */
 .chip-title.title-size-s {
   font-size: 11px;
   line-height: 1.3;
+}
+.chip-title.title-size-s.title-horizontal {
+  top: 10px;
+  left: 10px;
+  max-width: calc(100% - 20px);
+}
+.chip-title.title-size-s.title-vertical {
+  top: 10px;
+  right: 10px;
 }
 .chip-title.title-size-m {
   font-size: 12px;
@@ -895,9 +911,11 @@ header {
   background: rgba(227, 219, 209, 0.78); /* #E3DBD1 */
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  padding: 120px 16px 20px 24px;
+  /* Bottom-left anchored palette (was top-left). Items stay vertically
+     stacked; the whole group now clusters near the bottom of the viewport. */
+  padding: 20px 16px 60px 24px;
   border-right: 1px solid rgba(26, 26, 26, 0.08);
-  justify-content: flex-start;
+  justify-content: flex-end;
 }
 .sidebar-item {
   display: flex;
