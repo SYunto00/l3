@@ -860,6 +860,12 @@ document.getElementById('upload-form').addEventListener('submit', async (e) => {
     setFormError('トークンを入力してください（一番上のフィールド）');
     return;
   }
+  /* Validate token is pure ASCII (HTTP header requirement) */
+  if (!/^[\x21-\x7E]+$/.test(token)) {
+    const bad = [...token].filter(c => c.charCodeAt(0) > 126 || c.charCodeAt(0) < 33).map(c => c.charCodeAt(0).toString(16)).join(', ');
+    setFormError(`トークンに無効な文字が含まれています（非ASCII）: ${bad}\nトークンを再生成し、英数字のみでやり直してください。`);
+    return;
+  }
 
   const validationError = validateForm();
   if (validationError) {
