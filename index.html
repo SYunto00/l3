@@ -2397,8 +2397,8 @@ function buildChipEl(chip, x, y, chipW, chipH, sz, placedIdx, animIdx, isClone) 
       closeT = setTimeout(() => {
         shown = false;
         onLeave();
-        /* resume drift 1200ms after mouse-out */
-        setTimeout(() => { driftPaused = false; }, 1200);
+        /* resume drift immediately after preview-close debounce (200ms) */
+        driftPaused = false;
       }, 200);
     });
 
@@ -2600,7 +2600,7 @@ document.querySelector('.page').addEventListener('touchmove', (e) => {
   /* Dismiss preview when scroll drag starts (> 10px in any direction) */
   if (previewOpenForChipId !== null && (Math.abs(totalDx) > 10 || Math.abs(totalDy) > 10)) {
     onLeave();
-    setTimeout(() => { driftPaused = false; }, 1200);
+    driftPaused = false; /* resume drift immediately on preview dismiss */
   }
 
   if (_touchLocked !== 'x') return; /* let browser handle vertical pan */
@@ -3088,7 +3088,7 @@ document.addEventListener('click', (e) => {
 
   /* Outside click: dismiss preview */
   onLeave();
-  setTimeout(() => { driftPaused = false; }, 1200);
+  driftPaused = false; /* resume drift immediately on preview dismiss */
 });
 
 /* ===================================================================
@@ -3141,7 +3141,7 @@ document.addEventListener('keydown', (e) => {
     } else if (previewOpenForChipId !== null) {
       /* dismiss the preview panel */
       onLeave();
-      setTimeout(() => { driftPaused = false; }, 1200);
+      driftPaused = false; /* resume drift immediately on preview dismiss */
     } else {
       activeFilters.clear();
       document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
@@ -3586,7 +3586,7 @@ drawerBackdrop.addEventListener('click', closeDrawer);
 document.getElementById('preview-backdrop').addEventListener('click', () => {
   if (previewOpenForChipId !== null) {
     onLeave();
-    setTimeout(() => { driftPaused = false; }, 1200);
+    driftPaused = false; /* resume drift immediately on preview dismiss */
   }
 });
 
