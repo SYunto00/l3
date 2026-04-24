@@ -182,11 +182,16 @@ header {
   text-align: right;
 }
 
+/* caption + trail wrapper — sits outside the chip, below it */
+.chip-wrap {
+  position: absolute;
+  /* left/top set to match chip position via JS */
+  pointer-events: none;
+}
+
 /* caption below chip */
 .chip-caption {
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 0;
+  display: block;
   width: 280px; /* wider than chip, left-aligned */
   font-family: "IBM Plex Mono", monospace;
   font-size: 11px;
@@ -194,7 +199,6 @@ header {
   text-transform: uppercase;
   color: rgba(26, 26, 26, 0.7);
   white-space: nowrap;
-  pointer-events: none;
   user-select: none;
 }
 
@@ -1159,12 +1163,55 @@ body.is-scrolling .chip { pointer-events: none; }
   color: rgba(26,26,26,0.35);
   padding: 8px 0;
 }
+/* Collapsed state: "+ つぶやく" button */
+.btn-comment-expand {
+  font-family: "Noto Sans JP", sans-serif;
+  font-size: 13px;
+  color: rgba(26,26,26,0.55);
+  background: none;
+  border: 1px dashed rgba(26,26,26,0.18);
+  border-radius: 20px;
+  padding: 8px 18px;
+  cursor: pointer;
+  transition: color 200ms, border-color 200ms, background 200ms;
+  display: block;
+  margin: 20px auto 0;
+}
+.btn-comment-expand:hover {
+  color: #1A1A1A;
+  border-color: #988771;
+  background: rgba(227,219,209,0.4);
+}
+.detail-comments-form-collapsed.hidden { display: none; }
+
 .detail-comments-form {
-  margin-top: 32px;
-  display: flex;
+  display: none;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 400ms cubic-bezier(0.22,1,0.36,1), transform 400ms cubic-bezier(0.22,1,0.36,1);
+  position: relative;
+  margin-top: 20px;
   flex-direction: column;
   gap: 12px;
 }
+.detail-comments-form.open {
+  display: flex;
+  opacity: 1;
+  transform: translateY(0);
+}
+.btn-comment-collapse {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: rgba(26,26,26,0.55);
+  cursor: pointer;
+  padding: 4px 8px;
+  line-height: 1;
+}
+.btn-comment-collapse:hover { color: #1A1A1A; }
 #detail-comments-label {
   font-family: "IBM Plex Mono", monospace;
   font-size: 11px;
@@ -1245,13 +1292,12 @@ body.is-scrolling .chip { pointer-events: none; }
 
 /* ── CHIP COMMENT TRAILS ── */
 .chip-comment-trail {
-  position: absolute;
-  bottom: 5px;
-  right: 5px;
+  position: static;
   display: flex;
   gap: 2px;
+  margin-top: 4px;
+  justify-content: flex-end;
   pointer-events: none;
-  z-index: 2;
 }
 .chip-trail-dot {
   width: 5px;
@@ -2150,13 +2196,21 @@ function buildChipEl(chip, x, y, chipW, chipH, sz, placedIdx, animIdx, isClone) 
     el.appendChild(dots);
   }
 
-  /* P1 — caption: YYYY.M.D / tag */
+  /* P1 — caption + trail wrap: sits below the chip (not inside it) */
   const tagJP   = TAG_JP[chip.tag] || chip.tag;
   const dateStr = `${chip.year}.${chip.month}.${chip.day}`;
+  const wrap = document.createElement('div');
+  wrap.className = 'chip-wrap';
+  /* position the wrap just below the chip's bottom edge */
+  wrap.style.left = x + 'px';
+  wrap.style.top  = (y + chipH + 8) + 'px';
   const cap = document.createElement('div');
   cap.className   = 'chip-caption';
   cap.textContent = `${dateStr} / ${tagJP}`;
-  el.appendChild(cap);
+  wrap.appendChild(cap);
+  /* trail placeholder — will be populated by injectChipTrails() */
+  wrap._chipRef = el; /* link wrap → chip for trail injection */
+  el._capWrap = wrap; /* link chip → wrap for trail injection */
 
   /* Decision 3 γ / Tap-to-preview: hover intent (desktop mouse) + tap model (touch) */
   (function attachHoverIntent(chip, el, chipW, chipH, placedIdx) {
@@ -2247,7 +2301,7 @@ function buildChipEl(chip, x, y, chipW, chipH, sz, placedIdx, animIdx, isClone) 
     el.addEventListener('animationend', () => el.classList.remove('chip-loading'), { once: true });
   }
 
-  return el;
+  return { el, wrap };
 }
 
 function render() {
@@ -2286,13 +2340,15 @@ function render() {
     let animIdx = 0;
     placed.forEach(({ chip, x, y, sz, chipW, chipH }, placedIdx) => {
       /* primary copy */
-      const el = buildChipEl(chip, x, y, chipW, chipH, sz, placedIdx, animIdx++, false);
+      const { el, wrap } = buildChipEl(chip, x, y, chipW, chipH, sz, placedIdx, animIdx++, false);
       scatter.appendChild(el);
-      allPlaced.push({ chip, el, x, y, sz, chipW, chipH });
+      scatter.appendChild(wrap);
+      allPlaced.push({ chip, el, wrap, x, y, sz, chipW, chipH });
 
       /* clone copy (no animation) */
-      const elC = buildChipEl(chip, x, y, chipW, chipH, sz, placedIdx, 0, true);
+      const { el: elC, wrap: wrapC } = buildChipEl(chip, x, y, chipW, chipH, sz, placedIdx, 0, true);
       scatterClone.appendChild(elC);
+      scatterClone.appendChild(wrapC);
     });
   }
 
@@ -2573,12 +2629,17 @@ function buildDetailContent(chip, idx) {
   /* ── Comment section ── */
   const commentSection = document.createElement('section');
   commentSection.className = 'detail-comments';
+  const pickerH = window.innerWidth <= 768 ? 70 : 55;
   commentSection.innerHTML = `
     <h3 class="detail-comments-title">つぶやき</h3>
     <div id="detail-comments-list"></div>
-    <div class="detail-comments-form">
+    <div class="detail-comments-form-collapsed">
+      <button id="btn-comment-expand" class="btn-comment-expand" type="button">+ つぶやく</button>
+    </div>
+    <div class="detail-comments-form" id="detail-comments-form" aria-hidden="true">
+      <button class="btn-comment-collapse" type="button" id="btn-comment-collapse" aria-label="閉じる">×</button>
       <div id="detail-comments-label">YOUR MARK</div>
-      <canvas id="detail-color-picker" width="240" height="160"></canvas>
+      <canvas id="detail-color-picker" width="240" height="${pickerH}"></canvas>
       <div id="detail-color-preview">
         <span id="detail-color-dot"></span>
         <span id="detail-color-hex">#—</span>
@@ -2591,8 +2652,7 @@ function buildDetailContent(chip, idx) {
     </div>`;
   detailBody.appendChild(commentSection);
 
-  /* Init color picker (draws on new canvas) and load comments */
-  initColorPicker();
+  /* Load comments; color picker init deferred until form is expanded */
   loadComments(chip.id);
 }
 
@@ -3250,11 +3310,11 @@ async function loadAllChipComments() {
   }
 }
 
-/* Inject trail dots into all currently-rendered primary chips */
+/* Inject trail dots into all currently-rendered primary chips (below caption in wrap) */
 function injectChipTrails() {
-  allPlaced.forEach(({ chip, el }) => {
+  allPlaced.forEach(({ chip, wrap }) => {
     /* remove any existing trail (idempotent) */
-    const existing = el.querySelector('.chip-comment-trail');
+    const existing = wrap ? wrap.querySelector('.chip-comment-trail') : null;
     if (existing) existing.remove();
 
     const colors = commentsByWork[chip.id] || [];
@@ -3268,7 +3328,7 @@ function injectChipTrails() {
       dot.style.background = color;
       trail.appendChild(dot);
     });
-    el.appendChild(trail);
+    if (wrap) wrap.appendChild(trail);
   });
 }
 
@@ -3279,9 +3339,10 @@ function updateChipTrail(workId, newColor) {
   /* prepend new color (most-recent first), cap at 7 */
   commentsByWork[workId] = [newColor, ...existing].slice(0, 7);
   /* re-inject only the chip(s) matching this workId */
-  allPlaced.forEach(({ chip, el }) => {
+  allPlaced.forEach(({ chip, wrap }) => {
     if (chip.id !== workId) return;
-    const old = el.querySelector('.chip-comment-trail');
+    if (!wrap) return;
+    const old = wrap.querySelector('.chip-comment-trail');
     if (old) old.remove();
     const colors = commentsByWork[workId];
     if (!colors.length) return;
@@ -3293,7 +3354,7 @@ function updateChipTrail(workId, newColor) {
       dot.style.background = color;
       trail.appendChild(dot);
     });
-    el.appendChild(trail);
+    wrap.appendChild(trail);
   });
 }
 
@@ -3389,6 +3450,55 @@ document.addEventListener('keydown', (e) => {
    DETAIL COMMENTS
    =================================================================== */
 
+/* ── Comment form collapse/expand ── */
+function collapseCommentForm() {
+  const form = document.getElementById('detail-comments-form');
+  const collapsed = document.querySelector('.detail-comments-form-collapsed');
+  if (form && form.classList.contains('open')) {
+    form.classList.remove('open');
+    form.setAttribute('aria-hidden', 'true');
+    /* Hide display after transition ends (400ms) */
+    setTimeout(() => {
+      if (form && !form.classList.contains('open')) {
+        form.style.display = '';
+      }
+    }, 420);
+  }
+  if (collapsed) collapsed.classList.remove('hidden');
+}
+
+/* Global click handler for form expand/collapse/outside-dismiss */
+document.addEventListener('click', (e) => {
+  if (e.target && e.target.id === 'btn-comment-expand') {
+    const form = document.getElementById('detail-comments-form');
+    const collapsed = document.querySelector('.detail-comments-form-collapsed');
+    if (form) {
+      /* Step 1: set display:flex (opacity still 0, translateY still 8px) */
+      form.style.display = 'flex';
+      form.setAttribute('aria-hidden', 'false');
+      /* Step 2: next frame — add .open to trigger opacity+transform transition */
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          form.classList.add('open');
+        });
+      });
+    }
+    if (collapsed) collapsed.classList.add('hidden');
+    /* Re-draw color picker since canvas may have been hidden */
+    if (typeof initColorPicker === 'function') initColorPicker();
+  } else if (e.target && e.target.id === 'btn-comment-collapse') {
+    collapseCommentForm();
+  } else {
+    /* Outside click: collapse form if open and click was outside */
+    const form = document.getElementById('detail-comments-form');
+    if (form && form.classList.contains('open')) {
+      if (!form.contains(e.target) && !e.target.closest('.detail-comments-form-collapsed')) {
+        collapseCommentForm();
+      }
+    }
+  }
+});
+
 /* Track the currently picked color (#RRGGBB or null) */
 let _pickedColor = null;
 
@@ -3397,6 +3507,9 @@ let _pickedColor = null;
 function initColorPicker() {
   const canvas = document.getElementById('detail-color-picker');
   if (!canvas) return;
+  /* Set canvas pixel dimensions based on viewport */
+  canvas.width  = 240;
+  canvas.height = window.innerWidth <= 768 ? 70 : 55;
   const ctx = canvas.getContext('2d');
   const W = canvas.width;
   const H = canvas.height;
@@ -3622,6 +3735,9 @@ async function submitComment(workId) {
 
     if (statusEl) statusEl.textContent = 'コメントを投稿しました';
     setTimeout(() => { if (statusEl) statusEl.textContent = ''; }, 3000);
+
+    /* Collapse form after successful submit */
+    collapseCommentForm();
 
     /* Update chip trail for this work immediately from local state */
     updateChipTrail(workId, submittedColor);
