@@ -1196,57 +1196,114 @@ const MEDIA_JP = { text:'text', photo:'photo', video:'video', audio:'audio', mus
 const SZ = { L:320, M:200, S:120 };
 
 /* ===================================================================
-   24 CHIP DATASET — exactly ONE L (hero)
+   DATA — loaded dynamically from /api/content on page start.
+   Hardcoded array below serves as the local fallback if fetch fails
+   (e.g. offline, R2 not yet configured, local file:// dev).
+   The API returns entries in the new schema (id, themes[], date,
+   mediaKey …); this adapter normalises them to the legacy shape that
+   the rest of the render code expects.
    =================================================================== */
-const DATA = [
-  // ── HERO ──
-  { theme:'nature',              year:2026, month:4,  day:29, tag:'mountain',    mediaType:'photo',  size:'L',
-    title:'里山の稜線',      body:'夕暮れ時、稜線が紫に変わる瞬間を3年間追い続けた記録。光は毎回違う顔を見せた。' },
-  // ── M ──
-  { theme:'philosophy',          year:2026, month:3,  day:14, tag:'writing',     mediaType:'text',   size:'M',
-    title:'言葉の重力',      body:'書くことで思考が固まる。メモが草稿になり、草稿が問いになる過程を可視化する試み。' },
-  { theme:'system',              year:2025, month:11, day:3,  tag:'automation',  mediaType:'text',   size:'M',
-    title:'仕組みの骨格',    body:'毎朝繰り返す作業を0にした。人間がやらなくていいことは機械に任せる、その設計思想。' },
-  { theme:'education',           year:2024, month:9,  day:20, tag:'classroom',   mediaType:'video',  size:'M',
-    title:'教室の静けさ',    body:'問いが生まれる瞬間の静寂がある。答えの直前ではなく、問いの直前の空気。' },
-  { theme:'music',               year:2026, month:5,  day:7,  tag:'loop',        mediaType:'audio',  size:'M',
-    title:'8小節の宇宙',     body:'同じフレーズが繰り返されるたびに意味が変わる。ループは反復ではなく螺旋だ。' },
-  { theme:'nature×system',       year:2026, month:7,  day:4,  tag:'permaculture',mediaType:'text',   size:'M',
-    title:'森の設計論',      body:'自然のパターンを仕組みに変換する実験。里山のエッジ効果をシステム設計に援用する。' },
-  { theme:'philosophy',          year:2024, month:4,  day:12, tag:'identity',    mediaType:'text',   size:'M',
-    title:'場所なき自己',    body:'国籍でも言語でもない、第三の帰属感を探している。それはまだ言葉になっていない。' },
-  { theme:'philosophy',          year:2025, month:8,  day:25, tag:'translation', mediaType:'audio',  size:'M',
-    title:'翻訳の余白',      body:'訳せない言葉こそが文化の核心だ。その余白をどう渡すか、録音しながら考えた。' },
-  // ── S ──
-  { theme:'nature',              year:2024, month:7,  day:15, tag:'rain',        mediaType:'photo',  size:'S',
-    title:'雨の地図',        body:'同じ場所で1年間、雨を記録した。季節ごとに音が変わる。' },
-  { theme:'system',              year:2026, month:9,  day:3,  tag:'pipeline',    mediaType:'text',   size:'S',
-    title:'自動化の詩',      body:'コードが動く夜、私は何もしていない。それが設計の完成形だ。' },
-  { theme:'music',               year:2024, month:10, day:8,  tag:'silence',     mediaType:'audio',  size:'S',
-    title:'沈黙の長さ',      body:'音楽の中で最も雄弁なのは、音のない4拍目だ。' },
-  { theme:'education',           year:2025, month:5,  day:30, tag:'question',    mediaType:'text',   size:'S',
-    title:'問いの種',        body:'良い問いは答えより長く生きる。それが教育の本質かもしれない。' },
-  { theme:'nature×philosophy',   year:2025, month:9,  day:11, tag:'ecology',     mediaType:'text',   size:'S',
-    title:'生態の文法',      body:'植物が情報を交換する方法を言語として読む視点。' },
-  { theme:'philosophy',          year:2026, month:6,  day:17, tag:'time',        mediaType:'text',   size:'S',
-    title:'時間の形',        body:'線ではなく層として時間を感じる。過去は沈殿し、未来は浮遊する。' },
-  { theme:'music',               year:2025, month:7,  day:26, tag:'festival',    mediaType:'audio',  size:'S',
-    title:'祭りの拍動',      body:'村の祭りのリズムはグリッドの外にある。それが生きている証拠だ。' },
-  { theme:'philosophy',          year:2024, month:5,  day:9,  tag:'meaning',     mediaType:'text',   size:'S',
-    title:'意味の重なり',    body:'概念と言語が一致しない地点で思考が始まる。' },
-  { theme:'system',              year:2024, month:8,  day:14, tag:'signal',      mediaType:'audio',  size:'S',
-    title:'信号と雑音',      body:'ノイズの中にパターンを見つける訓練。' },
-  { theme:'education',           year:2026, month:4,  day:8,  tag:'field',       mediaType:'video',  size:'S',
-    title:'野外の授業',      body:'教室の外で初めて答える顔がある。土の上で問うこと。' },
-  { theme:'nature',              year:2026, month:8,  day:19, tag:'seed',        mediaType:'photo',  size:'S',
-    title:'種の設計',        body:'小さな殻の中に次の森がある。生命の情報圧縮。' },
-  { theme:'system',              year:2025, month:10, day:5,  tag:'network',     mediaType:'text',   size:'S',
-    title:'根のネット',      body:'農村のコミュニティはプロトコルなき分散ネットワークだ。' },
-  { theme:'philosophy',          year:2024, month:6,  day:22, tag:'dialect',     mediaType:'audio',  size:'S',
-    title:'方言の地層',      body:'地域の言葉は地形に刻まれた歴史の断面図だ。' },
-  { theme:'philosophy',          year:2025, month:4,  day:17, tag:'boundary',    mediaType:'text',   size:'S',
-    title:'境界の倫理',      body:'どこで「私」が終わり「他者」が始まるかを問い続ける。' },
+
+/* Convert a single API entry (new schema) to the legacy chip shape */
+function normaliseEntry(e) {
+  /* theme: join multiple themes with × to match existing THEMES/MIXES keys */
+  const theme = Array.isArray(e.themes) ? e.themes.join('×') : (e.theme || 'philosophy');
+
+  /* date: parse "YYYY-MM-DD" or use year/month/day fields */
+  let year = e.year, month = e.month, day = e.day;
+  if (e.date && !year) {
+    const parts = e.date.split('-');
+    year  = parseInt(parts[0], 10);
+    month = parseInt(parts[1], 10);
+    day   = parseInt(parts[2], 10);
+  }
+
+  return {
+    /* preserve original id for deep-link keying */
+    id:        e.id  || null,
+    theme,
+    year:      year  || 2026,
+    month:     month || 1,
+    day:       day   || 1,
+    tag:       e.tag || theme.split('×')[0],
+    mediaType: e.mediaType || 'text',
+    size:      e.size || 'M',
+    title:     e.title || '',
+    body:      e.body  || '',
+    /* new fields for real media */
+    mediaKey:  e.mediaKey  || null,
+  };
+}
+
+/* Hardcoded fallback — mirrors the API seed exactly */
+const FALLBACK_DATA = [
+  { theme:'nature',            year:2026, month:4,  day:29, tag:'mountain',    mediaType:'photo',  size:'L',
+    title:'里山の稜線',    body:'夕暮れ時、稜線が紫に変わる瞬間を3年間追い続けた記録。光は毎回違う顔を見せた。',    mediaKey:null },
+  { theme:'philosophy',        year:2026, month:3,  day:14, tag:'writing',     mediaType:'text',   size:'M',
+    title:'言葉の重力',    body:'書くことで思考が固まる。メモが草稿になり、草稿が問いになる過程を可視化する試み。',  mediaKey:null },
+  { theme:'system',            year:2025, month:11, day:3,  tag:'automation',  mediaType:'text',   size:'M',
+    title:'仕組みの骨格',  body:'毎朝繰り返す作業を0にした。人間がやらなくていいことは機械に任せる、その設計思想。',mediaKey:null },
+  { theme:'education',         year:2024, month:9,  day:20, tag:'classroom',   mediaType:'video',  size:'M',
+    title:'教室の静けさ',  body:'問いが生まれる瞬間の静寂がある。答えの直前ではなく、問いの直前の空気。',          mediaKey:null },
+  { theme:'music',             year:2026, month:5,  day:7,  tag:'loop',        mediaType:'audio',  size:'M',
+    title:'8小節の宇宙',   body:'同じフレーズが繰り返されるたびに意味が変わる。ループは反復ではなく螺旋だ。',      mediaKey:null },
+  { theme:'nature×system',     year:2026, month:7,  day:4,  tag:'permaculture',mediaType:'text',   size:'M',
+    title:'森の設計論',    body:'自然のパターンを仕組みに変換する実験。里山のエッジ効果をシステム設計に援用する。',  mediaKey:null },
+  { theme:'philosophy',        year:2024, month:4,  day:12, tag:'identity',    mediaType:'text',   size:'M',
+    title:'場所なき自己',  body:'国籍でも言語でもない、第三の帰属感を探している。それはまだ言葉になっていない。',  mediaKey:null },
+  { theme:'philosophy',        year:2025, month:8,  day:25, tag:'translation', mediaType:'audio',  size:'M',
+    title:'翻訳の余白',    body:'訳せない言葉こそが文化の核心だ。その余白をどう渡すか、録音しながら考えた。',      mediaKey:null },
+  { theme:'nature',            year:2024, month:7,  day:15, tag:'rain',        mediaType:'photo',  size:'S',
+    title:'雨の地図',      body:'同じ場所で1年間、雨を記録した。季節ごとに音が変わる。',                          mediaKey:null },
+  { theme:'system',            year:2026, month:9,  day:3,  tag:'pipeline',    mediaType:'text',   size:'S',
+    title:'自動化の詩',    body:'コードが動く夜、私は何もしていない。それが設計の完成形だ。',                      mediaKey:null },
+  { theme:'music',             year:2024, month:10, day:8,  tag:'silence',     mediaType:'audio',  size:'S',
+    title:'沈黙の長さ',    body:'音楽の中で最も雄弁なのは、音のない4拍目だ。',                                    mediaKey:null },
+  { theme:'education',         year:2025, month:5,  day:30, tag:'question',    mediaType:'text',   size:'S',
+    title:'問いの種',      body:'良い問いは答えより長く生きる。それが教育の本質かもしれない。',                    mediaKey:null },
+  { theme:'nature×philosophy', year:2025, month:9,  day:11, tag:'ecology',     mediaType:'text',   size:'S',
+    title:'生態の文法',    body:'植物が情報を交換する方法を言語として読む視点。',                                  mediaKey:null },
+  { theme:'philosophy',        year:2026, month:6,  day:17, tag:'time',        mediaType:'text',   size:'S',
+    title:'時間の形',      body:'線ではなく層として時間を感じる。過去は沈殿し、未来は浮遊する。',                  mediaKey:null },
+  { theme:'music',             year:2025, month:7,  day:26, tag:'festival',    mediaType:'audio',  size:'S',
+    title:'祭りの拍動',    body:'村の祭りのリズムはグリッドの外にある。それが生きている証拠だ。',                  mediaKey:null },
+  { theme:'philosophy',        year:2024, month:5,  day:9,  tag:'meaning',     mediaType:'text',   size:'S',
+    title:'意味の重なり',  body:'概念と言語が一致しない地点で思考が始まる。',                                    mediaKey:null },
+  { theme:'system',            year:2024, month:8,  day:14, tag:'signal',      mediaType:'audio',  size:'S',
+    title:'信号と雑音',    body:'ノイズの中にパターンを見つける訓練。',                                          mediaKey:null },
+  { theme:'education',         year:2026, month:4,  day:8,  tag:'field',       mediaType:'video',  size:'S',
+    title:'野外の授業',    body:'教室の外で初めて答える顔がある。土の上で問うこと。',                            mediaKey:null },
+  { theme:'nature',            year:2026, month:8,  day:19, tag:'seed',        mediaType:'photo',  size:'S',
+    title:'種の設計',      body:'小さな殻の中に次の森がある。生命の情報圧縮。',                                  mediaKey:null },
+  { theme:'system',            year:2025, month:10, day:5,  tag:'network',     mediaType:'text',   size:'S',
+    title:'根のネット',    body:'農村のコミュニティはプロトコルなき分散ネットワークだ。',                          mediaKey:null },
+  { theme:'philosophy',        year:2024, month:6,  day:22, tag:'dialect',     mediaType:'audio',  size:'S',
+    title:'方言の地層',    body:'地域の言葉は地形に刻まれた歴史の断面図だ。',                                    mediaKey:null },
+  { theme:'philosophy',        year:2025, month:4,  day:17, tag:'boundary',    mediaType:'text',   size:'S',
+    title:'境界の倫理',    body:'どこで「私」が終わり「他者」が始まるかを問い続ける。',                          mediaKey:null },
 ];
+
+/* Live data array — populated by loadContent() before render() */
+let DATA = [];
+
+/* ===================================================================
+   CONTENT LOADER
+   Fetches /api/content (Cloudflare Worker → R2 content.json).
+   Falls back to FALLBACK_DATA on any error so the page always renders.
+   =================================================================== */
+async function loadContent() {
+  try {
+    const res = await fetch('/api/content');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const entries = await res.json();
+    if (!Array.isArray(entries) || entries.length === 0) throw new Error('empty');
+    DATA = entries.map(normaliseEntry);
+  } catch (err) {
+    /* Network error, R2 not configured, local file:// dev, etc. */
+    console.warn('[L3] /api/content unavailable, using fallback data:', err.message);
+    DATA = FALLBACK_DATA;
+  }
+}
 
 /* ===================================================================
    SEEDED PRNG — seed 7331, reset before each layout call
@@ -1556,7 +1613,14 @@ function onEnter(chip, el, x, y, chipW, chipH, placedIdx) {
   allPlaced.forEach(p => { if (p.el !== el) p.el.style.opacity = '0.28'; });
 
   /* populate panel content */
-  prevThumb.style.background = chipBg(chip);
+  if (chip.mediaType === 'photo' && chip.mediaKey) {
+    /* Real photo: show as img inside the thumb area */
+    prevThumb.style.background = 'none';
+    prevThumb.innerHTML = `<img src="/media/${chip.mediaKey}" alt="${chip.title}" style="width:100%;height:100%;object-fit:cover;display:block;">`;
+  } else {
+    prevThumb.style.background = chipBg(chip);
+    prevThumb.innerHTML = '';
+  }
   prevTitle.textContent = chip.title;
   prevText.textContent  = chip.body;
   prevDate.textContent  = `${chip.year}.${chip.month}.${chip.day} / ${chip.tag}`;
@@ -2166,40 +2230,78 @@ function buildDetailContent(chip, idx) {
     textWrap.appendChild(p);
   });
 
-  /* media placeholder */
+  /* media element — real if mediaKey exists, placeholder otherwise */
   let mediaEl = null;
   if (chip.mediaType === 'photo') {
-    mediaEl = document.createElement('div');
-    mediaEl.className = 'detail-media-photo';
-    const lbl = document.createElement('span');
-    lbl.className = 'detail-media-label';
-    lbl.textContent = 'photo placeholder';
-    mediaEl.appendChild(lbl);
+    if (chip.mediaKey) {
+      /* Real photo: render <img> */
+      mediaEl = document.createElement('div');
+      mediaEl.className = 'detail-media-photo';
+      mediaEl.style.background = 'none';
+      const img = document.createElement('img');
+      img.src   = `/media/${chip.mediaKey}`;
+      img.alt   = chip.title;
+      img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
+      mediaEl.appendChild(img);
+    } else {
+      /* Placeholder */
+      mediaEl = document.createElement('div');
+      mediaEl.className = 'detail-media-photo';
+      const lbl = document.createElement('span');
+      lbl.className = 'detail-media-label';
+      lbl.textContent = 'photo placeholder';
+      mediaEl.appendChild(lbl);
+    }
   } else if (chip.mediaType === 'video') {
-    mediaEl = document.createElement('div');
-    mediaEl.className = 'detail-media-video';
-    mediaEl.textContent = '▶ play';
+    if (chip.mediaKey) {
+      /* Real video: render <video controls> */
+      mediaEl = document.createElement('div');
+      mediaEl.className = 'detail-media-video';
+      mediaEl.style.background = '#000';
+      const video = document.createElement('video');
+      video.src      = `/media/${chip.mediaKey}`;
+      video.controls = true;
+      video.style.cssText = 'width:100%;height:100%;display:block;';
+      mediaEl.appendChild(video);
+    } else {
+      /* Placeholder */
+      mediaEl = document.createElement('div');
+      mediaEl.className = 'detail-media-video';
+      mediaEl.textContent = '▶ play';
+    }
   } else if (chip.mediaType === 'audio' || chip.mediaType === 'music') {
-    mediaEl = document.createElement('div');
-    mediaEl.className = 'detail-media-audio';
-    const bars = [30, 55, 70, 45, 60, 35, 65, 50, 40, 58];
-    const svgNS = 'http://www.w3.org/2000/svg';
-    const svg = document.createElementNS(svgNS, 'svg');
-    svg.setAttribute('width', '120');
-    svg.setAttribute('height', '60');
-    svg.setAttribute('viewBox', '0 0 120 60');
-    bars.forEach((h, i) => {
-      const rect = document.createElementNS(svgNS, 'rect');
-      const x = 4 + i * 12;
-      const y = (60 - h) / 2;
-      rect.setAttribute('x', x);
-      rect.setAttribute('y', y);
-      rect.setAttribute('width', '7');
-      rect.setAttribute('height', h);
-      rect.setAttribute('fill', '#999');
-      svg.appendChild(rect);
-    });
-    mediaEl.appendChild(svg);
+    if (chip.mediaKey) {
+      /* Real audio: render <audio controls> */
+      mediaEl = document.createElement('div');
+      mediaEl.className = 'detail-media-audio';
+      const audio = document.createElement('audio');
+      audio.src      = `/media/${chip.mediaKey}`;
+      audio.controls = true;
+      audio.style.cssText = 'width:80%;max-width:400px;';
+      mediaEl.appendChild(audio);
+    } else {
+      /* Placeholder waveform SVG */
+      mediaEl = document.createElement('div');
+      mediaEl.className = 'detail-media-audio';
+      const bars = [30, 55, 70, 45, 60, 35, 65, 50, 40, 58];
+      const svgNS = 'http://www.w3.org/2000/svg';
+      const svg = document.createElementNS(svgNS, 'svg');
+      svg.setAttribute('width', '120');
+      svg.setAttribute('height', '60');
+      svg.setAttribute('viewBox', '0 0 120 60');
+      bars.forEach((h, i) => {
+        const rect = document.createElementNS(svgNS, 'rect');
+        const x = 4 + i * 12;
+        const y = (60 - h) / 2;
+        rect.setAttribute('x', x);
+        rect.setAttribute('y', y);
+        rect.setAttribute('width', '7');
+        rect.setAttribute('height', h);
+        rect.setAttribute('fill', '#999');
+        svg.appendChild(rect);
+      });
+      mediaEl.appendChild(svg);
+    }
   }
 
   if (mediaEl) detailBody.appendChild(mediaEl);
@@ -2809,15 +2911,20 @@ window.addEventListener('resize', scheduleProximityDim, { passive: true });
 
 /* ===================================================================
    INIT + RESIZE
+   loadContent() fetches /api/content and populates DATA before the
+   first render. All other init (sidebar, hash, drift) follows after.
    =================================================================== */
-buildLegend();
-buildSidebar();
-render();
-checkHashOnLoad();
-/* run proximity dim once after initial render */
-applyProximityDim();
-/* start drift loop */
-driftLoop();
+(async () => {
+  buildLegend();
+  buildSidebar();
+  await loadContent();
+  render();
+  checkHashOnLoad();
+  /* run proximity dim once after initial render */
+  applyProximityDim();
+  /* start drift loop */
+  driftLoop();
+})();
 
 let _prevW = window.innerWidth;
 window.addEventListener('resize', () => {
