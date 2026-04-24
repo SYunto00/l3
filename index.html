@@ -25,7 +25,7 @@
 <title>L3 — 思想の散歩道</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@300&family=IBM+Plex+Mono:wght@400&family=Zen+Kaku+Gothic+New:wght@400;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@300&family=IBM+Plex+Mono:wght@400&family=Noto+Sans+JP:wght@500&family=Zen+Kaku+Gothic+New:wght@400;900&display=swap" rel="stylesheet">
 <style>
 /* ── RESET ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -448,6 +448,7 @@ header {
   display: inline-block;
   width: 11px;
   height: 11px;
+  border-radius: 50%;
   flex-shrink: 0;
   outline: 1px solid rgba(26,26,26,0.25);
   vertical-align: middle;
@@ -1090,7 +1091,11 @@ body.is-scrolling .chip { pointer-events: none; }
   transform: translateY(0) !important;
 }
 
-/* ── DETAIL COMMENTS ── */
+/* ── DETAIL COMMENTS (つぶやき) ── */
+@keyframes murmur-appear {
+  0%   { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
 .detail-comments {
   max-width: min(640px, 92vw);
   margin: 48px auto 0;
@@ -1099,32 +1104,35 @@ body.is-scrolling .chip { pointer-events: none; }
   text-align: left;
 }
 .detail-comments-title {
-  font-family: "IBM Plex Mono", monospace;
+  font-family: "Noto Sans JP", sans-serif;
   font-size: 11px;
-  font-weight: 400;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-weight: 500;
+  letter-spacing: 0.04em;
   color: rgba(26,26,26,0.55);
   margin-bottom: 20px;
+}
+#detail-comments-list {
+  position: relative;
+  min-height: 4px;
 }
 #detail-comments-list .comment-item {
   display: flex;
   flex-direction: row;
   align-items: flex-start;
-  gap: 10px;
+  gap: 8px;
   margin-bottom: 12px;
   cursor: pointer;
   border-radius: 4px;
+  /* horizontal offset applied inline via JS */
   transition: background 400ms cubic-bezier(0.22,1,0.36,1),
-              padding 400ms cubic-bezier(0.22,1,0.36,1),
-              margin 400ms cubic-bezier(0.22,1,0.36,1);
+              padding 400ms cubic-bezier(0.22,1,0.36,1);
 }
 #detail-comments-list .comment-item .comment-dot {
-  width: 14px;
-  height: 14px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   flex-shrink: 0;
-  margin-top: 3px;
+  margin-top: 5px;
   border: 1px solid rgba(26,26,26,0.12);
 }
 #detail-comments-list .comment-item .comment-text {
@@ -1143,8 +1151,6 @@ body.is-scrolling .chip { pointer-events: none; }
 #detail-comments-list .comment-item.expanded {
   background: rgba(0,0,0,0.02);
   padding: 8px 12px;
-  margin-left: -12px;
-  margin-right: -12px;
 }
 .detail-comments-empty {
   font-family: "IBM Plex Mono", monospace;
@@ -1235,6 +1241,23 @@ body.is-scrolling .chip { pointer-events: none; }
   letter-spacing: 0.06em;
   color: rgba(26,26,26,0.55);
   min-height: 18px;
+}
+
+/* ── CHIP COMMENT TRAILS ── */
+.chip-comment-trail {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  display: flex;
+  gap: 2px;
+  pointer-events: none;
+  z-index: 2;
+}
+.chip-trail-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 0.5px rgba(0,0,0,0.15);
 }
 
 /* P9 — rise overlay kept for close-reverse animation */
@@ -2551,7 +2574,7 @@ function buildDetailContent(chip, idx) {
   const commentSection = document.createElement('section');
   commentSection.className = 'detail-comments';
   commentSection.innerHTML = `
-    <h3 class="detail-comments-title">COMMENTS <span id="detail-comments-count">—</span></h3>
+    <h3 class="detail-comments-title">つぶやき</h3>
     <div id="detail-comments-list"></div>
     <div class="detail-comments-form">
       <div id="detail-comments-label">YOUR MARK</div>
@@ -3196,6 +3219,85 @@ window.addEventListener('resize', scheduleProximityDim, { passive: true });
 })();
 
 /* ===================================================================
+   CHIP COMMENT TRAILS  (Task D)
+   Fetch comments for every chip in parallel, build color map, then
+   inject .chip-comment-trail elements into already-rendered chips.
+   =================================================================== */
+
+/* Global map: workId → array of hex color strings (most-recent first, max 7) */
+let commentsByWork = {};
+
+async function loadAllChipComments() {
+  if (!DATA.length) return;
+  try {
+    const results = await Promise.all(DATA.map(async work => {
+      if (!work.id) return { id: work.id, comments: [] };
+      try {
+        const r = await fetch(`/api/comments?workId=${encodeURIComponent(work.id)}`);
+        return r.ok ? { id: work.id, comments: await r.json() } : { id: work.id, comments: [] };
+      } catch { return { id: work.id, comments: [] }; }
+    }));
+    results.forEach(({ id, comments }) => {
+      if (!id) return;
+      /* most-recent first: API returns newest-last, so reverse */
+      const colors = [...comments].reverse()
+        .map(c => c.color).filter(Boolean).slice(0, 7);
+      commentsByWork[id] = colors;
+    });
+  } catch (e) {
+    /* non-fatal — trails just show empty */
+    console.warn('[L3 trails]', e);
+  }
+}
+
+/* Inject trail dots into all currently-rendered primary chips */
+function injectChipTrails() {
+  allPlaced.forEach(({ chip, el }) => {
+    /* remove any existing trail (idempotent) */
+    const existing = el.querySelector('.chip-comment-trail');
+    if (existing) existing.remove();
+
+    const colors = commentsByWork[chip.id] || [];
+    if (!colors.length) return;
+
+    const trail = document.createElement('div');
+    trail.className = 'chip-comment-trail';
+    colors.forEach(color => {
+      const dot = document.createElement('span');
+      dot.className = 'chip-trail-dot';
+      dot.style.background = color;
+      trail.appendChild(dot);
+    });
+    el.appendChild(trail);
+  });
+}
+
+/* Update trail for a single chip after a successful comment submit */
+function updateChipTrail(workId, newColor) {
+  if (!workId) return;
+  const existing = commentsByWork[workId] || [];
+  /* prepend new color (most-recent first), cap at 7 */
+  commentsByWork[workId] = [newColor, ...existing].slice(0, 7);
+  /* re-inject only the chip(s) matching this workId */
+  allPlaced.forEach(({ chip, el }) => {
+    if (chip.id !== workId) return;
+    const old = el.querySelector('.chip-comment-trail');
+    if (old) old.remove();
+    const colors = commentsByWork[workId];
+    if (!colors.length) return;
+    const trail = document.createElement('div');
+    trail.className = 'chip-comment-trail';
+    colors.forEach(color => {
+      const dot = document.createElement('span');
+      dot.className = 'chip-trail-dot';
+      dot.style.background = color;
+      trail.appendChild(dot);
+    });
+    el.appendChild(trail);
+  });
+}
+
+/* ===================================================================
    INIT + RESIZE
    loadContent() fetches /api/content and populates DATA before the
    first render. All other init (sidebar, hash, drift) follows after.
@@ -3210,6 +3312,8 @@ window.addEventListener('resize', scheduleProximityDim, { passive: true });
   applyProximityDim();
   /* start drift loop */
   driftLoop();
+  /* load comment trails in background — non-blocking */
+  loadAllChipComments().then(injectChipTrails);
 })();
 
 let _prevW = window.innerWidth;
@@ -3398,11 +3502,9 @@ document.addEventListener('input', (e) => {
 async function loadComments(workId) {
   if (!workId) return;
   const listEl   = document.getElementById('detail-comments-list');
-  const countEl  = document.getElementById('detail-comments-count');
   if (!listEl) return;
 
   listEl.innerHTML = '<span class="detail-comments-empty">読み込み中…</span>';
-  if (countEl) countEl.textContent = '—';
 
   try {
     const res = await fetch(`/api/comments?workId=${encodeURIComponent(workId)}`);
@@ -3416,18 +3518,21 @@ async function loadComments(workId) {
 }
 
 /* ── renderComments ── */
+/* Offset pattern (%) cycling for scattered horizontal placement */
+const MURMUR_OFFSETS = [2, 22, 8, 30, 0, 14, 26, 6, 18];
+
 function renderComments(comments, workId) {
   const listEl  = document.getElementById('detail-comments-list');
-  const countEl = document.getElementById('detail-comments-count');
   if (!listEl) return;
 
-  if (countEl) countEl.textContent = comments.length || '0';
-
   if (!comments.length) {
-    listEl.innerHTML = '<span class="detail-comments-empty">まだコメントはありません</span>';
+    listEl.innerHTML = '<span class="detail-comments-empty" style="font-size:18px;color:rgba(26,26,26,0.18);">·</span>';
   } else {
     listEl.innerHTML = '';
-    comments.forEach(c => listEl.appendChild(buildCommentItem(c)));
+    comments.forEach((c, i) => {
+      const item = buildCommentItem(c, i);
+      listEl.appendChild(item);
+    });
   }
 
   /* Bind submit button for this workId (always — even for empty list) */
@@ -3441,9 +3546,17 @@ function renderComments(comments, workId) {
 }
 
 /* ── buildCommentItem ── */
-function buildCommentItem(c) {
+function buildCommentItem(c, i) {
   const item = document.createElement('div');
   item.className = 'comment-item';
+
+  /* Scattered horizontal offset — cycle through fixed pattern */
+  const offsetPct = MURMUR_OFFSETS[i % MURMUR_OFFSETS.length];
+  item.style.marginLeft = `${offsetPct}%`;
+
+  /* Fade-in stagger */
+  item.style.animation = `murmur-appear 600ms cubic-bezier(0.22,1,0.36,1) both`;
+  item.style.animationDelay = `${i * 80}ms`;
 
   const dot = document.createElement('span');
   dot.className = 'comment-dot';
@@ -3482,6 +3595,9 @@ async function submitComment(workId) {
     return;
   }
 
+  /* capture color before clearing */
+  const submittedColor = _pickedColor;
+
   submitBtn.disabled = true;
   if (statusEl) statusEl.textContent = '投稿中…';
 
@@ -3489,7 +3605,7 @@ async function submitComment(workId) {
     const res = await fetch('/api/comments', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ workId, color: _pickedColor, text }),
+      body: JSON.stringify({ workId, color: submittedColor, text }),
     });
     const data = await res.json();
     if (!data.ok) throw new Error(data.error || `HTTP ${res.status}`);
@@ -3506,6 +3622,9 @@ async function submitComment(workId) {
 
     if (statusEl) statusEl.textContent = 'コメントを投稿しました';
     setTimeout(() => { if (statusEl) statusEl.textContent = ''; }, 3000);
+
+    /* Update chip trail for this work immediately from local state */
+    updateChipTrail(workId, submittedColor);
 
     /* Reload comments */
     await loadComments(workId);
