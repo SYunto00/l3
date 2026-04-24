@@ -1522,8 +1522,8 @@ function renderMixingZone() {
 
 /* Physics constants */
 const SPRING_CENTER = 0.12;  // spring stiffness for center body (anchor-like)
-const SPRING_OUTER  = 0.025; // spring stiffness for outer bodies (floaty/water-like)
-const COUPLING_K  = 0.015;  // coupling between bodies (reduced for softer water feel)
+const SPRING_OUTER  = 0;     // no return spring for outer bodies — free drift
+const COUPLING_K  = 0.03;   // stronger coupling so ropes pull balls back when stretched
 const DAMPING     = 0.95;   // velocity damping per frame (more viscous, slower decay)
 const BROWNIAN_F  = 0.10;   // random ambient force magnitude (gentler water currents)
 const CENTER_MASS = 3.0;    // center acts as anchor
@@ -1707,10 +1707,14 @@ function physicsStep() {
   }
 
   /* Integrate */
+  const MAX_V = 8;
   for (let i = 0; i < N; i++) {
     const b = bodies[i];
     b.vx = (b.vx + fx[i] / b.mass) * DAMPING;
     b.vy = (b.vy + fy[i] / b.mass) * DAMPING;
+    /* Velocity cap: prevent runaway when outer spring is zero */
+    b.vx = Math.max(-MAX_V, Math.min(MAX_V, b.vx));
+    b.vy = Math.max(-MAX_V, Math.min(MAX_V, b.vy));
     b.x += b.vx;
     b.y += b.vy;
   }
@@ -1722,7 +1726,13 @@ function physicsStep() {
     const dx = b.x - b.restX;
     const dy = b.y - b.restY;
     if (b.el) {
-      b.el.style.transform = `translate(${dx.toFixed(2)}px, ${dy.toFixed(2)}px)`;
+      if (b.isCenter) {
+        /* Center circle uses CSS top:50%;left:50%;transform:translate(-50%,-50%) for initial
+           centering — compound the physics offset so the centering isn't overwritten */
+        b.el.style.transform = `translate(calc(-50% + ${dx.toFixed(2)}px), calc(-50% + ${dy.toFixed(2)}px))`;
+      } else {
+        b.el.style.transform = `translate(${dx.toFixed(2)}px, ${dy.toFixed(2)}px)`;
+      }
     }
     /* Update SVG rope paths (outer circles only, index 0-4) with curved Bezier */
     if (i < 5 && svgLines[i]) {
@@ -1798,7 +1808,9 @@ function applyImpulse(bodyIndex) {
     el.style.transition = 'transform 80ms ease-out';
     const baseDx = b.x - b.restX;
     const baseDy = b.y - b.restY;
-    el.style.transform = `translate(${baseDx.toFixed(2)}px, ${baseDy.toFixed(2)}px) scale(1.15)`;
+    el.style.transform = b.isCenter
+      ? `translate(calc(-50% + ${baseDx.toFixed(2)}px), calc(-50% + ${baseDy.toFixed(2)}px)) scale(1.15)`
+      : `translate(${baseDx.toFixed(2)}px, ${baseDy.toFixed(2)}px) scale(1.15)`;
     setTimeout(() => {
       el.style.transition = '';
     }, 200);

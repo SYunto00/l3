@@ -580,8 +580,10 @@ header {
 }
 #detail-close:hover { color: #fff; }
 #detail-close.visible { display: block; }
+/* Safety: force close button hidden whenever detail view is not open */
+#detail-view:not(.visible) ~ #detail-close { display: none !important; }
 
-/* Change B: color band grows from chip upward to fill 24vh (28vh on mobile) */
+/* Change B: color band grows from chip upward to fill 16vh (19vh on mobile) */
 #detail-color-band {
   display: none; /* shown only when detail is open (JS sets display:block) */
   position: fixed;
@@ -623,11 +625,11 @@ header {
   display: none;
 }
 
-/* Push detail body below the color band (24vh desktop, 28vh mobile) */
+/* Push detail body below the color band (16vh desktop, 19vh mobile) */
 .detail-body-wrap {
   max-width: 640px;
   margin: 0 auto;
-  padding-top: calc(24vh + 40px);
+  padding-top: calc(16vh + 40px);
   padding-left: 24px;
   padding-right: 24px;
   padding-bottom: 120px;
@@ -635,7 +637,7 @@ header {
 }
 @media (max-width: 768px) {
   .detail-body-wrap {
-    padding-top: calc(28vh + 40px);
+    padding-top: calc(19vh + 40px);
   }
 }
 
@@ -648,19 +650,19 @@ header {
   top: 0;
   left: 0;
   right: 0;
-  height: 24vh;
+  height: 16vh;
   z-index: 302;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
-  padding-bottom: 40px;
+  padding-bottom: 24px;
   pointer-events: none;
 }
 @media (max-width: 768px) {
   #detail-band-content {
-    height: 28vh;
-    padding-bottom: 36px;
+    height: 19vh;
+    padding-bottom: 20px;
   }
 }
 .detail-title {
@@ -732,6 +734,28 @@ header {
   align-items: center;
   justify-content: center;
   margin: 40px 0;
+}
+
+/* Photo-centric detail layout */
+.detail-media {
+  margin: 0 auto 32px;
+  display: flex;
+  justify-content: center;
+}
+.detail-media img,
+.detail-media video {
+  max-width: min(640px, 92vw);
+  max-height: 55vh;
+  object-fit: contain;
+  width: auto;
+  height: auto;
+}
+.detail-media audio { width: min(480px, 88vw); }
+@media (max-width: 768px) {
+  .detail-media img,
+  .detail-media video {
+    max-height: 48vh;
+  }
 }
 
 /* expand/collapse morph overlay */
@@ -991,6 +1015,7 @@ body.is-scrolling .chip { pointer-events: none; }
     justify-content: center;
   }
   #detail-close.visible { display: flex; }
+  #detail-view:not(.visible) ~ #detail-close { display: none !important; }
 
   /* L chip max-width cap */
   .chip[style*="width: 320px"],
@@ -2299,59 +2324,56 @@ function buildDetailContent(chip, idx) {
     textWrap.appendChild(p);
   });
 
-  /* media element — real if mediaKey exists, placeholder otherwise */
+  /* media element — wrapped in .detail-media container, placed BEFORE body text */
   let mediaEl = null;
   if (chip.mediaType === 'photo') {
+    const wrap = document.createElement('div');
+    wrap.className = 'detail-media';
     if (chip.mediaKey) {
-      /* Real photo: render <img> */
-      mediaEl = document.createElement('div');
-      mediaEl.className = 'detail-media-photo';
-      mediaEl.style.background = 'none';
+      /* Real photo */
       const img = document.createElement('img');
-      img.src   = `/media/${chip.mediaKey}`;
-      img.alt   = chip.title;
-      img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
-      mediaEl.appendChild(img);
+      img.src = `/media/${chip.mediaKey}`;
+      img.alt = chip.title;
+      wrap.appendChild(img);
     } else {
       /* Placeholder */
-      mediaEl = document.createElement('div');
-      mediaEl.className = 'detail-media-photo';
+      const inner = document.createElement('div');
+      inner.className = 'detail-media-photo';
       const lbl = document.createElement('span');
       lbl.className = 'detail-media-label';
       lbl.textContent = 'photo placeholder';
-      mediaEl.appendChild(lbl);
+      inner.appendChild(lbl);
+      wrap.appendChild(inner);
     }
+    mediaEl = wrap;
   } else if (chip.mediaType === 'video') {
+    const wrap = document.createElement('div');
+    wrap.className = 'detail-media';
     if (chip.mediaKey) {
-      /* Real video: render <video controls> */
-      mediaEl = document.createElement('div');
-      mediaEl.className = 'detail-media-video';
-      mediaEl.style.background = '#000';
+      /* Real video */
       const video = document.createElement('video');
       video.src      = `/media/${chip.mediaKey}`;
       video.controls = true;
-      video.style.cssText = 'width:100%;height:100%;display:block;';
-      mediaEl.appendChild(video);
+      wrap.appendChild(video);
     } else {
       /* Placeholder */
-      mediaEl = document.createElement('div');
-      mediaEl.className = 'detail-media-video';
-      mediaEl.textContent = '▶ play';
+      const inner = document.createElement('div');
+      inner.className = 'detail-media-video';
+      inner.textContent = '▶ play';
+      wrap.appendChild(inner);
     }
+    mediaEl = wrap;
   } else if (chip.mediaType === 'audio' || chip.mediaType === 'music') {
+    const wrap = document.createElement('div');
+    wrap.className = 'detail-media';
     if (chip.mediaKey) {
-      /* Real audio: render <audio controls> */
-      mediaEl = document.createElement('div');
-      mediaEl.className = 'detail-media-audio';
+      /* Real audio */
       const audio = document.createElement('audio');
       audio.src      = `/media/${chip.mediaKey}`;
       audio.controls = true;
-      audio.style.cssText = 'width:80%;max-width:400px;';
-      mediaEl.appendChild(audio);
+      wrap.appendChild(audio);
     } else {
       /* Placeholder waveform SVG */
-      mediaEl = document.createElement('div');
-      mediaEl.className = 'detail-media-audio';
       const bars = [30, 55, 70, 45, 60, 35, 65, 50, 40, 58];
       const svgNS = 'http://www.w3.org/2000/svg';
       const svg = document.createElementNS(svgNS, 'svg');
@@ -2369,10 +2391,12 @@ function buildDetailContent(chip, idx) {
         rect.setAttribute('fill', '#999');
         svg.appendChild(rect);
       });
-      mediaEl.appendChild(svg);
+      wrap.appendChild(svg);
     }
+    mediaEl = wrap;
   }
 
+  /* Media first (photo/video/audio at top), body caption text below */
   if (mediaEl) detailBody.appendChild(mediaEl);
   detailBody.appendChild(textWrap);
 }
@@ -2433,7 +2457,7 @@ function openDetail(chip, chipEl, idx) {
   const cr    = chipEl.getBoundingClientRect();
   const color = getChipDisplayColor(chip.theme); /* E3: use mixed color for multi-theme */
   const vh    = window.innerHeight;
-  const bandFraction = window.innerWidth <= 768 ? 0.28 : 0.24;
+  const bandFraction = window.innerWidth <= 768 ? 0.19 : 0.16;
   const bandTargetH = Math.round(vh * bandFraction);
 
   /* hide hover panel immediately — reset β clip-path to hidden state */
@@ -2511,7 +2535,7 @@ function openDetail(chip, chipEl, idx) {
     }
 
     /* body elements: wrap in .detail-content-stack */
-    const bodyEls = detailBody.querySelectorAll('.detail-text, .detail-media-photo, .detail-media-video, .detail-media-audio');
+    const bodyEls = detailBody.querySelectorAll('.detail-text, .detail-media, .detail-media-photo, .detail-media-video, .detail-media-audio');
     let bodyStack = detailBody.querySelector('.detail-content-stack');
     if (!bodyStack) {
       bodyStack = document.createElement('div');
@@ -2557,6 +2581,7 @@ function closeDetail() {
   const color   = detailView._chipColor || '#888';
 
   detailClose.classList.remove('visible');
+  detailClose.style.display = 'none'; /* belt-and-suspenders: force hide immediately */
 
   /* t=0: fade content stacks simultaneously over 500ms */
   [
@@ -2601,6 +2626,8 @@ function closeDetail() {
     detailColorBand.style.removeProperty('--band-color');
     detailBandContent.style.cssText = 'display:none;opacity:0;';
     detailBandContent.innerHTML = '';
+    /* reset close button inline style so .visible class can control it on next open */
+    detailClose.style.display = '';
     /* remove anim classes (legacy cleanup) */
     detailBody.querySelectorAll('.detail-title-anim,.detail-meta-anim,.detail-body-anim').forEach(el => {
       el.classList.remove('detail-title-anim','detail-meta-anim','detail-body-anim');
