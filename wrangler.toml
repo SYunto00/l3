@@ -2,6 +2,11 @@ name = "l3"
 compatibility_date = "2026-04-24"
 compatibility_flags = ["nodejs_compat"]
 
+main = "_worker.js"
+
+[assets]
+directory = "."
+
 [[r2_buckets]]
 binding = "MEDIA"
 bucket_name = "l3-media"
