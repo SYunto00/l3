@@ -1,0 +1,7 @@
+name = "l3"
+compatibility_date = "2026-04-24"
+compatibility_flags = ["nodejs_compat"]
+
+[[r2_buckets]]
+binding = "MEDIA"
+bucket_name = "l3-media"

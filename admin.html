@@ -1,0 +1,973 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>L3 Admin — 投稿</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@300&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ── RESET ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── TOKENS ── */
+:root {
+  --bg:         #F2EBD5;   /* washi */
+  --bg-card:    #FAF6EC;   /* slightly lighter card */
+  --ink:        #1A1A1A;
+  --ink-mute:   rgba(26, 26, 26, 0.55);
+  --ink-light:  rgba(26, 26, 26, 0.35);
+  --accent:     #988771;
+  --line:       rgba(26, 26, 26, 0.12);
+  --line-solid: #E0D8C6;
+
+  /* theme palette */
+  --c-nature:     #87A96B;
+  --c-system:     #D97A4A;
+  --c-education:  #E4C26F;
+  --c-music:      #8C7DB0;
+  --c-philosophy: #4A6374;
+
+  --ease-bloom: cubic-bezier(0.22, 1, 0.36, 1);
+  --radius: 2px;
+}
+
+html { background: var(--bg); }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Noto Sans JP", sans-serif;
+  font-weight: 400;
+  min-height: 100vh;
+  padding: 0 0 80px;
+}
+
+/* ── HEADER ── */
+.admin-header {
+  border-bottom: 1px solid var(--line-solid);
+  padding: 28px 24px 20px;
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  background: var(--bg);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.admin-wordmark {
+  font-family: "Fraunces", serif;
+  font-weight: 300;
+  font-size: 36px;
+  line-height: 1;
+  color: var(--ink);
+}
+.admin-subtitle {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.admin-back {
+  margin-left: auto;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--ink-mute);
+  text-decoration: none;
+  transition: color 120ms ease;
+}
+.admin-back:hover { color: var(--ink); }
+
+/* ── CONTAINER ── */
+.container {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 40px 24px 0;
+}
+
+/* ── SECTION ── */
+.section {
+  margin-bottom: 32px;
+}
+.section + .section {
+  border-top: 1px solid var(--line-solid);
+  padding-top: 28px;
+}
+
+/* ── LABEL ── */
+label,
+.field-label {
+  display: block;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  margin-bottom: 8px;
+}
+.field-label .required {
+  color: var(--c-system);
+  margin-left: 4px;
+}
+
+/* ── INPUT / TEXTAREA ── */
+input[type="text"],
+input[type="password"],
+input[type="date"],
+select,
+textarea {
+  width: 100%;
+  background: var(--bg-card);
+  border: 1px solid var(--line-solid);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  font-family: "Noto Sans JP", sans-serif;
+  font-size: 15px;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+  -webkit-appearance: none;
+  appearance: none;
+}
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="date"]:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(152, 135, 113, 0.18);
+}
+textarea {
+  resize: vertical;
+  min-height: 120px;
+  line-height: 1.7;
+}
+select {
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M0 0l6 8 6-8z' fill='%23988771'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+}
+
+/* ── TOKEN FIELD (password type) ── */
+.token-row {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+.token-row input {
+  flex: 1;
+}
+.btn-small {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: none;
+  border: 1px solid var(--line-solid);
+  border-radius: var(--radius);
+  color: var(--ink-mute);
+  padding: 0 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 120ms, border-color 120ms;
+}
+.btn-small:hover { color: var(--ink); border-color: var(--accent); }
+#token-status {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--ink-light);
+  margin-top: 6px;
+}
+#token-status.ok    { color: var(--c-nature); }
+#token-status.error { color: var(--c-system); }
+
+/* ── CHECKBOXES (themes) ── */
+.checkbox-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+  user-select: none;
+  padding: 6px 12px 6px 8px;
+  border: 1px solid var(--line-solid);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  transition: border-color 150ms, background 150ms;
+  font-family: "Noto Sans JP", sans-serif;
+  font-size: 13px;
+  color: var(--ink);
+}
+.checkbox-label input[type="checkbox"] {
+  /* hidden visually; state shown via dot */
+  appearance: none;
+  -webkit-appearance: none;
+  width: 0; height: 0;
+  margin: 0; padding: 0;
+  border: none;
+  background: none;
+  position: absolute;
+}
+.theme-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  outline: 1px solid rgba(26,26,26,0.12);
+  transition: outline-color 150ms, outline-offset 150ms;
+}
+.checkbox-label:has(input:checked) {
+  border-color: var(--accent);
+  background: rgba(152, 135, 113, 0.08);
+}
+.checkbox-label:has(input:checked) .theme-dot {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+/* ── RADIO (type) ── */
+.radio-group {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 8px 14px;
+  border: 1px solid var(--line-solid);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--ink-mute);
+  transition: border-color 150ms, color 150ms, background 150ms;
+  user-select: none;
+}
+.radio-label input[type="radio"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 0; height: 0; margin: 0; padding: 0;
+  border: none; background: none;
+  position: absolute;
+}
+.radio-label:has(input:checked) {
+  border-color: var(--accent);
+  color: var(--ink);
+  background: rgba(152, 135, 113, 0.08);
+}
+.type-glyph {
+  font-size: 16px;
+  line-height: 1;
+}
+
+/* ── CONDITIONAL FIELDS ── */
+.type-fields {
+  display: none;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line-solid);
+}
+.type-fields.active { display: block; }
+
+/* ── FILE INPUT ── */
+.file-drop {
+  border: 1.5px dashed var(--line-solid);
+  border-radius: var(--radius);
+  padding: 24px 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 150ms, background 150ms;
+  background: var(--bg-card);
+  position: relative;
+}
+.file-drop:hover,
+.file-drop.dragover {
+  border-color: var(--accent);
+  background: rgba(152, 135, 113, 0.06);
+}
+.file-drop input[type="file"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+}
+.file-drop-label {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  pointer-events: none;
+}
+.file-drop-sub {
+  font-family: "Noto Sans JP", sans-serif;
+  font-size: 12px;
+  color: var(--ink-light);
+  margin-top: 4px;
+  pointer-events: none;
+}
+.file-chosen {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--c-nature);
+  margin-top: 4px;
+}
+
+/* ── SIZE SELECT ── */
+.size-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.size-row select {
+  width: auto;
+  min-width: 100px;
+}
+.size-hint {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: var(--ink-light);
+}
+
+/* ── SUBMIT ── */
+.submit-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding-top: 8px;
+}
+.btn-submit {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: var(--ink);
+  color: var(--bg);
+  border: none;
+  border-radius: var(--radius);
+  padding: 12px 28px;
+  cursor: pointer;
+  transition: opacity 150ms ease, background 150ms;
+}
+.btn-submit:hover { opacity: 0.82; }
+.btn-submit:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* ── PROGRESS ── */
+#upload-progress {
+  display: none;
+  align-items: center;
+  gap: 10px;
+}
+#upload-progress.active { display: flex; }
+.progress-bar-wrap {
+  flex: 1;
+  height: 3px;
+  background: var(--line-solid);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: var(--c-nature);
+  border-radius: 2px;
+  width: 0%;
+  transition: width 200ms ease;
+}
+.progress-label {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: var(--ink-mute);
+  white-space: nowrap;
+}
+
+/* ── TOAST ── */
+#toast {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%) translateY(0);
+  background: var(--ink);
+  color: var(--bg);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  padding: 10px 20px;
+  border-radius: var(--radius);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 300ms var(--ease-bloom);
+  z-index: 200;
+  white-space: nowrap;
+}
+#toast.visible { opacity: 1; }
+#toast.error { background: #C0392B; }
+
+/* ── ERROR MESSAGE ── */
+#form-error {
+  display: none;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--c-system);
+  padding: 10px 14px;
+  border: 1px solid rgba(217, 122, 74, 0.35);
+  border-radius: var(--radius);
+  background: rgba(217, 122, 74, 0.06);
+  margin-top: 12px;
+}
+#form-error.visible { display: block; }
+
+/* ── FIELD SPACING ── */
+.field { margin-bottom: 20px; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 480px) {
+  .container { padding: 24px 16px 0; }
+  .checkbox-group { gap: 8px; }
+  .radio-group { gap: 8px; }
+  .admin-header { padding: 20px 16px 14px; }
+  .admin-wordmark { font-size: 28px; }
+}
+</style>
+</head>
+<body>
+
+<header class="admin-header">
+  <div class="admin-wordmark">L3</div>
+  <span class="admin-subtitle">投稿管理</span>
+  <a href="/" class="admin-back">← archive</a>
+</header>
+
+<main class="container">
+
+  <!-- ─────────────────── TOKEN ─────────────────── -->
+  <section class="section">
+    <div class="field">
+      <label for="field-token">
+        ADMIN TOKEN
+      </label>
+      <div class="token-row">
+        <input type="password" id="field-token" placeholder="xxxxxxxxxxxxxxxx" autocomplete="current-password">
+        <button type="button" class="btn-small" id="btn-save-token">保存</button>
+        <button type="button" class="btn-small" id="btn-clear-token">消去</button>
+      </div>
+      <div id="token-status">— localStorage に保存済みのトークンを自動ロードします</div>
+    </div>
+  </section>
+
+  <!-- ─────────────────── FORM ─────────────────── -->
+  <form id="upload-form" novalidate>
+
+    <!-- TITLE + DATE -->
+    <section class="section">
+      <div class="field">
+        <label for="field-title">
+          TITLE <span class="required">*</span>
+        </label>
+        <input type="text" id="field-title" name="title" placeholder="作品タイトル（日本語）" required>
+      </div>
+      <div class="field">
+        <label for="field-date">
+          DATE <span class="required">*</span>
+        </label>
+        <input type="date" id="field-date" name="date" required>
+      </div>
+    </section>
+
+    <!-- THEMES -->
+    <section class="section">
+      <div class="field-label">
+        THEMES <span class="required">*</span>
+      </div>
+      <div class="checkbox-group" id="themes-group">
+        <label class="checkbox-label">
+          <input type="checkbox" name="themes" value="nature">
+          <span class="theme-dot" style="background:#87A96B;"></span>
+          山・自然
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" name="themes" value="system">
+          <span class="theme-dot" style="background:#D97A4A;"></span>
+          仕組み・AI
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" name="themes" value="education">
+          <span class="theme-dot" style="background:#E4C26F;"></span>
+          教育・子ども
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" name="themes" value="music">
+          <span class="theme-dot" style="background:#8C7DB0;"></span>
+          音楽・即興
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" name="themes" value="philosophy">
+          <span class="theme-dot" style="background:#4A6374;"></span>
+          哲学・生き方
+        </label>
+      </div>
+    </section>
+
+    <!-- TYPE -->
+    <section class="section">
+      <div class="field-label">
+        TYPE <span class="required">*</span>
+      </div>
+      <div class="radio-group" id="type-group">
+        <label class="radio-label">
+          <input type="radio" name="mediaType" value="text" checked>
+          <span class="type-glyph">文</span> 文章
+        </label>
+        <label class="radio-label">
+          <input type="radio" name="mediaType" value="photo">
+          <span class="type-glyph">写</span> 写真
+        </label>
+        <label class="radio-label">
+          <input type="radio" name="mediaType" value="video">
+          <span class="type-glyph">動</span> 動画
+        </label>
+        <label class="radio-label">
+          <input type="radio" name="mediaType" value="audio">
+          <span class="type-glyph">音</span> 音声
+        </label>
+      </div>
+
+      <!-- 文章: textarea body -->
+      <div class="type-fields active" id="fields-text">
+        <div class="field">
+          <label for="field-body-text">BODY</label>
+          <textarea id="field-body-text" name="body" placeholder="本文（日本語）。段落は改行で区切ってください。" style="min-height:180px;"></textarea>
+        </div>
+      </div>
+
+      <!-- 写真: file + caption -->
+      <div class="type-fields" id="fields-photo">
+        <div class="field">
+          <div class="field-label">FILE <span class="required">*</span></div>
+          <div class="file-drop" id="drop-photo">
+            <input type="file" id="file-photo" accept="image/*">
+            <div class="file-drop-label">写真をドロップ、またはクリックして選択</div>
+            <div class="file-drop-sub">JPEG / PNG / WebP / HEIC</div>
+            <div class="file-chosen" id="chosen-photo"></div>
+          </div>
+        </div>
+        <div class="field">
+          <label for="caption-photo">CAPTION</label>
+          <textarea id="caption-photo" placeholder="キャプション（任意）" style="min-height:80px;"></textarea>
+        </div>
+      </div>
+
+      <!-- 動画: file + caption -->
+      <div class="type-fields" id="fields-video">
+        <div class="field">
+          <div class="field-label">FILE <span class="required">*</span></div>
+          <div class="file-drop" id="drop-video">
+            <input type="file" id="file-video" accept="video/*">
+            <div class="file-drop-label">動画をドロップ、またはクリックして選択</div>
+            <div class="file-drop-sub">MP4 / WebM / MOV</div>
+            <div class="file-chosen" id="chosen-video"></div>
+          </div>
+        </div>
+        <div class="field">
+          <label for="caption-video">CAPTION</label>
+          <textarea id="caption-video" placeholder="キャプション（任意）" style="min-height:80px;"></textarea>
+        </div>
+      </div>
+
+      <!-- 音声: file + transcript -->
+      <div class="type-fields" id="fields-audio">
+        <div class="field">
+          <div class="field-label">FILE <span class="required">*</span></div>
+          <div class="file-drop" id="drop-audio">
+            <input type="file" id="file-audio" accept="audio/*">
+            <div class="file-drop-label">音声をドロップ、またはクリックして選択</div>
+            <div class="file-drop-sub">MP3 / WAV / AAC / FLAC / M4A</div>
+            <div class="file-chosen" id="chosen-audio"></div>
+          </div>
+        </div>
+        <div class="field">
+          <label for="transcript-audio">TRANSCRIPT</label>
+          <textarea id="transcript-audio" placeholder="文字起こし・メモ（任意）" style="min-height:80px;"></textarea>
+        </div>
+      </div>
+    </section>
+
+    <!-- SIZE -->
+    <section class="section">
+      <div class="field">
+        <div class="field-label">SIZE</div>
+        <div class="size-row">
+          <select id="field-size" name="size">
+            <option value="M" selected>M — standard</option>
+            <option value="L">L — hero (1つだけ推奨)</option>
+            <option value="S">S — small</option>
+          </select>
+          <span class="size-hint">S=120px / M=200px / L=320px — チップのキュレーション重み</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- SUBMIT -->
+    <section class="section">
+      <div id="form-error"></div>
+      <div class="submit-row">
+        <button type="submit" class="btn-submit" id="btn-submit">投稿する</button>
+        <div id="upload-progress">
+          <div class="progress-bar-wrap">
+            <div class="progress-bar-fill" id="progress-fill"></div>
+          </div>
+          <span class="progress-label" id="progress-label">0%</span>
+        </div>
+      </div>
+    </section>
+
+  </form>
+</main>
+
+<div id="toast"></div>
+
+<script>
+/* ==========================================================================
+   L3 Admin — client-side JS
+   ========================================================================== */
+
+/* ── Token management ── */
+const TOKEN_KEY = 'l3_admin_token';
+const tokenInput  = document.getElementById('field-token');
+const tokenStatus = document.getElementById('token-status');
+
+function loadToken() {
+  /* Also accept ?token= URL param (one-time convenience; does NOT save) */
+  const params = new URLSearchParams(window.location.search);
+  const urlToken = params.get('token');
+  if (urlToken) {
+    tokenInput.value = urlToken;
+    /* Save it to localStorage and strip from URL */
+    localStorage.setItem(TOKEN_KEY, urlToken);
+    const cleanUrl = window.location.pathname;
+    history.replaceState(null, '', cleanUrl);
+    setTokenStatus('ok', 'URLパラメータから読み込み、保存しました');
+    return;
+  }
+  const saved = localStorage.getItem(TOKEN_KEY);
+  if (saved) {
+    tokenInput.value = saved;
+    setTokenStatus('ok', 'localstorage から自動ロード済み');
+  }
+}
+
+function setTokenStatus(state, msg) {
+  tokenStatus.className = state; /* '' | 'ok' | 'error' */
+  tokenStatus.textContent = msg;
+}
+
+document.getElementById('btn-save-token').addEventListener('click', () => {
+  const val = tokenInput.value.trim();
+  if (!val) { setTokenStatus('error', 'トークンが空です'); return; }
+  localStorage.setItem(TOKEN_KEY, val);
+  setTokenStatus('ok', '保存しました');
+});
+
+document.getElementById('btn-clear-token').addEventListener('click', () => {
+  localStorage.removeItem(TOKEN_KEY);
+  tokenInput.value = '';
+  setTokenStatus('', '消去しました');
+});
+
+/* ── Set today's date as default ── */
+const dateInput = document.getElementById('field-date');
+function todayISO() {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+dateInput.value = todayISO();
+
+/* ── Type radio → show/hide conditional fields ── */
+const typeRadios = document.querySelectorAll('input[name="mediaType"]');
+const typeFieldsMap = {
+  text:  document.getElementById('fields-text'),
+  photo: document.getElementById('fields-photo'),
+  video: document.getElementById('fields-video'),
+  audio: document.getElementById('fields-audio'),
+};
+
+function updateTypeFields() {
+  const selected = document.querySelector('input[name="mediaType"]:checked')?.value || 'text';
+  Object.entries(typeFieldsMap).forEach(([key, el]) => {
+    el.classList.toggle('active', key === selected);
+  });
+}
+
+typeRadios.forEach(r => r.addEventListener('change', updateTypeFields));
+updateTypeFields(); /* init */
+
+/* ── File input: chosen filename display + drag-and-drop ── */
+function setupFileDrop(dropId, inputId, chosenId) {
+  const dropEl   = document.getElementById(dropId);
+  const inputEl  = document.getElementById(inputId);
+  const chosenEl = document.getElementById(chosenId);
+
+  function showChosen(file) {
+    if (!file) { chosenEl.textContent = ''; return; }
+    const sizeKB = (file.size / 1024).toFixed(0);
+    const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+    const sizeStr = file.size > 1024 * 1024 ? `${sizeMB} MB` : `${sizeKB} KB`;
+    chosenEl.textContent = `${file.name}  (${sizeStr})`;
+  }
+
+  inputEl.addEventListener('change', () => showChosen(inputEl.files[0] || null));
+
+  dropEl.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropEl.classList.add('dragover');
+  });
+  dropEl.addEventListener('dragleave', () => dropEl.classList.remove('dragover'));
+  dropEl.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropEl.classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (!file) return;
+    /* Transfer to the hidden file input via DataTransfer */
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    inputEl.files = dt.files;
+    showChosen(file);
+  });
+}
+
+setupFileDrop('drop-photo', 'file-photo', 'chosen-photo');
+setupFileDrop('drop-video', 'file-video', 'chosen-video');
+setupFileDrop('drop-audio', 'file-audio', 'chosen-audio');
+
+/* ── Toast ── */
+let _toastTimer = null;
+function showToast(msg, isError = false) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className   = 'visible' + (isError ? ' error' : '');
+  if (_toastTimer) clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => { el.className = ''; }, 3000);
+}
+
+/* ── Form error ── */
+function setFormError(msg) {
+  const el = document.getElementById('form-error');
+  if (msg) {
+    el.textContent = msg;
+    el.classList.add('visible');
+  } else {
+    el.classList.remove('visible');
+    el.textContent = '';
+  }
+}
+
+/* ── Progress bar ── */
+function setProgress(pct) {
+  document.getElementById('progress-fill').style.width  = pct + '%';
+  document.getElementById('progress-label').textContent = Math.round(pct) + '%';
+}
+
+/* ── Validate form before submission ── */
+function validateForm() {
+  const title  = document.getElementById('field-title').value.trim();
+  const date   = document.getElementById('field-date').value.trim();
+  const themes = [...document.querySelectorAll('input[name="themes"]:checked')].map(c => c.value);
+  const type   = document.querySelector('input[name="mediaType"]:checked')?.value;
+
+  if (!title)          return 'タイトルを入力してください';
+  if (!date)           return '日付を選択してください';
+  if (!themes.length)  return 'テーマを1つ以上選択してください';
+  if (!type)           return 'タイプを選択してください';
+
+  if (type !== 'text') {
+    const fileInput = document.getElementById(`file-${type}`);
+    if (!fileInput || !fileInput.files.length) {
+      return `${type === 'photo' ? '写真' : type === 'video' ? '動画' : '音声'}ファイルを選択してください`;
+    }
+  }
+
+  return null; /* no error */
+}
+
+/* ── Build FormData from current form state ── */
+function buildFormData() {
+  const type    = document.querySelector('input[name="mediaType"]:checked')?.value || 'text';
+  const themes  = [...document.querySelectorAll('input[name="themes"]:checked')].map(c => c.value);
+
+  /* Collect body/caption depending on type */
+  let body = '';
+  if (type === 'text') {
+    body = document.getElementById('field-body-text').value.trim();
+  } else if (type === 'photo') {
+    body = document.getElementById('caption-photo').value.trim();
+  } else if (type === 'video') {
+    body = document.getElementById('caption-video').value.trim();
+  } else if (type === 'audio') {
+    body = document.getElementById('transcript-audio').value.trim();
+  }
+
+  const fd = new FormData();
+  fd.append('title',     document.getElementById('field-title').value.trim());
+  fd.append('date',      document.getElementById('field-date').value.trim());
+  fd.append('themes',    themes.join(','));
+  fd.append('mediaType', type);
+  fd.append('body',      body);
+  fd.append('size',      document.getElementById('field-size').value);
+
+  if (type !== 'text') {
+    const fileInput = document.getElementById(`file-${type}`);
+    if (fileInput.files.length) fd.append('file', fileInput.files[0]);
+  }
+
+  return fd;
+}
+
+/* ── Submit handler ── */
+document.getElementById('upload-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  setFormError(null);
+
+  const token = tokenInput.value.trim();
+  if (!token) {
+    setFormError('トークンを入力してください（一番上のフィールド）');
+    return;
+  }
+
+  const validationError = validateForm();
+  if (validationError) {
+    setFormError(validationError);
+    return;
+  }
+
+  const submitBtn    = document.getElementById('btn-submit');
+  const progressWrap = document.getElementById('upload-progress');
+
+  submitBtn.disabled = true;
+  progressWrap.classList.add('active');
+  setProgress(0);
+
+  const fd = buildFormData();
+
+  try {
+    /* Use XMLHttpRequest instead of fetch to get upload progress events */
+    await uploadWithProgress(fd, token);
+
+    /* Success */
+    showToast('投稿完了！');
+    resetForm();
+  } catch (err) {
+    const msg = err.message || '投稿に失敗しました';
+    setFormError(msg);
+    showToast(msg, true);
+  } finally {
+    submitBtn.disabled = false;
+    progressWrap.classList.remove('active');
+    setProgress(0);
+  }
+});
+
+/**
+ * POST /api/upload with XHR for upload progress events.
+ * Resolves on 2xx, rejects with Error(message) on failure.
+ */
+function uploadWithProgress(formData, token) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/upload');
+    xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+
+    /* Save token to localStorage on first successful submission */
+    xhr.upload.addEventListener('progress', (e) => {
+      if (e.lengthComputable) {
+        setProgress((e.loaded / e.total) * 100);
+      }
+    });
+
+    xhr.addEventListener('load', () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        /* Also save token now that we know it works */
+        localStorage.setItem(TOKEN_KEY, token);
+        setTokenStatus('ok', '認証成功 — localstorage に保存しました');
+        resolve(JSON.parse(xhr.responseText));
+      } else {
+        let msg = `エラー ${xhr.status}`;
+        try {
+          const body = JSON.parse(xhr.responseText);
+          if (body.error) msg = body.error;
+        } catch (_) { /* ignore */ }
+        reject(new Error(msg));
+      }
+    });
+
+    xhr.addEventListener('error', () => reject(new Error('ネットワークエラー')));
+    xhr.addEventListener('abort', () => reject(new Error('中断されました')));
+
+    xhr.send(formData);
+  });
+}
+
+/* ── Reset form after successful submission ── */
+function resetForm() {
+  document.getElementById('field-title').value = '';
+  document.getElementById('field-date').value  = todayISO();
+  /* uncheck all themes */
+  document.querySelectorAll('input[name="themes"]').forEach(c => { c.checked = false; });
+  /* reset type to text */
+  const textRadio = document.querySelector('input[name="mediaType"][value="text"]');
+  if (textRadio) textRadio.checked = true;
+  updateTypeFields();
+  /* clear text body */
+  document.getElementById('field-body-text').value = '';
+  /* clear captions */
+  ['caption-photo', 'caption-video', 'transcript-audio'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  /* clear file inputs + chosen labels */
+  ['file-photo', 'file-video', 'file-audio'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  ['chosen-photo', 'chosen-video', 'chosen-audio'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = '';
+  });
+  /* reset size to M */
+  document.getElementById('field-size').value = 'M';
+  /* clear errors */
+  setFormError(null);
+}
+
+/* ── Init ── */
+loadToken();
+</script>
+</body>
+</html>
