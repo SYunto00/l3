@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>L3 — Palette Compare</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@300&family=IBM+Plex+Mono:wght@400&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #F2EBD5;
+  color: #1A1A1A;
+  font-family: "Noto Sans JP", sans-serif;
+  padding: 20px 28px 40px;
+}
+h1 {
+  font-family: "Fraunces", serif;
+  font-weight: 300;
+  font-size: 26px;
+  margin-bottom: 4px;
+}
+.sub {
+  font-size: 11px;
+  color: rgba(26,26,26,0.55);
+  margin-bottom: 16px;
+}
+.pal {
+  margin-bottom: 18px;
+  padding: 12px 16px;
+  background: rgba(26,26,26,0.03);
+  max-width: 1200px;
+}
+.pal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+.pal-title {
+  font-family: "Fraunces", serif;
+  font-size: 18px;
+  font-weight: 300;
+}
+.pal-desc {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  color: rgba(26,26,26,0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.row {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  margin-bottom: 4px;
+}
+.row-label {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 9px;
+  color: rgba(26,26,26,0.55);
+  width: 80px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.swatches {
+  display: flex;
+  gap: 4px;
+}
+.swatches.sources .sw { width: 90px; height: 32px; }
+.swatches.sources .sw-label {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 8px;
+  color: rgba(255,255,255,0.9);
+  text-align: center;
+  line-height: 32px;
+}
+.sw {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: rgba(26,26,26,0.6);
+}
+.sw-block { width: 48px; height: 24px; }
+.sw-hex {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 9px;
+  color: rgba(26,26,26,0.55);
+  margin-top: 2px;
+}
+.sw-sm { width: 44px; }
+.sw-sm .sw-block { width: 44px; height: 24px; }
+.final .sw-block { width: 72px; height: 40px; }
+.final .sw-hex { font-size: 10px; color: #1A1A1A; font-weight: 700; }
+.col-group {
+  display: flex;
+  gap: 18px;
+}
+.col-group .col-title {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 8px;
+  color: rgba(26,26,26,0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 2px;
+}
+.col-block .swatches { gap: 2px; }
+.col-block { border-right: 1px solid rgba(26,26,26,0.08); padding-right: 14px; }
+.col-block:last-child { border-right: none; }
+</style>
+</head>
+<body>
+
+<h1>Palette Compare</h1>
+<p class="sub">4候補を同じアルゴで比較。各行: 2色mix×5 / 5色mix×1 / αScreen vs βSoft vs Avg</p>
+
+<div id="palettes"></div>
+
+<script>
+const palettes = [
+  {
+    id:'A', title:'A — Japanese Muted（現状）', desc:'和風ミュート',
+    themes:[
+      {key:'nature',     hex:'#6B8E50', en:'N'},
+      {key:'system',     hex:'#D68D52', en:'S'},
+      {key:'education',  hex:'#D6A849', en:'E'},
+      {key:'music',      hex:'#7A5C8C', en:'M'},
+      {key:'philosophy', hex:'#455B70', en:'P'}
+    ]
+  },
+  {
+    id:'B', title:'B — Bauhaus Modernist', desc:'西洋モダン・彩度高め',
+    themes:[
+      {key:'nature',     hex:'#2E7D32', en:'N'},
+      {key:'system',     hex:'#E07A4E', en:'S'},
+      {key:'education',  hex:'#F4B942', en:'E'},
+      {key:'music',      hex:'#5E3E8C', en:'M'},
+      {key:'philosophy', hex:'#2C4057', en:'P'}
+    ]
+  },
+  {
+    id:'C', title:'C — Wes Anderson Balanced', desc:'映画パステル柔らか',
+    themes:[
+      {key:'nature',     hex:'#87A96B', en:'N'},
+      {key:'system',     hex:'#D97A4A', en:'S'},
+      {key:'education',  hex:'#E4C26F', en:'E'},
+      {key:'music',      hex:'#6A5A9C', en:'M'},
+      {key:'philosophy', hex:'#4A6374', en:'P'}
+    ]
+  },
+  {
+    id:'D', title:'D — Minimalist Sharp', desc:'クリーン彩度最大',
+    themes:[
+      {key:'nature',     hex:'#4EA966', en:'N'},
+      {key:'system',     hex:'#E8764C', en:'S'},
+      {key:'education',  hex:'#EFC84A', en:'E'},
+      {key:'music',      hex:'#7A5AAA', en:'M'},
+      {key:'philosophy', hex:'#2C3E55', en:'P'}
+    ]
+  }
+];
+
+function hex2rgb(h){h=h.replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
+function rgb2hex(r,g,b){const c=v=>Math.round(Math.max(0,Math.min(255,v))).toString(16).padStart(2,'0').toUpperCase();return '#'+c(r)+c(g)+c(b);}
+function screenBlend(colors){let pR=1,pG=1,pB=1;colors.forEach(c=>{const[R,G,B]=hex2rgb(c);pR*=(1-R/255);pG*=(1-G/255);pB*=(1-B/255);});return rgb2hex((1-pR)*255,(1-pG)*255,(1-pB)*255);}
+function avgBlend(colors){const n=colors.length;let r=0,g=0,b=0;colors.forEach(c=>{const[R,G,B]=hex2rgb(c);r+=R;g+=G;b+=B;});return rgb2hex(r/n,g/n,b/n);}
+function softScreen(colors,k=0.7){const s=hex2rgb(screenBlend(colors));const a=hex2rgb(avgBlend(colors));return rgb2hex(s[0]*k+a[0]*(1-k),s[1]*k+a[1]*(1-k),s[2]*k+a[2]*(1-k));}
+
+const keyMixes=[[0,1],[0,3],[1,3],[0,4],[3,4]];
+
+function swHtml(hex, big=false){
+  const size = big ? 'final' : '';
+  return `<div class="sw ${size}"><div class="sw-block" style="background:${hex};"></div><div class="sw-hex">${hex}</div></div>`;
+}
+
+function renderPalette(p){
+  const sources = p.themes.map(t => `<div class="sw" style="width:92px;"><div class="sw-block" style="background:${t.hex};width:92px;height:28px;color:rgba(255,255,255,0.85);display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono';font-size:9px;">${t.en}</div><div class="sw-hex">${t.hex}</div></div>`).join('');
+
+  const mixRows = (algo) => keyMixes.map(([i,j]) => {
+    const colors=[p.themes[i].hex, p.themes[j].hex];
+    let result;
+    if (algo==='screen') result=screenBlend(colors);
+    else if (algo==='soft') result=softScreen(colors);
+    else result=avgBlend(colors);
+    return `<div class="sw" style="width:48px;"><div class="sw-block" style="background:${result};"></div><div class="sw-hex" style="font-size:8px;">${p.themes[i].en}+${p.themes[j].en}</div></div>`;
+  }).join('');
+
+  const finalColors = p.themes.map(t=>t.hex);
+  const finalScreen = screenBlend(finalColors);
+  const finalSoft = softScreen(finalColors);
+  const finalAvg = avgBlend(finalColors);
+
+  return `<div class="pal">
+    <div class="pal-head">
+      <div class="pal-title">${p.title}</div>
+      <div class="pal-desc">${p.desc}</div>
+    </div>
+    <div class="row">
+      <span class="row-label">SOURCES</span>
+      <div class="swatches">${sources}</div>
+    </div>
+    <div class="col-group">
+      <div class="col-block">
+        <div class="col-title">α SCREEN — 2色</div>
+        <div class="swatches">${mixRows('screen')}</div>
+      </div>
+      <div class="col-block">
+        <div class="col-title">β SOFT ×0.7 — 2色</div>
+        <div class="swatches">${mixRows('soft')}</div>
+      </div>
+      <div class="col-block">
+        <div class="col-title">AVG — 2色 (参考)</div>
+        <div class="swatches">${mixRows('avg')}</div>
+      </div>
+    </div>
+    <div class="row" style="margin-top:10px;">
+      <span class="row-label">ALL 5</span>
+      <div class="col-group">
+        <div class="col-block">
+          <div class="col-title">α SCREEN</div>
+          ${swHtml(finalScreen, true)}
+        </div>
+        <div class="col-block">
+          <div class="col-title">β SOFT ×0.7</div>
+          ${swHtml(finalSoft, true)}
+        </div>
+        <div class="col-block">
+          <div class="col-title">AVG</div>
+          ${swHtml(finalAvg, true)}
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+document.getElementById('palettes').innerHTML = palettes.map(renderPalette).join('');
+</script>
+
+</body>
+</html>

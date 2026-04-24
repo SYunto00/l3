@@ -1,0 +1,2884 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="L3 — Syuntoの個人アーカイブ。山、仕組み、教育、音楽、哲学、5つの思想が色で配置される。">
+<meta name="theme-color" content="#F2EBD5">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="L3 — 思想の散歩道">
+<meta property="og:description" content="5つの色で配置されるSyuntoの個人アーカイブ。文章、写真、音声、動画が色の交差点で出会う。">
+<meta property="og:url" content="https://l3.pages.dev/">
+<meta property="og:image" content="/og-image.svg">
+<meta property="og:locale" content="ja_JP">
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="L3 — 思想の散歩道">
+<meta name="twitter:description" content="5つの色で配置されるSyuntoの個人アーカイブ。">
+<meta name="twitter:image" content="/og-image.svg">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<title>L3 — 思想の散歩道</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@300&family=IBM+Plex+Mono:wght@400&family=Zen+Kaku+Gothic+New:wght@400;900&display=swap" rel="stylesheet">
+<style>
+/* ── RESET ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+/* ── TOKENS ── */
+:root {
+  --bg:  #F2EBD5;
+  --ink: #1A1A1A;
+  --mute: rgba(26, 26, 26, 0.55);
+  --line:#EDEDED;
+  --canvas-w: 1440px;
+  --ease-bloom:  cubic-bezier(0.22, 1, 0.36, 1);   /* expo-out, base */
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1); /* gentle overshoot ~40% */
+  /* theme colors */
+  --c-nature:     #87A96B;
+  --c-system:     #D97A4A;
+  --c-education:  #E4C26F;
+  --c-music:      #8C7DB0;
+  --c-philosophy: #4A6374;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Zen Kaku Gothic New", sans-serif;
+  font-weight: 400;
+  overflow: hidden; /* horizontal scroll handled by #h-scroll-track */
+}
+
+/* ── HEADER ── */
+header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  padding: 28px 48px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  pointer-events: none;
+  background: rgba(253,252,249,0.92);
+  backdrop-filter: none; /* no glassmorphism */
+}
+.wordmark {
+  font-family: "Fraunces", serif;
+  font-weight: 300;
+  font-size: 48px;
+  line-height: 1;
+  color: var(--ink);
+  user-select: none;
+}
+.coord {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: #988771;
+  text-align: right;
+  line-height: 1.6;
+  padding-top: 6px;
+  flex-shrink: 0; /* never let coord be squeezed out */
+}
+
+/* ── PAGE WRAPPER ── */
+/* Horizontal scroll container — fills viewport, no vertical scroll */
+.page {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+}
+
+/* ── HORIZONTAL SCROLL TRACK ── */
+/* The outer container that receives wheel events and tracks scrollLeft */
+#h-scroll-track {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden; /* we control scroll via JS transform, not scrollLeft */
+}
+
+/* The inner strip: holds two copies of chips side by side */
+#h-strip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  /* width set by JS: 2× chip canvas width */
+  will-change: transform;
+}
+
+/* ── SCATTER CANVAS ── */
+#scatter {
+  position: absolute;
+  top: 0;
+  left: 0;
+  /* width and height set by JS */
+}
+
+/* Second copy of scatter for seamless loop */
+#scatter-clone {
+  position: absolute;
+  top: 0;
+  /* left set by JS = width of #scatter */
+  /* width/height = same as #scatter */
+}
+
+/* ── FLOWING INDICATOR ── */
+#flowing-label {
+  position: fixed;
+  bottom: 14px;
+  right: 20px;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: #988771;
+  opacity: 0.7;
+  pointer-events: none;
+  user-select: none;
+  z-index: 60;
+}
+
+/* ── CHIP ── */
+.chip {
+  position: absolute;
+  cursor: pointer;
+  transition: transform 400ms var(--ease-bloom),
+              opacity   500ms var(--ease-bloom);
+  /* no border, no shadow, no radius per spec */
+}
+.chip:focus { outline: none; }
+/* tap-selected state: subtle scale to indicate preview is open for this chip */
+.chip.preview-selected {
+  transform: scale(1.02);
+  outline: 2px solid rgba(255,255,255,0.55);
+  outline-offset: 2px;
+}
+
+/* A1 / P2 — media-type glyph (english word) */
+.chip-glyph {
+  position: absolute;
+  bottom: 6px;
+  right: 8px;
+  font-family: "IBM Plex Mono", monospace;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1;
+  color: rgba(255,255,255,0.65);
+  pointer-events: none;
+  user-select: none;
+  text-align: right;
+}
+
+/* caption below chip */
+.chip-caption {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 280px; /* wider than chip, left-aligned */
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(26, 26, 26, 0.7);
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ── HOVER PREVIEW PANEL ── */
+/* Decision 2 β: clip-path circle reveal from left-middle edge.
+   Panel is always at its final position; clip-path controls visibility. */
+#preview {
+  position: fixed;
+  z-index: 200;
+  pointer-events: none; /* off by default; enabled when blooming */
+  overflow: hidden;
+  width: 280px;
+  height: 340px;
+  background: #F2EBD5;
+  display: flex;
+  flex-direction: row;
+  cursor: pointer; /* hint that preview is tappable to open detail */
+  /* initial hidden state */
+  clip-path: circle(0% at 0% 50%);
+  filter: blur(8px);
+  /* geometry (left/top) set via JS */
+}
+#preview.blooming {
+  clip-path: circle(180% at 0% 50%);
+  filter: blur(0px);
+  pointer-events: auto; /* accept clicks/taps when open */
+  transition:
+    clip-path 500ms var(--ease-spring),
+    filter    450ms var(--ease-bloom);
+}
+#preview.retracting {
+  clip-path: circle(0% at 0% 50%);
+  filter: blur(8px);
+  transition:
+    clip-path 500ms var(--ease-bloom),
+    filter    450ms var(--ease-bloom);
+}
+
+/* Decision 2 β: 6px accent strip on the left edge of the panel */
+#preview-accent {
+  width: 6px;
+  flex-shrink: 0;
+  align-self: stretch;
+  /* background color set by JS via chipColor */
+  opacity: 0;
+  transition: opacity 500ms var(--ease-bloom);
+}
+#preview.blooming #preview-accent {
+  opacity: 1;
+}
+
+/* panel content column to the right of accent strip */
+#preview-content-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Change A α: all content starts at t=0 and completes at ~500ms alongside clip-path */
+#preview .preview-thumb,
+#preview .preview-body {
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    opacity   500ms var(--ease-bloom),
+    transform 500ms var(--ease-bloom);
+  transition-delay: 0ms;
+}
+#preview.blooming .preview-thumb,
+#preview.blooming .preview-body {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: 0ms;
+}
+#preview.retracting .preview-thumb,
+#preview.retracting .preview-body {
+  opacity: 0;
+  transform: translateY(0);
+  transition-delay: 0ms;
+  transition-duration: 400ms;
+}
+
+.preview-thumb { width: 100%; height: 140px; flex-shrink: 0; }
+.preview-body  { padding: 16px; }
+.preview-title {
+  font-family: "Zen Kaku Gothic New", sans-serif;
+  font-weight: 900;
+  font-size: 24px;
+  line-height: 1.3;
+  color: #1A1A1A;
+  margin-bottom: 8px;
+}
+.preview-text {
+  font-family: "Zen Kaku Gothic New", sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.6;
+  color: rgba(26, 26, 26, 0.55);
+  margin-bottom: 12px;
+}
+.preview-date {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: rgba(26, 26, 26, 0.55);
+}
+
+/* Change A: color bridge strip tethering panel to chip */
+#preview-bridge {
+  position: fixed;
+  z-index: 195;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 200ms var(--ease-bloom);
+}
+#preview-bridge.visible { opacity: 1; }
+
+/* ── FOOTER ── */
+#footer-area {
+  padding: 0 0 64px;
+  text-align: center;
+  width: 100%;
+  max-width: var(--canvas-w);
+  margin: 0 auto;
+}
+
+/* A3 — legend */
+#legend {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 32px;
+  padding: 56px 96px 0;
+  flex-wrap: wrap;
+  position: relative;
+}
+.legend-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+  transition: opacity 160ms ease;
+}
+.legend-item:hover { opacity: 0.65; }
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: outline-offset 120ms ease;
+}
+.legend-name {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(26, 26, 26, 0.55);
+}
+.legend-item.active .legend-dot {
+  outline: 2px solid #1A1A1A;
+  outline-offset: 2px;
+}
+.legend-about {
+  position: absolute;
+  right: 48px;
+  top: 56px;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: rgba(26, 26, 26, 0.6);
+  user-select: none;
+  cursor: default;
+}
+
+/* footer text */
+#tagline {
+  padding-top: 40px;
+  font-family: "Zen Kaku Gothic New", sans-serif;
+  font-weight: 400;
+  font-size: 13px;
+  letter-spacing: 0.15em;
+  color: #988771;
+}
+#footer-year {
+  padding-top: 8px;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: rgba(26, 26, 26, 0.3);
+}
+
+/* A5 — end marker */
+#end-marker {
+  padding: 200px 0 40px;
+  text-align: center;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(26, 26, 26, 0.4);
+}
+
+/* ── COLOR FILTER NOTICE ── */
+#color-filter-notice {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: rgba(26, 26, 26, 0.75);
+  pointer-events: all;
+  align-self: flex-start;
+  padding-top: 10px;
+}
+#color-filter-notice.visible { display: flex; }
+#color-filter-swatch {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  flex-shrink: 0;
+  outline: 1px solid rgba(26,26,26,0.25);
+  vertical-align: middle;
+}
+#color-filter-clear {
+  background: none;
+  border: none;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: rgba(26, 26, 26, 0.5);
+  cursor: pointer;
+  padding: 0;
+  pointer-events: all;
+  transition: opacity 120ms ease;
+  text-decoration: underline;
+}
+#color-filter-clear:hover { color: rgba(26,26,26,0.9); }
+
+/* ── COLOR FILTER PULSE ANIMATION ── */
+@keyframes chipColorPulse {
+  0%   { transform: scale(1.0); }
+  50%  { transform: scale(1.08); }
+  100% { transform: scale(1.0); }
+}
+.chip-color-pulse {
+  animation: chipColorPulse 600ms ease-in-out 2;
+}
+
+/* ── B7 — load-in cascade (horizontal: fade+translateX from left) ── */
+@keyframes chipFadeIn {
+  from { opacity: 0; transform: translateX(-40px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.chip-loading {
+  opacity: 0;
+  animation: chipFadeIn 800ms ease-out forwards;
+  animation-delay: calc(var(--i, 0) * 30ms);
+}
+
+/* ── B11 — hover connector line ── */
+#connector {
+  position: fixed;
+  height: 1px;
+  background: #1A1A1A;
+  opacity: 0;
+  width: 0;
+  pointer-events: none;
+  z-index: 150;
+  transition: opacity 500ms var(--ease-bloom),
+              width 500ms var(--ease-bloom);
+}
+#connector.visible { opacity: 0.5; }
+
+/* ── C13 — SHUFFLE BUTTON ── */
+#shuffle-btn {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(26, 26, 26, 0.6);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  pointer-events: all;
+  align-self: flex-start;
+  padding-top: 10px; /* align with coord */
+  transition: opacity 120ms ease;
+  text-decoration: none;
+}
+#shuffle-btn:hover { opacity: 1; text-decoration: underline; }
+
+/* ── C14 — TIMELINE TOGGLE ── */
+#timeline-toggle {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  z-index: 90;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.tl-btn {
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: rgba(26, 26, 26, 0.6);
+  padding: 0;
+  transition: opacity 120ms ease;
+}
+.tl-btn:hover { color: rgba(26, 26, 26, 0.85); }
+.tl-btn.active { color: #1A1A1A; text-decoration: underline; }
+.tl-sep { color: rgba(26, 26, 26, 0.3); pointer-events: none; }
+
+/* ── C12+C15 — DETAIL VIEW ── */
+#detail-view {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: #fff;
+  overflow-y: auto;
+}
+#detail-view.visible { display: block; }
+
+#detail-close {
+  position: fixed;
+  top: 24px;
+  right: 32px;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 14px;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  z-index: 310;
+  background: none;
+  border: none;
+  padding: 4px 8px;
+  transition: opacity 120ms ease;
+  display: none;
+}
+#detail-close:hover { color: #fff; }
+#detail-close.visible { display: block; }
+
+/* Change B: color band grows from chip upward to fill 35vh */
+#detail-color-band {
+  display: none; /* shown only when detail is open (JS sets display:block) */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 0;
+  z-index: 301;
+  pointer-events: none;
+  overflow: visible; /* allow ::after to extend below */
+}
+/* Washi bleed edge: a pseudo-element sits at the bottom of the band,
+   containing a gradient from transparent→white (to blend into the white body),
+   with a turbulence SVG filter applied to make the edge organic/ragged.
+   The filter references the #washi-bleed filter defined in the inline SVG. */
+#detail-color-band::after {
+  content: '';
+  position: absolute;
+  bottom: -60px; /* hangs below the band bottom */
+  left: -20px;
+  right: -20px;
+  height: 120px; /* total transition zone */
+  /* gradient: band-color at top → transparent at bottom */
+  background: linear-gradient(to bottom,
+    var(--band-color, #87A96B) 0%,
+    transparent 100%
+  );
+  filter: url(#washi-bleed);
+  pointer-events: none;
+}
+
+/* The scrollable detail view sits behind the color band */
+#detail-view {
+  background: #fff;
+}
+
+/* detail-strip is kept for legacy compat but hidden in new layout */
+#detail-strip {
+  display: none;
+}
+
+/* Push detail body below the 35vh band */
+.detail-body-wrap {
+  max-width: 640px;
+  margin: 0 auto;
+  padding-top: calc(35vh + 40px);
+  padding-left: 24px;
+  padding-right: 24px;
+  padding-bottom: 120px;
+  text-align: center;
+}
+
+/* Change B: body + band content visibility is now handled by .detail-content-stack.
+   Individual elements do not need opacity:0 — the wrapper stack controls visibility. */
+
+/* Title/meta live in the color band, positioned absolutely */
+#detail-band-content {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 35vh;
+  z-index: 302;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding-bottom: 56px;
+  pointer-events: none;
+}
+.detail-title {
+  font-family: "IBM Plex Mono", monospace;
+  font-weight: 500;
+  font-size: 36px;
+  line-height: 1.3;
+  letter-spacing: 0.04em;
+  color: #fff;
+  margin-bottom: 12px;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.18);
+}
+.detail-meta {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.8);
+  margin-bottom: 0;
+}
+
+.detail-text {
+  font-family: "Zen Kaku Gothic New", sans-serif;
+  font-weight: 400;
+  font-size: 17px;
+  line-height: 1.8;
+  color: var(--ink);
+  text-align: left;
+  margin-bottom: 24px;
+}
+
+.detail-media-photo {
+  width: 640px;
+  max-width: 100%;
+  height: 400px;
+  background: #D8D8D8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 40px 0;
+}
+.detail-media-video {
+  width: 640px;
+  max-width: 100%;
+  height: 360px;
+  background: #D8D8D8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 40px 0;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  color: #666;
+}
+.detail-media-label {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #888;
+}
+.detail-media-audio {
+  width: 640px;
+  max-width: 100%;
+  height: 80px;
+  background: #EDEDED;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 40px 0;
+}
+
+/* expand/collapse morph overlay */
+#morph-overlay {
+  position: fixed;
+  z-index: 295;
+  pointer-events: none;
+  display: none;
+}
+
+/* ── P3 — bottom stripe ── */
+.chip-stripe {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 2px;
+  pointer-events: none;
+}
+.chip-stripe[data-mt="text"]  { background: rgba(255,255,255,0.35); }
+.chip-stripe[data-mt="photo"] {
+  background: repeating-linear-gradient(90deg,
+    rgba(255,255,255,0.35) 0, rgba(255,255,255,0.35) 6px,
+    transparent 6px, transparent 10px);
+}
+.chip-stripe[data-mt="video"] { background: rgba(255,255,255,0.35); height: 3px; }
+.chip-stripe[data-mt="audio"] {
+  background: repeating-linear-gradient(90deg,
+    rgba(255,255,255,0.35) 0, rgba(255,255,255,0.35) 2px,
+    transparent 2px, transparent 6px);
+}
+/* music stripe removed — music collapsed into audio */
+
+/* ── P6 — left sidebar legend ── */
+#theme-sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  max-width: 160px;
+  pointer-events: all;
+  background: rgba(253, 252, 249, 0.78);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 120px 16px 20px 24px;
+  border-right: 1px solid rgba(26, 26, 26, 0.08);
+  justify-content: flex-start;
+}
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  transition: opacity 160ms ease;
+}
+.sidebar-item:hover { opacity: 0.65; }
+.sidebar-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: outline-offset 120ms ease;
+}
+.sidebar-name {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(26, 26, 26, 0.75);
+  white-space: nowrap;
+  transition: opacity 160ms ease;
+}
+.sidebar-dot {
+  /* no outline on cream background */
+}
+.sidebar-item.active .sidebar-dot {
+  outline: 2px solid #1A1A1A;
+  outline-offset: 2px;
+}
+.sidebar-item.active .sidebar-name { color: #1A1A1A; }
+#sidebar-clear {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  color: rgba(26, 26, 26, 0.55);
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: left;
+  transition: opacity 120ms ease;
+}
+#sidebar-clear:hover { color: #1A1A1A; }
+#sidebar-about {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  color: #988771;
+  cursor: pointer;
+  margin-top: -16px;
+  text-decoration: none;
+  display: block;
+}
+#sidebar-about:hover {
+  text-decoration: underline;
+}
+
+/* Decision 3 γ: scroll suppression — pointer-events off on all chips while scrolling */
+body.is-scrolling .chip { pointer-events: none; }
+
+/* ── MOBILE (<900px) ── */
+@media (max-width: 899px) {
+  :root { --canvas-w: 100vw; }
+  header { padding: 18px 24px 0; }
+  .wordmark { font-size: 32px; }
+  #legend { gap: 18px; padding: 36px 24px 0; }
+  /* preview is now tap-accessible on mobile — keep visible */
+  .detail-title { font-size: 24px; }
+  #theme-sidebar { display: none; }
+}
+
+/* ── TOUCH CANVAS — allow horizontal pan without browser interference ── */
+#h-scroll-track {
+  touch-action: pan-x;
+}
+.page {
+  touch-action: pan-x;
+}
+
+/* ── M1 — MOBILE RESPONSIVE (≤768px) ── */
+
+/* Hamburger button */
+#hamburger-btn {
+  display: none; /* hidden on desktop */
+  background: none;
+  border: none;
+  font-size: 28px;
+  line-height: 1;
+  color: var(--ink);
+  cursor: pointer;
+  padding: 0;
+  /* 44×44 tap target */
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  pointer-events: all;
+  user-select: none;
+  transition: opacity 120ms ease;
+}
+#hamburger-btn:hover { opacity: 0.65; }
+
+/* Drawer backdrop */
+#drawer-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 26, 26, 0.35);
+  z-index: 45;
+  opacity: 0;
+  transition: opacity 280ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+#drawer-backdrop.visible {
+  display: block;
+}
+#drawer-backdrop.open {
+  opacity: 1;
+}
+
+@media (max-width: 768px) {
+  /* Show hamburger, hide shuffle */
+  #hamburger-btn { display: flex; }
+  #shuffle-btn   { display: none; }
+
+  /* Header layout */
+  header {
+    padding: 14px 16px 0;
+    align-items: center;
+  }
+  /* Left group: hamburger + wordmark */
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .wordmark { font-size: 32px; }
+
+  /* Coord: smaller, always visible */
+  .coord {
+    font-size: 10px;
+    padding-top: 0;
+    max-width: 110px;
+    min-width: 72px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* Filter notice: allow wrap */
+  #color-filter-notice {
+    flex-wrap: wrap;
+  }
+
+  /* Sidebar becomes a drawer */
+  #theme-sidebar {
+    display: flex !important; /* override the 900px rule */
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 46;
+    width: min(280px, 80vw);
+    max-width: none;
+    padding: 80px 16px 32px 24px;
+    background: rgba(253, 252, 249, 0.98);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-right: 1px solid rgba(26, 26, 26, 0.08);
+    transform: translateX(-100%);
+    transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
+    overflow-y: auto;
+    pointer-events: all;
+  }
+  #theme-sidebar.drawer-open {
+    transform: translateX(0);
+  }
+
+  /* Footer: reduce font size slightly to prevent overlap */
+  #timeline-toggle {
+    font-size: 9px;
+  }
+  #flowing-label {
+    font-size: 9px;
+  }
+
+  /* Detail view: body padding */
+  .detail-body-wrap {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  /* Close button tap target */
+  #detail-close {
+    padding: 12px 16px;
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #detail-close.visible { display: flex; }
+
+  /* L chip max-width cap */
+  .chip[style*="width: 320px"],
+  .chip[style*="width:320px"] {
+    max-width: min(320px, 80vw);
+  }
+}
+
+@media (max-width: 480px) {
+  .wordmark { font-size: 32px; }
+  .coord {
+    font-size: 9px;
+    max-width: 90px;
+    min-width: 64px;
+  }
+  header {
+    padding: 12px 12px 0;
+  }
+}
+
+/* ── E3 — source dots for multi-theme chips ── */
+.chip-dots {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: flex;
+  gap: 4px;
+  pointer-events: none;
+  flex-wrap: wrap;
+  max-width: 60px; /* wrap after 4 dots (~4×6 + 3×4 = 36px, add buffer) */
+}
+.chip-dot {
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  outline: 1px solid rgba(255,255,255,0.4);
+}
+
+/* ── P9 / Change B — animation keyframes ── */
+@keyframes chipScalePulse {
+  0%   { transform: scale(1.0); }
+  100% { transform: scale(1.025); }
+}
+
+/* Change B α/β: single .detail-content-stack wrapper animated as one unit */
+.detail-content-stack {
+  transition: opacity 700ms var(--ease-bloom), transform 700ms var(--ease-bloom);
+}
+.detail-content-stack.stack-hidden {
+  opacity: 0;
+  transform: translateY(24px);
+}
+.detail-content-stack.stack-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Legacy anim classes — kept so cleanup code doesn't error; no-op visually */
+.detail-title-anim {
+  transition: opacity 700ms var(--ease-bloom), transform 700ms var(--ease-bloom);
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+.detail-meta-anim {
+  transition: opacity 500ms var(--ease-bloom), transform 500ms var(--ease-bloom);
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+.detail-body-anim {
+  transition: opacity 700ms var(--ease-bloom), transform 700ms var(--ease-bloom);
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+
+/* P9 — rise overlay kept for close-reverse animation */
+#rise-overlay {
+  position: fixed;
+  z-index: 305;
+  pointer-events: none;
+  transform-origin: bottom center;
+  display: none;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <button id="hamburger-btn" aria-label="メニューを開く" aria-expanded="false">☰</button>
+    <div class="wordmark">L3</div>
+  </div>
+  <div style="display:flex;align-items:flex-start;gap:20px;min-width:0;overflow:hidden;">
+    <button id="shuffle-btn" title="Shuffle layout">SHUFFLE</button>
+    <div id="color-filter-notice" aria-live="polite">
+      FILTER: <span id="color-filter-swatch"></span> <span id="color-filter-label">#000000 (0 works)</span>
+      <button id="color-filter-clear" title="Clear color filter">× clear</button>
+    </div>
+  </div>
+  <div class="coord" id="coord-display">—</div>
+</header>
+
+<!-- M1: drawer backdrop (mobile only) -->
+<div id="drawer-backdrop"></div>
+
+<!-- C14 timeline toggle -->
+<div id="timeline-toggle">
+  <button class="tl-btn active" id="tl-curated">CURATED</button>
+  <span class="tl-sep">|</span>
+  <button class="tl-btn" id="tl-chrono">CHRONOLOGICAL</button>
+</div>
+
+<!-- P6 left sidebar legend -->
+<div id="theme-sidebar"></div>
+
+<!-- washi SVG filter — applied to #detail-color-band::after for organic bleed edge -->
+<svg id="washi-svg" xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute;pointer-events:none;overflow:hidden;">
+  <defs>
+    <!-- #washi-bleed: α×β fusion — fiber-bias displacement + goo threshold + saturation core.
+         Chain:
+           1. feTurbulence anisotropic (fiber direction grain)
+           2. feTurbulence isotropic  (micro-roughness)
+           3. feBlend multiply        (combine both turbulence layers)
+           4. feDisplacementMap       (bias boundary along fibers, scale 22)
+           5. feGaussianBlur α=6      (goo blur — creates blobby mass)
+           6. feComponentTransfer     (discrete alpha threshold — hard ragged ink edge)
+           7. secondary feGaussianBlur σ=2 merged via feComposite "in" (preserve color saturation at core)
+    -->
+    <filter id="washi-bleed" x="-10%" y="-10%" width="120%" height="150%" color-interpolation-filters="sRGB">
+      <!-- Step 1: anisotropic turbulence → fiber-direction grain -->
+      <feTurbulence type="fractalNoise" baseFrequency="0.008 0.04"
+                    numOctaves="3" seed="5" result="t1"/>
+      <!-- Step 2: isotropic micro-roughness -->
+      <feTurbulence type="turbulence" baseFrequency="0.08"
+                    numOctaves="2" seed="13" result="t2"/>
+      <!-- Step 3: multiply-blend the two turbulence layers -->
+      <feBlend in="t1" in2="t2" mode="multiply" result="combined"/>
+      <!-- Step 4: displace source along the combined fiber map -->
+      <feDisplacementMap in="SourceGraphic" in2="combined"
+                         scale="22" xChannelSelector="R" yChannelSelector="G"
+                         result="displaced"/>
+      <!-- Step 5: goo blur (α) — creates blobby mass for threshold -->
+      <feGaussianBlur in="displaced" stdDeviation="6" result="blurred"/>
+      <!-- Step 6: discrete alpha threshold → hard irregular ink edge -->
+      <feComponentTransfer in="blurred" result="thresh">
+        <feFuncA type="discrete" tableValues="0 0 0 0 0 0 1 1 1 1"/>
+      </feComponentTransfer>
+      <!-- Step 7: secondary soft blur merged via "in" to preserve color saturation at core -->
+      <feGaussianBlur in="thresh" stdDeviation="2" result="softened"/>
+      <feComposite in="SourceGraphic" in2="softened" operator="in"/>
+    </filter>
+  </defs>
+</svg>
+
+<!-- C12+C15 detail view -->
+<div id="detail-view">
+  <div id="detail-strip"></div>
+  <div class="detail-body-wrap" id="detail-body"></div>
+</div>
+<!-- Change B: fixed color band overlay (35vh) -->
+<div id="detail-color-band"></div>
+<!-- band content: title + meta inside the color band -->
+<div id="detail-band-content" style="display:none;opacity:0;"></div>
+<button id="detail-close">close ×</button>
+
+<!-- morph overlay for chip→detail animation -->
+<div id="morph-overlay"></div>
+<!-- P9 rise overlay -->
+<div id="rise-overlay"></div>
+
+<div class="page">
+  <div id="h-scroll-track">
+    <div id="h-strip">
+      <div id="scatter"></div>
+      <div id="scatter-clone"></div>
+    </div>
+  </div>
+</div>
+
+<!-- flowing indicator -->
+<div id="flowing-label">↻ flowing</div>
+
+<!-- hidden legend kept for JS compat -->
+<div id="legend" style="display:none"></div>
+
+<!-- A5 — hidden in horizontal mode -->
+<div id="end-marker" style="display:none">archive ends here</div>
+
+<!-- B11 connector line -->
+<div id="connector"></div>
+
+<!-- Change A: color bridge strip between chip and preview panel -->
+<div id="preview-bridge"></div>
+
+<!-- Hover preview — Decision 2 β: clip-path reveal from left, 6px accent strip -->
+<div id="preview">
+  <div id="preview-accent"></div>
+  <div id="preview-content-col">
+    <div class="preview-thumb" id="preview-thumb"></div>
+    <div class="preview-body">
+      <div class="preview-title" id="preview-title"></div>
+      <div class="preview-text"  id="preview-text"></div>
+      <div class="preview-date"  id="preview-date"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===================================================================
+   TOKENS
+   =================================================================== */
+const THEMES = {
+  nature:     { hex: '#87A96B', name: 'NATURE'     },
+  system:     { hex: '#D97A4A', name: 'SYSTEM'      },
+  education:  { hex: '#E4C26F', name: 'EDUCATION'   },
+  music:      { hex: '#8C7DB0', name: 'MUSIC'       },
+  philosophy: { hex: '#4A6374', name: 'PHILOSOPHY'  },
+};
+
+/* A2 — β Soft Screen ×0.7 mixes with source colours */
+const MIXES = {
+  'nature×system':       { hex: '#DBBF84', srcA: '#87A96B', srcB: '#D97A4A' },
+  'nature×philosophy':   { hex: '#96B69B', srcA: '#87A96B', srcB: '#4A6374' },
+  'nature×music':        { hex: '#BAB7C8', srcA: '#87A96B', srcB: '#8C7DB0' },
+  'system×education':    { hex: '#F2CC87', srcA: '#D97A4A', srcB: '#E4C26F' },
+  'music×philosophy':    { hex: '#9B9AB7', srcA: '#8C7DB0', srcB: '#4A6374' },
+  'education×philosophy':{ hex: '#D2C49E', srcA: '#E4C26F', srcB: '#4A6374' },
+};
+
+/* A1 / P2 — English word glyph map (4 types: music collapsed into audio) */
+const GLYPHS = { text:'text', photo:'photo', video:'video', audio:'audio', music:'audio' };
+
+/* P1 — Japanese tag map */
+const TAG_JP = {
+  mountain:'山', writing:'文筆', automation:'自動化', classroom:'教室',
+  loop:'循環', soil:'土', permaculture:'農耕', identity:'同一性',
+  translation:'翻訳', rain:'雨', pipeline:'水路', silence:'静寂',
+  harvest:'収穫', question:'問い', ecology:'生態', time:'時間',
+  festival:'祭', meaning:'意味', signal:'信号', field:'野',
+  dialect:'方言', boundary:'境界', seed:'種', network:'網',
+};
+const MEDIA_JP = { text:'text', photo:'photo', video:'video', audio:'audio', music:'audio' };
+
+/* Size in px */
+const SZ = { L:320, M:200, S:120 };
+
+/* ===================================================================
+   24 CHIP DATASET — exactly ONE L (hero)
+   =================================================================== */
+const DATA = [
+  // ── HERO ──
+  { theme:'nature',              year:2026, month:4,  day:29, tag:'mountain',    mediaType:'photo',  size:'L',
+    title:'里山の稜線',      body:'夕暮れ時、稜線が紫に変わる瞬間を3年間追い続けた記録。光は毎回違う顔を見せた。' },
+  // ── M ──
+  { theme:'philosophy',          year:2026, month:3,  day:14, tag:'writing',     mediaType:'text',   size:'M',
+    title:'言葉の重力',      body:'書くことで思考が固まる。メモが草稿になり、草稿が問いになる過程を可視化する試み。' },
+  { theme:'system',              year:2025, month:11, day:3,  tag:'automation',  mediaType:'text',   size:'M',
+    title:'仕組みの骨格',    body:'毎朝繰り返す作業を0にした。人間がやらなくていいことは機械に任せる、その設計思想。' },
+  { theme:'education',           year:2024, month:9,  day:20, tag:'classroom',   mediaType:'video',  size:'M',
+    title:'教室の静けさ',    body:'問いが生まれる瞬間の静寂がある。答えの直前ではなく、問いの直前の空気。' },
+  { theme:'music',               year:2026, month:5,  day:7,  tag:'loop',        mediaType:'audio',  size:'M',
+    title:'8小節の宇宙',     body:'同じフレーズが繰り返されるたびに意味が変わる。ループは反復ではなく螺旋だ。' },
+  { theme:'nature×system',       year:2026, month:7,  day:4,  tag:'permaculture',mediaType:'text',   size:'M',
+    title:'森の設計論',      body:'自然のパターンを仕組みに変換する実験。里山のエッジ効果をシステム設計に援用する。' },
+  { theme:'philosophy',          year:2024, month:4,  day:12, tag:'identity',    mediaType:'text',   size:'M',
+    title:'場所なき自己',    body:'国籍でも言語でもない、第三の帰属感を探している。それはまだ言葉になっていない。' },
+  { theme:'philosophy',          year:2025, month:8,  day:25, tag:'translation', mediaType:'audio',  size:'M',
+    title:'翻訳の余白',      body:'訳せない言葉こそが文化の核心だ。その余白をどう渡すか、録音しながら考えた。' },
+  // ── S ──
+  { theme:'nature',              year:2024, month:7,  day:15, tag:'rain',        mediaType:'photo',  size:'S',
+    title:'雨の地図',        body:'同じ場所で1年間、雨を記録した。季節ごとに音が変わる。' },
+  { theme:'system',              year:2026, month:9,  day:3,  tag:'pipeline',    mediaType:'text',   size:'S',
+    title:'自動化の詩',      body:'コードが動く夜、私は何もしていない。それが設計の完成形だ。' },
+  { theme:'music',               year:2024, month:10, day:8,  tag:'silence',     mediaType:'audio',  size:'S',
+    title:'沈黙の長さ',      body:'音楽の中で最も雄弁なのは、音のない4拍目だ。' },
+  { theme:'education',           year:2025, month:5,  day:30, tag:'question',    mediaType:'text',   size:'S',
+    title:'問いの種',        body:'良い問いは答えより長く生きる。それが教育の本質かもしれない。' },
+  { theme:'nature×philosophy',   year:2025, month:9,  day:11, tag:'ecology',     mediaType:'text',   size:'S',
+    title:'生態の文法',      body:'植物が情報を交換する方法を言語として読む視点。' },
+  { theme:'philosophy',          year:2026, month:6,  day:17, tag:'time',        mediaType:'text',   size:'S',
+    title:'時間の形',        body:'線ではなく層として時間を感じる。過去は沈殿し、未来は浮遊する。' },
+  { theme:'music',               year:2025, month:7,  day:26, tag:'festival',    mediaType:'audio',  size:'S',
+    title:'祭りの拍動',      body:'村の祭りのリズムはグリッドの外にある。それが生きている証拠だ。' },
+  { theme:'philosophy',          year:2024, month:5,  day:9,  tag:'meaning',     mediaType:'text',   size:'S',
+    title:'意味の重なり',    body:'概念と言語が一致しない地点で思考が始まる。' },
+  { theme:'system',              year:2024, month:8,  day:14, tag:'signal',      mediaType:'audio',  size:'S',
+    title:'信号と雑音',      body:'ノイズの中にパターンを見つける訓練。' },
+  { theme:'education',           year:2026, month:4,  day:8,  tag:'field',       mediaType:'video',  size:'S',
+    title:'野外の授業',      body:'教室の外で初めて答える顔がある。土の上で問うこと。' },
+  { theme:'nature',              year:2026, month:8,  day:19, tag:'seed',        mediaType:'photo',  size:'S',
+    title:'種の設計',        body:'小さな殻の中に次の森がある。生命の情報圧縮。' },
+  { theme:'system',              year:2025, month:10, day:5,  tag:'network',     mediaType:'text',   size:'S',
+    title:'根のネット',      body:'農村のコミュニティはプロトコルなき分散ネットワークだ。' },
+  { theme:'philosophy',          year:2024, month:6,  day:22, tag:'dialect',     mediaType:'audio',  size:'S',
+    title:'方言の地層',      body:'地域の言葉は地形に刻まれた歴史の断面図だ。' },
+  { theme:'philosophy',          year:2025, month:4,  day:17, tag:'boundary',    mediaType:'text',   size:'S',
+    title:'境界の倫理',      body:'どこで「私」が終わり「他者」が始まるかを問い続ける。' },
+];
+
+/* ===================================================================
+   SEEDED PRNG — seed 7331, reset before each layout call
+   =================================================================== */
+let _seed = 7331;
+function resetSeed() { _seed = 7331; }
+function rng()       { _seed = (_seed * 9301 + 49297) % 233280; return _seed / 233280; }
+function rngR(a, b)  { return a + rng() * (b - a); }
+
+/* ===================================================================
+   COLOUR UTILITIES
+   =================================================================== */
+function hexToRgb(hex) {
+  const n = parseInt(hex.replace('#',''), 16);
+  return [(n>>16)&255, (n>>8)&255, n&255];
+}
+function rgbToHex(r,g,b) {
+  return '#' + [r,g,b].map(v => Math.round(v).toString(16).padStart(2,'0')).join('').toUpperCase();
+}
+function chipHex(chip) {
+  if (THEMES[chip.theme]) return THEMES[chip.theme].hex;
+  if (MIXES[chip.theme])  return MIXES[chip.theme].hex;
+  return '#888';
+}
+
+/* β Soft Screen ×0.7 mix functions */
+function screenBlend(colors) {
+  let pR=1, pG=1, pB=1;
+  for (const c of colors) {
+    const [R,G,B] = hexToRgb(c);
+    pR *= (1 - R/255);
+    pG *= (1 - G/255);
+    pB *= (1 - B/255);
+  }
+  return [(1-pR)*255, (1-pG)*255, (1-pB)*255];
+}
+function avgBlend(colors) {
+  let r=0,g=0,b=0;
+  for (const c of colors) { const [R,G,B]=hexToRgb(c); r+=R; g+=G; b+=B; }
+  const n = colors.length;
+  return [r/n, g/n, b/n];
+}
+function softMix(colors, k=0.7) {
+  const s = screenBlend(colors);
+  const a = avgBlend(colors);
+  return rgbToHex(
+    s[0]*k + a[0]*(1-k),
+    s[1]*k + a[1]*(1-k),
+    s[2]*k + a[2]*(1-k)
+  );
+}
+
+/* E3 helpers */
+/* Parse a theme string ('nature' or 'nature×system') into an array of theme keys */
+function parseThemeKeys(themeStr) {
+  return themeStr.split('×').map(k => k.trim());
+}
+
+/* Return the β Soft Screen ×0.7 hex for a set of theme keys (or a single key) */
+function getChipDisplayColor(themeStr) {
+  const keys = parseThemeKeys(themeStr);
+  if (keys.length === 1) {
+    return THEMES[keys[0]] ? THEMES[keys[0]].hex : '#888';
+  }
+  const hexes = keys.map(k => THEMES[k] ? THEMES[k].hex : null).filter(Boolean);
+  if (hexes.length === 0) return '#888';
+  return softMix(hexes);
+}
+
+/* Return array of source hex strings for multi-theme chips; empty array for single-theme */
+function getChipSourceColors(themeStr) {
+  const keys = parseThemeKeys(themeStr);
+  if (keys.length <= 1) return [];
+  return keys.map(k => THEMES[k] ? THEMES[k].hex : '#888');
+}
+
+/* B6 / P8 — washi paper texture: feTurbulence + vertical fiber streaks (~6% total) */
+const NOISE_URL = "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='washi'><feTurbulence type='fractalNoise' baseFrequency='0.02' numOctaves='4' seed='3'/><feDisplacementMap in='SourceGraphic' scale='3'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.03 0'/></filter><filter id='fiber'><feTurbulence type='turbulence' baseFrequency='0.6 0.02' numOctaves='1' seed='7'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.03 0'/></filter><rect width='100%25' height='100%25' filter='url(%23washi)'/><rect width='100%25' height='100%25' filter='url(%23fiber)'/></svg>\")";
+
+/* P4 — media-specific background patterns at 4% opacity (4 types, music→audio) */
+const MEDIA_PATTERNS = {
+  text:  "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='4' height='4'><line x1='0' y1='0' x2='0' y2='4' stroke='white' stroke-width='1' stroke-opacity='0.04'/></svg>\")",
+  photo: null,
+  video: "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='6' height='6'><line x1='0' y1='6' x2='6' y2='0' stroke='white' stroke-width='1' stroke-opacity='0.04'/></svg>\")",
+  audio: "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='4' height='4'><circle cx='2' cy='2' r='0.5' fill='white' fill-opacity='0.04'/></svg>\")",
+  music: "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='4' height='4'><circle cx='2' cy='2' r='0.5' fill='white' fill-opacity='0.04'/></svg>\")",
+};
+
+/* A2 / P4 / P8 — CSS background: washi > media pattern > solid display colour (E3: no diagonal split) */
+function chipBg(chip, includePattern) {
+  const t = chip.theme;
+  const mediaPat = (includePattern !== false && chip.mediaType) ? MEDIA_PATTERNS[chip.mediaType] : null;
+  const layers = [];
+  /* top: washi texture */
+  layers.push(NOISE_URL);
+  /* media pattern */
+  if (mediaPat) layers.push(mediaPat);
+  /* E3: solid body = additive average of source theme colors */
+  layers.push(getChipDisplayColor(t));
+  return layers.join(',');
+}
+
+/* P8 — inner color bleed box-shadow */
+function chipBleedShadow(chip) {
+  const [r,g,b] = hexToRgb(getChipDisplayColor(chip.theme));
+  const dr = Math.max(0, r - 20);
+  const dg = Math.max(0, g - 20);
+  const db = Math.max(0, b - 20);
+  return `inset 0 0 8px 4px rgba(${dr},${dg},${db},0.35)`;
+}
+
+/* A4 — weighted average hex of non-dimmed chips */
+function computeCoord(placed, dimmedSet) {
+  const W = { L:3, M:2, S:1 };
+  let rs=0, gs=0, bs=0, ws=0;
+  placed.forEach(({ chip }) => {
+    if (dimmedSet && dimmedSet.has(chip)) return;
+    const w = W[chip.size] || 1;
+    const [r,g,b] = hexToRgb(chipHex(chip));
+    rs += r*w; gs += g*w; bs += b*w; ws += w;
+  });
+  return ws ? rgbToHex(rs/ws, gs/ws, bs/ws) : '—';
+}
+
+/* ===================================================================
+   LAYOUT ENGINE — HORIZONTAL
+   Chips are placed along a horizontal axis. Vertical position has
+   organic variation within the viewport height. No vertical scrolling.
+   =================================================================== */
+const PAD_X      = 20;
+const PAD_Y_TOP  = 120;   /* clear fixed header */
+const CHIP_COLS  = 6;     /* used only for chronological band logic */
+
+function horizontalLayout(chips, seed) {
+  _seed = seed;
+  const vh = window.innerHeight;
+  const usableH = vh - PAD_Y_TOP - 60; /* leave bottom margin */
+
+  /* A3: mobile uses smaller chip sizes */
+  const isMobileSz = window.innerWidth <= 480;
+  const SZ_USE = isMobileSz
+    ? { L: 200, M: 140, S: 96 }
+    : SZ;
+
+  /* pre-compute chip dimensions */
+  const entries = chips.map((chip, i) => {
+    let chipW = SZ_USE[chip.size];
+    let chipH = SZ_USE[chip.size];
+    if (chip.size !== 'L') {
+      const mod = i % 7;
+      if (mod === 1 || mod === 3 || mod === 5) chipW = Math.round(SZ_USE[chip.size] * 0.75);
+      else if (mod === 2 || mod === 4)          chipH = Math.round(SZ_USE[chip.size] * 0.75);
+    }
+    return { chip, chipW, chipH };
+  });
+
+  /* hero always first */
+  const sorted = [...entries];
+  const hi = sorted.findIndex(e => e.chip.size === 'L');
+  if (hi > 0) { const [h] = sorted.splice(hi, 1); sorted.unshift(h); }
+
+  const placed = [];
+  let curX = PAD_X;
+
+  /* 3-lane layout: chips distributed round-robin across vertical thirds.
+     Strides: L=220 / M=170 / S=130.  Mobile: L=160 / M=120 / S=90.
+     x-jitter ±30px keeps the organic wobble character.
+     Collision check: if a chip overlaps a previously placed chip, push its
+     xCursor forward by (overlap.x + 12px) and retry (up to 5 iterations). */
+  const LANES      = 3;
+  const LANE_H     = vh / LANES;
+
+  sorted.forEach(({ chip, chipW, chipH }, i) => {
+    const lane    = i % LANES;
+    const baseStride = isMobileSz
+      ? (chip.size === 'L' ? 160 : chip.size === 'M' ? 120 : 90)
+      : (chip.size === 'L' ? 220 : chip.size === 'M' ? 170 : 130);
+
+    /* y-offset: vary within the lane to prevent horizontal bands */
+    const laneTop = lane * LANE_H;
+    const laneBot = laneTop + LANE_H;
+    const yMin    = Math.max(PAD_Y_TOP, laneTop + 20);
+    const yMax    = Math.min(PAD_Y_TOP + usableH - chipH, laneBot - chipH - 40);
+    const y       = Math.round(yMin + rng() * Math.max(0, yMax - yMin));
+
+    /* collision-aware x placement — up to 5 retries against same-lane chips,
+       then a single final cross-all bbox safety pass.
+       Same-lane retries avoid cascading cross-lane pushes from the L chip
+       (which spans multiple lanes by design due to its 320px height). */
+    let x;
+    let localCurX = curX;
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const jitter = Math.round((rng() - 0.5) * 30); /* ±15px x-jitter */
+      x = localCurX + jitter;
+      let maxPush    = 0;
+      let hasOverlap = false;
+      placed.forEach((p, pi) => {
+        if (pi % LANES !== lane) return; /* same-lane only for retry loop */
+        if (x < p.x + p.chipW && x + chipW > p.x &&
+            y < p.y + p.chipH && y + chipH > p.y) {
+          hasOverlap = true;
+          maxPush = Math.max(maxPush, (p.x + p.chipW) - x);
+        }
+      });
+      if (!hasOverlap) break;
+      localCurX = x + maxPush + 12;
+    }
+    /* final safety: cross-all bbox check — single push to eliminate any
+       remaining overlap with chips from other lanes (e.g. the L chip) */
+    for (const p of placed) {
+      if (x < p.x + p.chipW && x + chipW > p.x &&
+          y < p.y + p.chipH && y + chipH > p.y) {
+        x = p.x + p.chipW + 12;
+      }
+    }
+
+    placed.push({ chip, x, y, sz: SZ[chip.size], chipW, chipH });
+    curX += baseStride;
+  });
+
+  const totalW = curX + 200; /* small trailing pad */
+  return { placed, totalW };
+}
+
+function mobileLayout(chips) {
+  resetSeed();
+  const vw    = window.innerWidth;
+  const padX  = 24;
+  const avail = vw - padX * 2;
+  let y = 90;
+  const placed = chips.slice(0, 12).map(chip => {
+    const sz = Math.min(SZ[chip.size], avail);
+    const p  = {
+      chip,
+      x: Math.round(padX + (avail - sz) / 2 + rngR(-4, 4)),
+      y: Math.round(y + rngR(-2, 2)),
+      sz,
+      chipW: sz,
+      chipH: sz,
+    };
+    y += sz + rngR(48, 72);
+    return p;
+  });
+  return { placed, totalH: y + 80, totalW: vw, canvasW: vw };
+}
+
+/* ===================================================================
+   STATE
+   =================================================================== */
+let activeFilters   = new Set(); /* P5 multi-select */
+let hoverEl         = null;
+let allPlaced       = [];
+let colorFilterActive = false; /* color hash filter state */
+
+/* ── Tap-to-preview state ── */
+/* null when no preview is open; set to the placedIdx of the chip whose
+   preview is currently showing (covers both hover-triggered and tap-triggered) */
+let previewOpenForChipId = null;
+/* The chip data and element of the currently open preview */
+let previewChipData  = null;
+let previewChipEl    = null;
+let previewChipIdx   = null; /* placedIdx for openDetail */
+
+/* ── Touch detection: suppress synthetic hover on touch devices ── */
+/* Set to true when a touchstart fires; cleared after 500ms.
+   Used to block the synthesized mouseenter/mouseleave that touch browsers emit. */
+let _recentlyTouched = false;
+let _recentlyTouchedT = null;
+document.addEventListener('touchstart', () => {
+  _recentlyTouched = true;
+  clearTimeout(_recentlyTouchedT);
+  _recentlyTouchedT = setTimeout(() => { _recentlyTouched = false; }, 500);
+}, { passive: true, capture: true });
+
+/* ===================================================================
+   DOM REFS
+   =================================================================== */
+const scatter    = document.getElementById('scatter');
+const prevPanel  = document.getElementById('preview');
+const prevThumb  = document.getElementById('preview-thumb');
+const prevTitle  = document.getElementById('preview-title');
+const prevText   = document.getElementById('preview-text');
+const prevDate   = document.getElementById('preview-date');
+const coordEl    = document.getElementById('coord-display');
+const connEl     = document.getElementById('connector');
+const bridgeEl   = document.getElementById('preview-bridge'); /* Change A */
+
+/* ===================================================================
+   HOVER  (Decision 2 β — clip-path circle reveal)
+   =================================================================== */
+let _previewContentTimer = null;
+let _previewRetractTimer = null;
+const prevAccent = document.getElementById('preview-accent');
+
+function onEnter(chip, el, x, y, chipW, chipH, placedIdx) {
+  hoverEl = el;
+  /* clear selected state on previous chip */
+  if (previewChipEl && previewChipEl !== el) {
+    previewChipEl.classList.remove('preview-selected');
+  }
+  previewOpenForChipId = placedIdx;
+  previewChipData = chip;
+  previewChipEl   = el;
+  previewChipIdx  = placedIdx;
+  el.style.transform = 'scale(1.04)';
+  el.style.zIndex    = '50';
+  allPlaced.forEach(p => { if (p.el !== el) p.el.style.opacity = '0.28'; });
+
+  /* populate panel content */
+  prevThumb.style.background = chipBg(chip);
+  prevTitle.textContent = chip.title;
+  prevText.textContent  = chip.body;
+  prevDate.textContent  = `${chip.year}.${chip.month}.${chip.day} / ${chip.tag}`;
+
+  /* Decision 2 β / E3: accent strip uses display color (mixed for multi-theme) */
+  const chipColor = getChipDisplayColor(chip.theme);
+  prevAccent.style.background = chipColor;
+
+  /* compute panel position */
+  const pw  = 280;
+  const ph  = 340;
+  const cr  = el.getBoundingClientRect();
+  const vw  = window.innerWidth;
+  const vh  = window.innerHeight;
+
+  let finalLeft = cr.right + 16;
+  if (finalLeft + pw > vw - 8) finalLeft = cr.left - pw - 16;
+  finalLeft = Math.max(8, Math.min(finalLeft, vw - pw - 8));
+
+  let finalTop = cr.top + cr.height/2 - ph/2;
+  finalTop = Math.max(80, Math.min(finalTop, vh - ph - 8));
+
+  /* clear any pending retract */
+  if (_previewRetractTimer) { clearTimeout(_previewRetractTimer); _previewRetractTimer = null; }
+  if (_previewContentTimer) { clearTimeout(_previewContentTimer); _previewContentTimer = null; }
+
+  /* hide bridge/connector — no longer used for bloom, kept for compat */
+  bridgeEl.classList.remove('visible');
+  connEl.classList.remove('visible');
+
+  /* Decision 2 β — two-step bloom:
+     Step 1 (sync): snap to start state (circle 0%) with no transition.
+     Step 2 (next task): clear inline overrides, add .blooming to animate open.
+     Using setTimeout(0) instead of rAF so it works in background/off-screen contexts. */
+  prevPanel.classList.remove('blooming', 'retracting', 'content-visible');
+  prevPanel.style.transition = 'none';
+  prevPanel.style.clipPath   = 'circle(0% at 0% 50%)';
+  prevPanel.style.filter     = 'blur(8px)';
+  prevPanel.style.left       = finalLeft + 'px';
+  prevPanel.style.top        = finalTop  + 'px';
+  void prevPanel.offsetWidth; /* force reflow to commit start state */
+
+  setTimeout(() => {
+    /* Clear inline overrides so CSS base values are active, then add class to animate.
+       .blooming drives clip-path (spring), filter (bloom), accent strip, and content
+       (all overlapping — no separate content-visible class needed). */
+    prevPanel.style.transition = '';
+    prevPanel.style.clipPath   = '';
+    prevPanel.style.filter     = '';
+    prevPanel.classList.add('blooming');
+  }, 0);
+
+  /* A4 — coord = only this chip */
+  const dimmed = new Set(allPlaced.filter(p => p.el !== el).map(p => p.chip));
+  coordEl.textContent = computeCoord(allPlaced, dimmed);
+}
+
+function onLeave() {
+  hoverEl = null;
+  previewOpenForChipId = null;
+  previewChipData = null;
+  if (previewChipEl) { previewChipEl.classList.remove('preview-selected'); previewChipEl = null; }
+  previewChipIdx  = null;
+  allPlaced.forEach(p => { p.el.style.transform = ''; p.el.style.zIndex = ''; });
+
+  bridgeEl.classList.remove('visible');
+  connEl.classList.remove('visible');
+
+  if (_previewContentTimer) { clearTimeout(_previewContentTimer); _previewContentTimer = null; }
+
+  /* retract via clip-path reverse — 300ms total */
+  prevPanel.classList.remove('content-visible', 'blooming');
+  prevPanel.classList.add('retracting');
+
+  /* after retract (~500ms), reset to hidden state */
+  _previewRetractTimer = setTimeout(() => {
+    prevPanel.classList.remove('retracting');
+    /* snap back to circle(0%) without transition so next open starts clean */
+    prevPanel.style.transition = 'none';
+    prevPanel.style.clipPath   = 'circle(0% at 0% 50%)';
+    prevPanel.style.filter     = 'blur(8px)';
+    _previewRetractTimer = null;
+  }, 520);
+
+  applyFilter();
+  updateCoord();
+  scheduleProximityDim();
+}
+
+/* ===================================================================
+   FILTER  (A3)
+   =================================================================== */
+/* P5 — multi-select: chip matches if ANY selected theme matches */
+function chipMatchesFilter(chip) {
+  if (activeFilters.size === 0) return true;
+  const t = chip.theme;
+  for (const f of activeFilters) {
+    if (t === f) return true;
+    if (MIXES[t] && t.includes(f)) return true;
+  }
+  return false;
+}
+
+function applyFilter() {
+  if (hoverEl) return;
+  if (colorFilterActive) return; /* color filter owns opacity while active */
+  allPlaced.forEach(({ chip, el }, i) => {
+    const opacity = (activeFilters.size === 0 || chipMatchesFilter(chip)) ? '1' : '0.12';
+    el.style.opacity = opacity;
+    /* also apply to clone chip at same index */
+    const cloneEl = scatterClone ? scatterClone.children[i] : null;
+    if (cloneEl) cloneEl.style.opacity = opacity;
+  });
+  /* re-apply proximity dim so it composes correctly */
+  scheduleProximityDim();
+}
+
+/* A4 */
+function updateCoord() {
+  if (hoverEl) return;
+  const dimmed = activeFilters.size > 0
+    ? new Set(allPlaced.filter(p => !chipMatchesFilter(p.chip)).map(p => p.chip))
+    : null;
+  coordEl.textContent = computeCoord(allPlaced, dimmed);
+}
+
+/* ===================================================================
+   P6 — SIDEBAR LEGEND (replaces horizontal legend)
+   =================================================================== */
+function buildLegend() { /* kept for compat — no-op */ }
+
+function buildSidebar() {
+  const sb = document.getElementById('theme-sidebar');
+  sb.innerHTML = '';
+
+  Object.entries(THEMES).forEach(([key, { hex, name }]) => {
+    const item = document.createElement('div');
+    item.className   = 'sidebar-item';
+    item.dataset.key = key;
+
+    const dot = document.createElement('div');
+    dot.className        = 'sidebar-dot';
+    dot.style.background = hex;
+
+    const lbl = document.createElement('div');
+    lbl.className   = 'sidebar-name';
+    lbl.textContent = name;
+
+    item.append(dot, lbl);
+    item.addEventListener('click', () => {
+      /* P5 multi-select toggle */
+      if (activeFilters.has(key)) {
+        activeFilters.delete(key);
+        item.classList.remove('active');
+      } else {
+        activeFilters.add(key);
+        item.classList.add('active');
+      }
+      applyFilter();
+      updateCoord();
+    });
+    sb.appendChild(item);
+  });
+
+  /* CLEAR */
+  const clearBtn = document.createElement('button');
+  clearBtn.id = 'sidebar-clear';
+  clearBtn.textContent = 'CLEAR';
+  clearBtn.addEventListener('click', () => {
+    activeFilters.clear();
+    sb.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+    applyFilter();
+    updateCoord();
+  });
+  sb.appendChild(clearBtn);
+
+  /* ABOUT COLORS → */
+  const about = document.createElement('a');
+  about.id = 'sidebar-about';
+  about.textContent = 'ABOUT COLORS →';
+  about.href = '/about-colors.html';
+  sb.appendChild(about);
+}
+
+/* ===================================================================
+   C13 — SHUFFLE
+   =================================================================== */
+let shuffleSeed = 7331;
+
+/* galleryScatter → delegates to horizontalLayout */
+function galleryScatter(chips, seed) {
+  return horizontalLayout(chips, seed);
+}
+
+/* ===================================================================
+   C14 — TIMELINE LAYOUT (horizontal, sorted by date)
+   =================================================================== */
+let timelineMode = 'curated'; // 'curated' | 'chronological'
+
+function chronologicalLayout(chips) {
+  /* Sort chips by full date */
+  const sorted = [...chips].sort((a, b) => {
+    const da = a.year * 10000 + a.month * 100 + a.day;
+    const db = b.year * 10000 + b.month * 100 + b.day;
+    return da - db;
+  });
+  return horizontalLayout(sorted, shuffleSeed);
+}
+
+/* ===================================================================
+   RENDER (horizontal flow with seamless clone)
+   =================================================================== */
+
+/* DOM refs for horizontal scroll */
+const hStrip   = document.getElementById('h-strip');
+const scatterClone = document.getElementById('scatter-clone');
+
+/* Current virtual scroll offset (px) — maintained by drift+wheel */
+let hScrollX = 0;
+/* Width of one full set of chips (set in render, used for wrap) */
+let hStripW  = 0;
+
+/* Build a chip DOM element and attach event handlers */
+function buildChipEl(chip, x, y, chipW, chipH, sz, placedIdx, animIdx, isClone) {
+  const el = document.createElement('div');
+  el.className = 'chip' + (isClone ? '' : ' chip-loading');
+  el.dataset.theme     = chip.theme;
+  el.dataset.mediaType = chip.mediaType;
+  if (!isClone) el.style.setProperty('--i', animIdx);
+  el.style.left       = x + 'px';
+  el.style.top        = y + 'px';
+  el.style.width      = chipW + 'px';
+  el.style.height     = chipH + 'px';
+  el.style.background = chipBg(chip);
+  el.style.boxShadow  = chipBleedShadow(chip);
+
+  /* P2 — kanji glyph */
+  const glyph = document.createElement('span');
+  glyph.className   = 'chip-glyph';
+  glyph.textContent = GLYPHS[chip.mediaType] || '?';
+  el.appendChild(glyph);
+
+  /* P3 — bottom stripe */
+  const stripe = document.createElement('div');
+  stripe.className = 'chip-stripe';
+  stripe.dataset.mt = chip.mediaType;
+  el.appendChild(stripe);
+
+  /* E3 — source dots for multi-theme chips only */
+  const srcColors = getChipSourceColors(chip.theme);
+  if (srcColors.length > 1) {
+    const dots = document.createElement('div');
+    dots.className = 'chip-dots';
+    srcColors.forEach(hex => {
+      const dot = document.createElement('span');
+      dot.className = 'chip-dot';
+      dot.style.background = hex;
+      dots.appendChild(dot);
+    });
+    el.appendChild(dots);
+  }
+
+  /* P1 — caption: YYYY.M.D / tag */
+  const tagJP   = TAG_JP[chip.tag] || chip.tag;
+  const dateStr = `${chip.year}.${chip.month}.${chip.day}`;
+  const cap = document.createElement('div');
+  cap.className   = 'chip-caption';
+  cap.textContent = `${dateStr} / ${tagJP}`;
+  el.appendChild(cap);
+
+  /* Decision 3 γ / Tap-to-preview: hover intent (desktop mouse) + tap model (touch) */
+  (function attachHoverIntent(chip, el, chipW, chipH, placedIdx) {
+    let restT = null, capT = null, closeT = null, shown = false;
+    /* Touch tap tracking: distinguish real tap from scroll drag */
+    let _tapStartX = 0, _tapStartY = 0, _tapMoved = false;
+
+    function showPreview() {
+      clearTimeout(restT); clearTimeout(capT);
+      restT = capT = null;
+      if (!shown) {
+        shown = true;
+        driftPaused = true;
+        onEnter(chip, el, x, y, chipW, chipH, placedIdx);
+        /* apply selected state visual */
+        el.classList.add('preview-selected');
+      }
+    }
+    function resetRest() {
+      clearTimeout(restT);
+      restT = setTimeout(showPreview, 80);
+    }
+
+    /* ── Desktop mouse hover intent (unchanged timing) ── */
+    el.addEventListener('mouseenter', () => {
+      /* skip synthesized hover events from touch interactions */
+      if (_recentlyTouched) return;
+      clearTimeout(closeT); closeT = null;
+      shown = false;
+      resetRest();
+      capT = setTimeout(showPreview, 180);
+    });
+    el.addEventListener('mousemove', () => {
+      if (_recentlyTouched) return;
+      if (!shown) resetRest();
+    });
+    el.addEventListener('mouseleave', () => {
+      if (_recentlyTouched) return;
+      clearTimeout(restT); clearTimeout(capT);
+      restT = capT = null;
+      closeT = setTimeout(() => {
+        shown = false;
+        onLeave();
+        /* resume drift 1200ms after mouse-out */
+        setTimeout(() => { driftPaused = false; }, 1200);
+      }, 200);
+    });
+
+    /* ── Touch tap: record start position to detect scroll vs tap ── */
+    el.addEventListener('touchstart', (e) => {
+      _tapStartX = e.touches[0].clientX;
+      _tapStartY = e.touches[0].clientY;
+      _tapMoved  = false;
+    }, { passive: true });
+    el.addEventListener('touchmove', (e) => {
+      const dx = e.touches[0].clientX - _tapStartX;
+      const dy = e.touches[0].clientY - _tapStartY;
+      if (Math.abs(dx) > 10 || Math.abs(dy) > 10) _tapMoved = true;
+    }, { passive: true });
+
+    /* ── Unified click handler (tap-to-preview model) ── */
+    el.addEventListener('click', (e) => {
+      /* If touch and finger moved more than threshold → it was a scroll, not a tap */
+      if (_tapMoved) { _tapMoved = false; return; }
+
+      if (previewOpenForChipId === placedIdx) {
+        /* Preview is already open for THIS chip:
+           desktop: hover+click = go directly to detail (seamless).
+           mobile: second tap on same chip = open detail. */
+        openDetail(chip, el, placedIdx);
+      } else if (previewOpenForChipId !== null) {
+        /* Preview open for a DIFFERENT chip: dismiss it, show new preview */
+        /* Remove selected state from previous chip */
+        if (previewChipEl) previewChipEl.classList.remove('preview-selected');
+        onLeave(); /* dismiss old preview */
+        shown = false;
+        /* Show new preview immediately (no hover intent delay needed on tap) */
+        showPreview();
+      } else {
+        /* No preview open: show this chip's preview */
+        shown = false;
+        showPreview();
+      }
+    });
+  })(chip, el, chipW, chipH, placedIdx);
+
+  if (!isClone) {
+    el.addEventListener('animationend', () => el.classList.remove('chip-loading'), { once: true });
+  }
+
+  return el;
+}
+
+function render() {
+  scatter.innerHTML = '';
+  scatterClone.innerHTML = '';
+  allPlaced = [];
+  hoverEl   = null;
+  /* reset tap-to-preview state */
+  previewOpenForChipId = null;
+  previewChipData = null;
+  previewChipEl   = null;
+  previewChipIdx  = null;
+  prevPanel.classList.remove('visible');
+
+  let layoutResult;
+  if (timelineMode === 'chronological') {
+    layoutResult = chronologicalLayout(DATA);
+  } else {
+    layoutResult = galleryScatter(DATA, shuffleSeed);
+  }
+  const { placed, totalW } = layoutResult;
+
+  {
+    /* Horizontal strip (desktop and mobile) */
+    const vh = window.innerHeight;
+    scatter.style.width  = totalW + 'px';
+    scatter.style.height = vh + 'px';
+    scatterClone.style.display = '';
+    scatterClone.style.width  = totalW + 'px';
+    scatterClone.style.height = vh + 'px';
+    scatterClone.style.left   = totalW + 'px';
+    hStrip.style.width = (totalW * 2) + 'px';
+    hStrip.style.height = vh + 'px';
+    hStripW = totalW;
+
+    let animIdx = 0;
+    placed.forEach(({ chip, x, y, sz, chipW, chipH }, placedIdx) => {
+      /* primary copy */
+      const el = buildChipEl(chip, x, y, chipW, chipH, sz, placedIdx, animIdx++, false);
+      scatter.appendChild(el);
+      allPlaced.push({ chip, el, x, y, sz, chipW, chipH });
+
+      /* clone copy (no animation) */
+      const elC = buildChipEl(chip, x, y, chipW, chipH, sz, placedIdx, 0, true);
+      scatterClone.appendChild(elC);
+    });
+  }
+
+  applyFilter();
+  updateCoord();
+  if (typeof scheduleProximityDim === 'function') scheduleProximityDim();
+}
+
+/* ===================================================================
+   HORIZONTAL DRIFT + WHEEL + INFINITE LOOP
+   =================================================================== */
+let driftPaused    = false;
+let wheelScrolling = false;
+let _wheelEndT     = null;
+/* ~0.58px per frame @ 60fps ≈ 35px/sec  */
+const DRIFT_PX_PER_MS = 45 / 1000;
+
+function applyHScroll() {
+  if (hStripW <= 0) return;
+  /* wrap within [0, hStripW) */
+  hScrollX = ((hScrollX % hStripW) + hStripW) % hStripW;
+  hStrip.style.transform = `translateX(${-hScrollX}px)`;
+}
+
+/* setInterval-based drift tick — runs even when tab is backgrounded */
+let _driftInterval  = null;
+let _lastDriftTick  = null;
+function driftTick() {
+  const now = performance.now();
+  if (_lastDriftTick === null) { _lastDriftTick = now; return; }
+  const elapsed = now - _lastDriftTick;
+  _lastDriftTick = now;
+  if (!driftPaused && !wheelScrolling && hStripW > 0) {
+    hScrollX += DRIFT_PX_PER_MS * elapsed;
+  }
+  applyHScroll();
+}
+function driftLoop() {
+  if (_driftInterval) clearInterval(_driftInterval);
+  _lastDriftTick = null;
+  _driftInterval = setInterval(driftTick, 16);
+}
+
+/* Wheel → horizontal scroll (also pauses drift briefly) */
+document.querySelector('.page').addEventListener('wheel', (e) => {
+  if (hStripW <= 0) return;
+  e.preventDefault();
+  /* Use deltaX if available (native horizontal swipe), else deltaY */
+  const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+  hScrollX += delta * 1.4;
+  applyHScroll();
+  /* mark wheel-scrolling to pause drift */
+  wheelScrolling = true;
+  if (_wheelEndT) clearTimeout(_wheelEndT);
+  _wheelEndT = setTimeout(() => { wheelScrolling = false; }, 300);
+}, { passive: false });
+
+/* Touch support: horizontal swipe on the chip canvas
+   A1: record startX/startScrollX at touchstart, compute absolute delta in touchmove,
+   add momentum flick on touchend, pause drift while finger is down. */
+let _touchStartX    = 0;
+let _touchStartY    = 0;
+let _touchStartScrollX = 0;
+let _touchLocked    = null; /* null | 'x' | 'y' — axis lock after first move */
+let _touchLastX     = 0;
+let _touchPrevLastX = 0;
+let _touchLastTime  = 0;
+let _momentumRafId  = null;
+
+function cancelMomentum() {
+  if (_momentumRafId) { cancelAnimationFrame(_momentumRafId); _momentumRafId = null; }
+}
+
+document.querySelector('.page').addEventListener('touchstart', (e) => {
+  cancelMomentum();
+  _touchStartX       = e.touches[0].clientX;
+  _touchStartY       = e.touches[0].clientY;
+  _touchStartScrollX = hScrollX;
+  _touchLocked       = null;
+  _touchLastX        = _touchStartX;
+  _touchPrevLastX    = _touchStartX;
+  _touchLastTime     = performance.now();
+  /* pause drift while finger is down */
+  wheelScrolling = true;
+  if (_wheelEndT) { clearTimeout(_wheelEndT); _wheelEndT = null; }
+}, { passive: true });
+
+document.querySelector('.page').addEventListener('touchmove', (e) => {
+  if (hStripW <= 0) return;
+  const curX = e.touches[0].clientX;
+  const curY = e.touches[0].clientY;
+  const totalDx = _touchStartX - curX;
+  const totalDy = _touchStartY - curY;
+
+  /* axis lock: determine direction on first meaningful movement */
+  if (_touchLocked === null) {
+    if (Math.abs(totalDx) > 6 || Math.abs(totalDy) > 6) {
+      _touchLocked = Math.abs(totalDx) >= Math.abs(totalDy) ? 'x' : 'y';
+    }
+  }
+
+  /* Dismiss preview when scroll drag starts (> 10px in any direction) */
+  if (previewOpenForChipId !== null && (Math.abs(totalDx) > 10 || Math.abs(totalDy) > 10)) {
+    onLeave();
+    setTimeout(() => { driftPaused = false; }, 1200);
+  }
+
+  if (_touchLocked !== 'x') return; /* let browser handle vertical pan */
+
+  e.preventDefault();
+  hScrollX = _touchStartScrollX + totalDx;
+  applyHScroll();
+
+  /* track velocity: last two positions for momentum calc */
+  _touchPrevLastX = _touchLastX;
+  _touchLastX     = curX;
+  _touchLastTime  = performance.now();
+}, { passive: false });
+
+document.querySelector('.page').addEventListener('touchend', (e) => {
+  if (_touchLocked !== 'x') {
+    wheelScrolling = false;
+    return;
+  }
+  /* compute flick velocity (px/ms) from last two recorded positions */
+  const velocityPxPerMs = (_touchLastX - _touchPrevLastX) * 0.8; /* raw px delta, decay factor */
+  let momentumV = velocityPxPerMs;
+  const DECAY = 0.92; /* per frame */
+  const MIN_V = 0.3;
+
+  function momentumStep() {
+    if (Math.abs(momentumV) < MIN_V) {
+      wheelScrolling = false;
+      _momentumRafId = null;
+      return;
+    }
+    hScrollX -= momentumV; /* subtract because positive swipe-right = scroll left */
+    applyHScroll();
+    momentumV *= DECAY;
+    _momentumRafId = requestAnimationFrame(momentumStep);
+  }
+  if (Math.abs(momentumV) >= MIN_V) {
+    _momentumRafId = requestAnimationFrame(momentumStep);
+  } else {
+    wheelScrolling = false;
+  }
+}, { passive: true });
+
+/* ===================================================================
+   C12+C15 — DETAIL VIEW  (Change B)
+   =================================================================== */
+const detailView      = document.getElementById('detail-view');
+const detailStrip     = document.getElementById('detail-strip');
+const detailBody      = document.getElementById('detail-body');
+const detailClose     = document.getElementById('detail-close');
+const morphOverlay    = document.getElementById('morph-overlay');
+const detailColorBand = document.getElementById('detail-color-band');
+const detailBandContent = document.getElementById('detail-band-content');
+
+let detailOpen = false;
+
+function themeDisplayNames(themeKey) {
+  if (THEMES[themeKey]) return THEMES[themeKey].name;
+  /* mixed theme: split by × */
+  return themeKey.split('×').map(k => THEMES[k] ? THEMES[k].name : k.toUpperCase()).join(' × ');
+}
+
+function buildDetailContent(chip, idx) {
+  /* Change B: title + meta go into the color band, body goes into white area */
+  const themes = themeDisplayNames(chip.theme);
+
+  /* ── band content (title + meta) ── */
+  detailBandContent.innerHTML = '';
+
+  const title = document.createElement('div');
+  title.className = 'detail-title';
+  title.textContent = chip.title;
+
+  const meta = document.createElement('div');
+  meta.className = 'detail-meta';
+  const detailDateStr = `${chip.year}.${chip.month}.${chip.day}`;
+  meta.textContent = `${detailDateStr} · ${themes}`;
+
+  detailBandContent.appendChild(title);
+  detailBandContent.appendChild(meta);
+
+  /* ── white body area ── */
+  detailBody.innerHTML = '';
+
+  /* 3 paragraphs from body field */
+  const paragraphs = [
+    chip.body,
+    chip.body + '　' + chip.body.slice(0, Math.ceil(chip.body.length / 2)),
+    chip.body.slice(Math.floor(chip.body.length / 3)) + '　思考は常に未完成である。',
+  ];
+
+  const textWrap = document.createElement('div');
+  paragraphs.forEach(txt => {
+    const p = document.createElement('p');
+    p.className = 'detail-text';
+    p.textContent = txt;
+    textWrap.appendChild(p);
+  });
+
+  /* media placeholder */
+  let mediaEl = null;
+  if (chip.mediaType === 'photo') {
+    mediaEl = document.createElement('div');
+    mediaEl.className = 'detail-media-photo';
+    const lbl = document.createElement('span');
+    lbl.className = 'detail-media-label';
+    lbl.textContent = 'photo placeholder';
+    mediaEl.appendChild(lbl);
+  } else if (chip.mediaType === 'video') {
+    mediaEl = document.createElement('div');
+    mediaEl.className = 'detail-media-video';
+    mediaEl.textContent = '▶ play';
+  } else if (chip.mediaType === 'audio' || chip.mediaType === 'music') {
+    mediaEl = document.createElement('div');
+    mediaEl.className = 'detail-media-audio';
+    const bars = [30, 55, 70, 45, 60, 35, 65, 50, 40, 58];
+    const svgNS = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(svgNS, 'svg');
+    svg.setAttribute('width', '120');
+    svg.setAttribute('height', '60');
+    svg.setAttribute('viewBox', '0 0 120 60');
+    bars.forEach((h, i) => {
+      const rect = document.createElementNS(svgNS, 'rect');
+      const x = 4 + i * 12;
+      const y = (60 - h) / 2;
+      rect.setAttribute('x', x);
+      rect.setAttribute('y', y);
+      rect.setAttribute('width', '7');
+      rect.setAttribute('height', h);
+      rect.setAttribute('fill', '#999');
+      svg.appendChild(rect);
+    });
+    mediaEl.appendChild(svg);
+  }
+
+  if (mediaEl) detailBody.appendChild(mediaEl);
+  detailBody.appendChild(textWrap);
+}
+
+/* ===================================================================
+   Change B — DETAIL VIEW OPEN/CLOSE
+   New overlapping timeline (~1800ms total):
+   t=0:    chip swell starts (250ms spring), band grow starts (900ms spring via transition)
+   t=500:  title fade+rise starts (700ms bloom)
+   t=800:  meta fade+rise starts (500ms bloom)
+   t=1100: body fade+rise starts (700ms bloom)
+   Close: band collapses 700ms bloom, content fades 400ms from t=0
+   =================================================================== */
+const riseOverlay = document.getElementById('rise-overlay');
+
+/* Build inline washi mask SVG URL for the color band bottom edge.
+   Strategy: solid white rectangle (fully opaque = fully visible band) for
+   the top portion, then a turbulence-displaced feather at the bottom 80px.
+   The mask is composed as: solid white rect MINUS a turbulence-eroded strip
+   at the bottom. We achieve this by:
+   - Filling the entire mask white (band is fully visible)
+   - Then blending in a black turbulence-displaced gradient at the bottom
+     using feComposite to create the ragged ink-bleed edge.
+*/
+function washibandMaskStyle(bandH) {
+  const bleedPx = 72;
+  const solidH  = Math.max(0, bandH - bleedPx);
+  /* The mask SVG:
+     1. White rectangle = band is fully visible (top solidH px)
+     2. Displaced gradient from white→black over the bottom bleedPx
+     feBlend or feComposite combines them so the bottom edge is ragged
+  */
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='1440' height='${bandH}'>
+    <defs>
+      <linearGradient id='wg' gradientUnits='userSpaceOnUse'
+        x1='0' y1='${solidH}' x2='0' y2='${bandH}'>
+        <stop offset='0' stop-color='white'/>
+        <stop offset='1' stop-color='black'/>
+      </linearGradient>
+      <filter id='wf' x='-5%' y='-5%' width='110%' height='110%'>
+        <feTurbulence type='fractalNoise' baseFrequency='0.022 0.004'
+          numOctaves='3' seed='17' result='noise'/>
+        <feDisplacementMap in='SourceGraphic' in2='noise'
+          scale='36' xChannelSelector='R' yChannelSelector='G'/>
+      </filter>
+    </defs>
+    <!-- solid white = fully opaque (band visible) -->
+    <rect width='100%' height='${solidH}' fill='white'/>
+    <!-- turbulence-displaced gradient strip at the bottom edge -->
+    <rect y='${solidH - 10}' width='100%' height='${bleedPx + 10}'
+      fill='url(#wg)' filter='url(#wf)'/>
+  </svg>`;
+  return `url("data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}")`;
+}
+
+function openDetail(chip, chipEl, idx) {
+  const id    = String(idx + 1).padStart(2, '0');
+  const cr    = chipEl.getBoundingClientRect();
+  const color = getChipDisplayColor(chip.theme); /* E3: use mixed color for multi-theme */
+  const vh    = window.innerHeight;
+  const bandTargetH = Math.round(vh * 0.35);
+
+  /* hide hover panel immediately — reset β clip-path to hidden state */
+  prevPanel.classList.remove('visible', 'content-visible', 'blooming', 'retracting');
+  prevPanel.style.transition = 'none';
+  prevPanel.style.clipPath   = 'circle(0% at 0% 50%)';
+  prevPanel.style.filter     = 'blur(8px)';
+  bridgeEl.classList.remove('visible');
+  connEl.classList.remove('visible');
+  /* clear tap-to-preview state */
+  previewOpenForChipId = null;
+  previewChipData = null;
+  if (previewChipEl) { previewChipEl.classList.remove('preview-selected'); previewChipEl = null; }
+  previewChipIdx  = null;
+
+  /* populate content (hidden) */
+  buildDetailContent(chip, idx);
+
+  /* show white detail view behind everything, scrolled to top */
+  detailView.style.opacity = '1';
+  detailView.classList.add('visible');
+  detailView.scrollTop = 0;
+
+  /* ── Color band: set up at height 0, no transition yet ── */
+  detailColorBand.style.cssText = `
+    display: block;
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 0px;
+    background: ${color};
+    z-index: 301;
+    pointer-events: none;
+    transition: none;
+    animation: none;
+  `;
+  detailColorBand.style.setProperty('--band-color', color);
+  detailColorBand.getBoundingClientRect(); /* reflow */
+
+  /* band-content hidden initially */
+  detailBandContent.style.cssText = 'display:flex;opacity:0;';
+
+  /* t=0: chip swell (200ms spring) + band grow via transition (spring overshoot cubic-bezier) */
+  chipEl.style.transition = 'transform 200ms var(--ease-spring)';
+  chipEl.style.transform  = 'scale(1.02)';
+  chipEl.style.zIndex     = '200';
+
+  /* Band grows via transition — setTimeout(0) lets height:0 / transition:none paint first,
+     then apply the spring cubic-bezier transition and set target height in px.
+     cubic-bezier(0.34, 1.56, 0.64, 1) has y-peak >1 → natural overshoot past 35vh → settles at 35vh. */
+  setTimeout(() => {
+    detailColorBand.style.transition = 'height 900ms var(--ease-spring)';
+    detailColorBand.style.height     = bandTargetH + 'px';
+  }, 0);
+
+  /* t=200: all content (band title+meta + body) appears together as one wrapper.
+     Build a .detail-content-stack that contains both band content and body, animate as one. */
+  setTimeout(() => {
+    /* make band-content wrapper visible (holds title+meta) */
+    detailBandContent.style.opacity = '1';
+
+    /* wrap title+meta into stack, start hidden */
+    const titleEl = detailBandContent.querySelector('.detail-title');
+    const metaEl  = detailBandContent.querySelector('.detail-meta');
+
+    /* band title+meta: wrap in .detail-content-stack */
+    let bandStack = detailBandContent.querySelector('.detail-content-stack');
+    if (!bandStack) {
+      bandStack = document.createElement('div');
+      bandStack.className = 'detail-content-stack stack-hidden';
+      if (titleEl) detailBandContent.replaceChild(bandStack, titleEl);
+      if (titleEl) bandStack.appendChild(titleEl);
+      if (metaEl)  bandStack.appendChild(metaEl);
+    }
+
+    /* body elements: wrap in .detail-content-stack */
+    const bodyEls = detailBody.querySelectorAll('.detail-text, .detail-media-photo, .detail-media-video, .detail-media-audio');
+    let bodyStack = detailBody.querySelector('.detail-content-stack');
+    if (!bodyStack) {
+      bodyStack = document.createElement('div');
+      bodyStack.className = 'detail-content-stack stack-hidden';
+      /* wrap all body els into the stack */
+      const parent = bodyEls[0] ? bodyEls[0].parentNode : detailBody;
+      const firstChild = bodyEls[0];
+      if (firstChild) parent.insertBefore(bodyStack, firstChild);
+      bodyEls.forEach(el => bodyStack.appendChild(el));
+    }
+
+    /* force hidden state to paint, then trigger transition to visible on next frame */
+    detailBody.getBoundingClientRect();
+    requestAnimationFrame(() => {
+      bandStack.classList.remove('stack-hidden');
+      bandStack.classList.add('stack-visible');
+      bodyStack.classList.remove('stack-hidden');
+      bodyStack.classList.add('stack-visible');
+    });
+  }, 200);
+
+  /* t=950: show close button + mark open (band at ~900ms + small buffer) */
+  setTimeout(() => {
+    detailClose.classList.add('visible');
+    detailOpen = true;
+    history.replaceState(null, '', `#/work/${id}`);
+  }, 950);
+
+  /* store for close */
+  detailView._chipEl    = chipEl;
+  detailView._chipIdx   = idx;
+  detailView._chipColor = color;
+  detailView._cr        = cr;
+  detailView._bandH     = bandTargetH;
+}
+
+function closeDetail() {
+  if (!detailOpen) return;
+  detailOpen = false;
+
+  const chipEl  = detailView._chipEl;
+  const cr      = detailView._cr || { left: window.innerWidth/2 - 60, top: window.innerHeight/2 - 60, width: 120, height: 120 };
+  const color   = detailView._chipColor || '#888';
+
+  detailClose.classList.remove('visible');
+
+  /* t=0: fade content stacks simultaneously over 500ms */
+  [
+    detailBandContent.querySelector('.detail-content-stack'),
+    detailBody.querySelector('.detail-content-stack'),
+  ].forEach(stack => {
+    if (!stack) return;
+    stack.classList.remove('stack-visible');
+    stack.classList.add('stack-hidden');
+    stack.style.transition = 'opacity 500ms var(--ease-bloom), transform 500ms var(--ease-bloom)';
+  });
+  /* Also fade band-content wrapper itself in case stack wasn't built */
+  detailBandContent.style.transition = 'opacity 500ms var(--ease-bloom)';
+  detailBandContent.style.opacity    = '0';
+
+  /* t=0: collapse band height over 900ms bloom — symmetric with open duration */
+  const currentH = detailColorBand.getBoundingClientRect().height;
+  detailColorBand.style.height = currentH + 'px'; /* pin current height for transition */
+  detailColorBand.getBoundingClientRect(); /* reflow */
+  detailColorBand.style.transition = `height 900ms var(--ease-bloom)`;
+  detailColorBand.style.height     = '0px';
+
+  /* restore chip */
+  if (chipEl) {
+    chipEl.style.transition = 'transform 300ms var(--ease-bloom)';
+    chipEl.style.transform  = '';
+    setTimeout(() => {
+      chipEl.style.transition = '';
+      chipEl.style.zIndex     = '';
+      chipEl.querySelectorAll('.chip-glyph,.chip-stripe,.chip-caption').forEach(el => {
+        el.style.transition = '';
+        el.style.opacity    = '';
+      });
+    }, 350);
+  }
+
+  /* clean up at 950ms (just past 900ms band + 500ms content — both end ≤900ms) */
+  setTimeout(() => {
+    detailView.classList.remove('visible');
+    detailColorBand.style.cssText = '';
+    detailColorBand.style.display = 'none';
+    detailColorBand.style.removeProperty('--band-color');
+    detailBandContent.style.cssText = 'display:none;opacity:0;';
+    detailBandContent.innerHTML = '';
+    /* remove anim classes (legacy cleanup) */
+    detailBody.querySelectorAll('.detail-title-anim,.detail-meta-anim,.detail-body-anim').forEach(el => {
+      el.classList.remove('detail-title-anim','detail-meta-anim','detail-body-anim');
+    });
+    history.replaceState(null, '', window.location.pathname + window.location.search);
+  }, 950);
+}
+
+detailClose.addEventListener('click', closeDetail);
+
+/* Click outside content area closes (click on outer scroll area) */
+detailView.addEventListener('click', (e) => {
+  if (e.target === detailView) closeDetail();
+});
+
+/* ===================================================================
+   TAP-TO-PREVIEW — panel click & outside-click dismiss
+   =================================================================== */
+
+/* Clicking the preview panel itself opens the detail view */
+prevPanel.addEventListener('click', (e) => {
+  e.stopPropagation(); /* prevent doc outside-click handler from firing */
+  if (previewOpenForChipId !== null && previewChipData && previewChipEl) {
+    openDetail(previewChipData, previewChipEl, previewChipIdx);
+  }
+});
+
+/* Document-level click: dismiss preview when tapping outside chip and panel */
+document.addEventListener('click', (e) => {
+  if (previewOpenForChipId === null) return;
+  if (detailOpen) return; /* detail open → preview already hidden */
+
+  /* Check if click is inside the preview panel */
+  if (prevPanel.contains(e.target)) return;
+
+  /* Check if click is inside any chip */
+  const clickedChip = e.target.closest('.chip');
+  if (clickedChip) return; /* chip click handlers manage state */
+
+  /* Outside click: dismiss preview */
+  onLeave();
+  setTimeout(() => { driftPaused = false; }, 1200);
+});
+
+/* ===================================================================
+   C13 — SHUFFLE BUTTON HANDLER
+   =================================================================== */
+document.getElementById('shuffle-btn').addEventListener('click', () => {
+  shuffleSeed = Math.floor(Math.random() * 999999) + 1000;
+  if (timelineMode === 'chronological') {
+    timelineMode = 'curated';
+    document.getElementById('tl-curated').classList.add('active');
+    document.getElementById('tl-chrono').classList.remove('active');
+  }
+  render();
+});
+
+/* ===================================================================
+   C14 — TIMELINE TOGGLE HANDLERS
+   =================================================================== */
+document.getElementById('tl-curated').addEventListener('click', () => {
+  if (timelineMode === 'curated') return;
+  timelineMode = 'curated';
+  document.getElementById('tl-curated').classList.add('active');
+  document.getElementById('tl-chrono').classList.remove('active');
+  render();
+});
+
+document.getElementById('tl-chrono').addEventListener('click', () => {
+  if (timelineMode === 'chronological') return;
+  timelineMode = 'chronological';
+  document.getElementById('tl-chrono').classList.add('active');
+  document.getElementById('tl-curated').classList.remove('active');
+  render();
+});
+
+/* ===================================================================
+   C16 — KEYBOARD SHORTCUTS
+   =================================================================== */
+const THEME_KEYS = ['nature', 'system', 'education', 'music', 'philosophy'];
+
+document.addEventListener('keydown', (e) => {
+  /* guard: ignore if typing in inputs */
+  if (e.target.tagName !== 'BODY') return;
+
+  const key = e.key;
+
+  /* ESC: close detail if open, else dismiss preview, else clear filter */
+  if (key === 'Escape') {
+    if (detailOpen) {
+      closeDetail();
+    } else if (previewOpenForChipId !== null) {
+      /* dismiss the preview panel */
+      onLeave();
+      setTimeout(() => { driftPaused = false; }, 1200);
+    } else {
+      activeFilters.clear();
+      document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+      applyFilter();
+      updateCoord();
+    }
+    return;
+  }
+
+  /* 1–7: toggle theme filter (P5 multi-select via keyboard) */
+  if (key >= '1' && key <= '7') {
+    const idx = parseInt(key) - 1;
+    const themeKey = THEME_KEYS[idx];
+    if (!themeKey) return;
+    const sb = document.getElementById('theme-sidebar');
+    if (activeFilters.has(themeKey)) {
+      activeFilters.delete(themeKey);
+      sb.querySelectorAll('.sidebar-item').forEach(i => {
+        if (i.dataset.key === themeKey) i.classList.remove('active');
+      });
+    } else {
+      activeFilters.add(themeKey);
+      sb.querySelectorAll('.sidebar-item').forEach(i => {
+        if (i.dataset.key === themeKey) i.classList.add('active');
+      });
+    }
+    applyFilter();
+    updateCoord();
+    return;
+  }
+
+  /* 0: clear all filters */
+  if (key === '0') {
+    activeFilters.clear();
+    document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+    applyFilter();
+    updateCoord();
+    return;
+  }
+
+  /* S: shuffle */
+  if (key === 's' || key === 'S') {
+    shuffleSeed = Math.floor(Math.random() * 999999) + 1000;
+    if (timelineMode === 'chronological') {
+      timelineMode = 'curated';
+      document.getElementById('tl-curated').classList.add('active');
+      document.getElementById('tl-chrono').classList.remove('active');
+    }
+    render();
+    return;
+  }
+
+  /* T: toggle timeline */
+  if (key === 't' || key === 'T') {
+    if (timelineMode === 'curated') {
+      timelineMode = 'chronological';
+      document.getElementById('tl-chrono').classList.add('active');
+      document.getElementById('tl-curated').classList.remove('active');
+    } else {
+      timelineMode = 'curated';
+      document.getElementById('tl-curated').classList.add('active');
+      document.getElementById('tl-chrono').classList.remove('active');
+    }
+    render();
+    return;
+  }
+});
+
+/* ===================================================================
+   C15 — URL hash deep link on page load
+   =================================================================== */
+function checkHashOnLoad() {
+  const hash = window.location.hash;
+  /* color filter takes priority */
+  const cm = hash.match(/^#color=([0-9A-Fa-f]{6})$/i);
+  if (cm) { applyColorFilter(cm[1].toUpperCase()); return; }
+  const m = hash.match(/^#\/work\/(\d+)$/);
+  if (!m) return;
+  const idx = parseInt(m[1]) - 1;
+  if (idx < 0 || idx >= allPlaced.length) return;
+  const { chip, el } = allPlaced[idx];
+  openDetail(chip, el, idx);
+}
+
+/* ===================================================================
+   COLOR FILTER — #color=HEX hash
+   =================================================================== */
+
+/* Euclidean RGB distance */
+function colorDistance(hexA, hexB) {
+  const [r1,g1,b1] = hexToRgb(hexA);
+  const [r2,g2,b2] = hexToRgb(hexB);
+  return Math.sqrt((r1-r2)**2 + (g1-g2)**2 + (b1-b2)**2);
+}
+
+const COLOR_FILTER_THRESHOLD = 30;
+
+function applyColorFilter(targetHex) {
+  if (!allPlaced.length) return;
+
+  /* normalise to uppercase with #  */
+  const hex6 = targetHex.replace('#','').toUpperCase();
+  const fullHex = '#' + hex6;
+
+  /* find matching chips by color distance on their displayed color */
+  const matches = [];
+  const nonMatches = [];
+  allPlaced.forEach(({ chip, el }, i) => {
+    const displayColor = getChipDisplayColor(chip.theme);
+    const dist = colorDistance(displayColor, fullHex);
+    if (dist <= COLOR_FILTER_THRESHOLD) {
+      matches.push({ chip, el, i });
+    } else {
+      nonMatches.push({ chip, el, i });
+    }
+  });
+
+  colorFilterActive = true;
+
+  /* dim non-matches */
+  nonMatches.forEach(({ el, i }) => {
+    el.style.opacity = '0.18';
+    /* also dim clone (i = original allPlaced index) */
+    const cloneEl = scatterClone ? scatterClone.children[i] : null;
+    if (cloneEl) cloneEl.style.opacity = '0.18';
+  });
+
+  /* keep matches at full opacity */
+  matches.forEach(({ el, i }) => {
+    el.style.opacity = '1';
+    const cloneEl = scatterClone ? scatterClone.children[i] : null;
+    if (cloneEl) cloneEl.style.opacity = '1';
+  });
+
+  /* show notice */
+  const noticeEl = document.getElementById('color-filter-notice');
+  const swatchEl = document.getElementById('color-filter-swatch');
+  const labelEl  = document.getElementById('color-filter-label');
+  swatchEl.style.background = fullHex;
+  const countLabel = matches.length === 0
+    ? `#${hex6} (0 works) — 該当なし`
+    : `#${hex6} (${matches.length} work${matches.length > 1 ? 's' : ''})`;
+  labelEl.textContent = countLabel;
+  noticeEl.classList.add('visible');
+
+  /* auto-scroll and pulse if matches found */
+  if (matches.length > 0) {
+    /* pause drift during scroll */
+    driftPaused = true;
+
+    /* find leftmost matching chip x position and its width */
+    let leftmostX = Infinity;
+    let leftmostW = 120;
+    matches.forEach(({ el }) => {
+      const chipX = parseFloat(el.style.left) || 0;
+      if (chipX < leftmostX) {
+        leftmostX = chipX;
+        leftmostW = parseFloat(el.style.width) || 120;
+      }
+    });
+
+    /* B: smooth scroll to center the leftmost matching chip in viewport.
+       Formula: targetScrollX = chipX - (viewportWidth/2) + (chipSize/2) */
+    const vw = window.innerWidth;
+    const targetScroll = leftmostX - vw / 2 + leftmostW / 2;
+    const clampedTarget = Math.max(0, targetScroll);
+
+    const scrollStart = hScrollX;
+    const scrollDelta = clampedTarget - scrollStart;
+    const scrollDuration = 1200;
+    const scrollStartTime = performance.now();
+
+    /* easing: cubic-bezier(0.22, 1, 0.36, 1) approximated via JS */
+    function easeOutExpo(t) {
+      /* approximate cubic-bezier(0.22, 1, 0.36, 1) */
+      return t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
+    }
+
+    function scrollStep(now) {
+      const elapsed = now - scrollStartTime;
+      const t = Math.min(elapsed / scrollDuration, 1);
+      const eased = easeOutExpo(t);
+      hScrollX = scrollStart + scrollDelta * eased;
+      applyHScroll();
+      if (t < 1) {
+        requestAnimationFrame(scrollStep);
+      } else {
+        /* scroll complete — trigger pulse animations */
+        matches.forEach(({ el }, idx) => {
+          const delay = idx * 150;
+          setTimeout(() => {
+            el.classList.remove('chip-color-pulse');
+            void el.offsetWidth; /* reflow to restart */
+            el.classList.add('chip-color-pulse');
+            el.addEventListener('animationend', () => {
+              el.classList.remove('chip-color-pulse');
+            }, { once: true });
+          }, delay);
+        });
+        /* resume drift after pulse completes */
+        const totalPulseDuration = (matches.length - 1) * 150 + 1200 + 400;
+        setTimeout(() => { driftPaused = false; }, totalPulseDuration);
+      }
+    }
+
+    requestAnimationFrame(scrollStep);
+  }
+}
+
+function clearColorFilter() {
+  colorFilterActive = false;
+  /* restore all chip opacities based on sidebar filter state */
+  applyFilter();
+  /* hide notice */
+  document.getElementById('color-filter-notice').classList.remove('visible');
+  /* clear hash */
+  history.replaceState(null, '', window.location.pathname + window.location.search);
+  /* resume drift */
+  driftPaused = false;
+}
+
+document.getElementById('color-filter-clear').addEventListener('click', clearColorFilter);
+
+/* ===================================================================
+   FIX B — PROXIMITY DIMMING
+   Dims chips whose left edge is within 24px of sidebar's right edge,
+   composing with filter dim (uses the lower opacity if both apply).
+   =================================================================== */
+const PROXIMITY_THRESHOLD = 24; /* px */
+let _rafProximity = null;
+
+function applyProximityDim() {
+  if (colorFilterActive) return; /* color filter owns opacity while active */
+  const sidebar = document.getElementById('theme-sidebar');
+  if (!sidebar || window.innerWidth < 900) return;
+  const sbRect = sidebar.getBoundingClientRect();
+  const sbRight = sbRect.right;
+
+  allPlaced.forEach(({ chip, el }) => {
+    const cr = el.getBoundingClientRect();
+    const isNear = cr.left < sbRight + PROXIMITY_THRESHOLD;
+
+    /* compute filter opacity (from activeFilters state) */
+    const filterOpacity = (activeFilters.size > 0 && !chipMatchesFilter(chip)) ? 0.12 : 1;
+
+    if (isNear) {
+      /* compose: use the lower of the two dim sources */
+      const composed = Math.min(filterOpacity, 0.35);
+      el.dataset.proximityDimmed = '1';
+      el.style.opacity = String(composed);
+    } else {
+      el.dataset.proximityDimmed = '';
+      /* restore filter opacity only if not hovered */
+      if (!hoverEl) {
+        el.style.opacity = String(filterOpacity);
+      }
+    }
+  });
+}
+
+function scheduleProximityDim() {
+  if (_rafProximity) return;
+  _rafProximity = requestAnimationFrame(() => {
+    _rafProximity = null;
+    applyProximityDim();
+  });
+}
+
+/* Proximity dim fires on resize (no vertical scroll in horizontal mode) */
+window.addEventListener('resize', scheduleProximityDim, { passive: true });
+
+/* Decision 3 γ: wheel-scrolling suppression — add is-scrolling while wheel is active */
+(function () {
+  let scrollEndT = null;
+  document.querySelector('.page').addEventListener('wheel', () => {
+    document.body.classList.add('is-scrolling');
+    clearTimeout(scrollEndT);
+    scrollEndT = setTimeout(() => {
+      document.body.classList.remove('is-scrolling');
+    }, 60);
+  }, { passive: true });
+})();
+
+/* ===================================================================
+   INIT + RESIZE
+   =================================================================== */
+buildLegend();
+buildSidebar();
+render();
+checkHashOnLoad();
+/* run proximity dim once after initial render */
+applyProximityDim();
+/* start drift loop */
+driftLoop();
+
+let _prevW = window.innerWidth;
+window.addEventListener('resize', () => {
+  const w = window.innerWidth;
+  /* Re-render when crossing layout breakpoints (900px or 480px mobile-size boundary) */
+  const needsRender =
+    (w < 900) !== (_prevW < 900) ||
+    (w <= 480) !== (_prevW <= 480);
+  _prevW = w;
+  if (needsRender) { render(); }
+  /* Close drawer if viewport expands above 768px */
+  if (w > 768) closeDrawer();
+});
+
+/* ===================================================================
+   M1 — HAMBURGER DRAWER
+   =================================================================== */
+const hamburgerBtn  = document.getElementById('hamburger-btn');
+const drawerBackdrop = document.getElementById('drawer-backdrop');
+const themeSidebar  = document.getElementById('theme-sidebar');
+
+function openDrawer() {
+  themeSidebar.classList.add('drawer-open');
+  drawerBackdrop.classList.add('visible');
+  /* Next frame triggers opacity transition */
+  requestAnimationFrame(() => drawerBackdrop.classList.add('open'));
+  hamburgerBtn.setAttribute('aria-expanded', 'true');
+  hamburgerBtn.textContent = '✕';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDrawer() {
+  themeSidebar.classList.remove('drawer-open');
+  drawerBackdrop.classList.remove('open');
+  hamburgerBtn.setAttribute('aria-expanded', 'false');
+  hamburgerBtn.textContent = '☰';
+  document.body.style.overflow = '';
+  /* Remove display after transition */
+  setTimeout(() => {
+    if (!themeSidebar.classList.contains('drawer-open')) {
+      drawerBackdrop.classList.remove('visible');
+    }
+  }, 300);
+}
+
+function isDrawerOpen() {
+  return themeSidebar.classList.contains('drawer-open');
+}
+
+hamburgerBtn.addEventListener('click', () => {
+  if (isDrawerOpen()) closeDrawer(); else openDrawer();
+});
+
+drawerBackdrop.addEventListener('click', closeDrawer);
+
+/* Close drawer on ESC */
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && isDrawerOpen()) {
+    closeDrawer();
+  }
+});
+</script>
+</body>
+</html>

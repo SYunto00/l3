@@ -1,0 +1,1831 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="L3 — Syuntoの個人アーカイブ。山、仕組み、教育、音楽、哲学、5つの思想が色で配置される。">
+<meta name="theme-color" content="#F2EBD5">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="L3 — 思想の散歩道">
+<meta property="og:description" content="5つの色で配置されるSyuntoの個人アーカイブ。文章、写真、音声、動画が色の交差点で出会う。">
+<meta property="og:url" content="https://l3.pages.dev/">
+<meta property="og:image" content="/og-image.svg">
+<meta property="og:locale" content="ja_JP">
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="L3 — 思想の散歩道">
+<meta name="twitter:description" content="5つの色で配置されるSyuntoの個人アーカイブ。">
+<meta name="twitter:image" content="/og-image.svg">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<title>L3 / about colors</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@300&family=Noto+Sans+JP:wght@400;700&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+/* ── RESET ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+/* ── TOKENS ── */
+:root {
+  --bg:   #F2EBD5;
+  --ink:  #1A1A1A;
+  --mute: rgba(26, 26, 26, 0.55);
+  --line: rgba(26, 26, 26, 0.12);
+  /* theme colors */
+  --c-nature:     #87A96B;
+  --c-system:     #D97A4A;
+  --c-education:  #E4C26F;
+  --c-music:      #8C7DB0;
+  --c-philosophy: #4A6374;
+  /* ease curves */
+  --ease-bloom:  cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Noto Sans JP", sans-serif;
+  font-weight: 400;
+  overflow-x: hidden;
+}
+
+/* ── HEADER ── */
+header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: 28px 48px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(253,252,249,0.92);
+  border-bottom: 1px solid var(--line);
+}
+
+.wordmark {
+  font-family: "Fraunces", serif;
+  font-weight: 300;
+  font-size: 48px;
+  line-height: 1;
+  color: #1A1A1A;
+  text-decoration: none;
+  user-select: none;
+  transition: opacity 200ms var(--ease-bloom);
+}
+.wordmark:hover { opacity: 0.6; }
+
+.header-back {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: #988771;
+  text-decoration: none;
+  transition: opacity 200ms var(--ease-bloom);
+}
+.header-back:hover { opacity: 0.5; text-decoration: underline; }
+
+/* ── MAIN CONTENT ── */
+main {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 80px 48px 120px;
+}
+
+/* ── SECTION ── */
+.section {
+  margin-bottom: 100px;
+}
+
+/* ── SECTION HEADER ── */
+.section-title {
+  font-family: "Fraunces", serif;
+  font-weight: 300;
+  font-size: 36px;
+  color: #1A1A1A;
+  margin-bottom: 6px;
+}
+.section-subtitle-jp {
+  font-family: "Noto Sans JP", sans-serif;
+  font-size: 14px;
+  color: rgba(26, 26, 26, 0.55);
+  margin-bottom: 40px;
+}
+
+/* ── OPENING SECTION ── */
+.opening-headline {
+  font-family: "Fraunces", serif;
+  font-weight: 300;
+  font-size: 48px;
+  line-height: 1.1;
+  color: #1A1A1A;
+  margin-bottom: 12px;
+}
+.opening-subtitle {
+  font-family: "Fraunces", serif;
+  font-weight: 300;
+  font-size: 20px;
+  color: rgba(26, 26, 26, 0.55);
+  margin-top: 4px;
+  margin-bottom: 48px;
+}
+/* ── CENTER COMPOSITION ── */
+.center-composition {
+  position: relative;
+  width: 420px;
+  height: 420px;
+  margin: 0 auto 40px;
+}
+.center-circle {
+  position: absolute;
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: #E3DBD1;
+  border: 1px solid rgba(26,26,26,0.08);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+.outer-circle {
+  position: absolute;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+}
+
+/* ── SWAY ANIMATIONS ── */
+@keyframes sway-1 {
+  0%,100% { transform: translate(0, 0); }
+  20%     { transform: translate(5px, -3px); }
+  45%     { transform: translate(2px, 4px); }
+  70%     { transform: translate(-4px, 2px); }
+  85%     { transform: translate(-2px, -2px); }
+}
+@keyframes sway-2 {
+  0%,100% { transform: translate(0, 0); }
+  15%     { transform: translate(-4px, 3px); }
+  40%     { transform: translate(3px, 4px); }
+  65%     { transform: translate(4px, -2px); }
+  85%     { transform: translate(-1px, 3px); }
+}
+@keyframes sway-3 {
+  0%,100% { transform: translate(0, 0); }
+  25%     { transform: translate(3px, 4px); }
+  50%     { transform: translate(-5px, 2px); }
+  75%     { transform: translate(2px, -3px); }
+}
+@keyframes sway-4 {
+  0%,100% { transform: translate(0, 0); }
+  30%     { transform: translate(-3px, -4px); }
+  55%     { transform: translate(5px, 1px); }
+  80%     { transform: translate(-2px, 4px); }
+}
+@keyframes sway-5 {
+  0%,100% { transform: translate(0, 0); }
+  20%     { transform: translate(4px, 3px); }
+  50%     { transform: translate(-3px, -4px); }
+  75%     { transform: translate(1px, 4px); }
+  90%     { transform: translate(-4px, -1px); }
+}
+/* Sway animations disabled — physics JS handles all outer-circle movement */
+#outer-1, #outer-2, #outer-3, #outer-4, #outer-5 { animation: none; }
+
+/* ── SHAKE ANIMATION for duplicate rejection ── */
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  20%     { transform: translateX(-4px); }
+  40%     { transform: translateX(4px); }
+  60%     { transform: translateX(-4px); }
+  80%     { transform: translateX(4px); }
+}
+.slot-shake {
+  animation: shake 250ms ease-in-out forwards !important;
+}
+.composition-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.opening-body {
+  font-family: "Noto Sans JP", sans-serif;
+  font-size: 15px;
+  line-height: 1.8;
+  color: #1A1A1A;
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: center;
+}
+.opening-body .hex-accent {
+  font-family: "IBM Plex Mono", monospace;
+  color: #988771;
+}
+.opening-body p + p {
+  margin-top: 16px;
+}
+
+/* ── COLOR CARDS GRID (Section 2) ── */
+.color-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px;
+  max-width: 900px;
+}
+.color-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 240px;
+}
+.color-card-swatch {
+  width: 80px;
+  height: 80px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+.color-card-label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.color-card-name {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  color: rgba(26, 26, 26, 0.55);
+  text-transform: uppercase;
+}
+.color-card-hex {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: rgba(26, 26, 26, 0.4);
+}
+.color-card-jp {
+  font-family: "Noto Sans JP", sans-serif;
+  font-size: 12px;
+  color: rgba(26, 26, 26, 0.55);
+  margin-top: 2px;
+}
+.color-card-desc {
+  font-family: "Noto Sans JP", sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(26, 26, 26, 0.75);
+}
+
+/* ── MIX CARDS GRID ── */
+.mix-intro {
+  font-family: "Noto Sans JP", sans-serif;
+  font-size: 15px;
+  line-height: 1.9;
+  color: #1A1A1A;
+  max-width: 720px;
+  margin-bottom: 48px;
+}
+.mix-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px;
+  max-width: 900px;
+}
+.mix-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 240px;
+}
+.mix-swatches {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.swatch {
+  width: 56px;
+  height: 56px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+.mix-op {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 16px;
+  color: #988771;
+  line-height: 1;
+}
+.mix-labels {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.mix-label-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1 0 0;
+}
+.mix-label-op-spacer {
+  /* spacer for + and = operators */
+  width: 24px;
+  flex-shrink: 0;
+}
+.mix-label-name {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  color: rgba(26, 26, 26, 0.55);
+  text-transform: uppercase;
+}
+.mix-label-hex {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: rgba(26, 26, 26, 0.4);
+}
+.mix-caption {
+  font-family: "Noto Sans JP", sans-serif;
+  font-size: 13px;
+  color: rgba(26, 26, 26, 0.55);
+  line-height: 1.5;
+  font-style: italic;
+}
+
+/* ── INTERACTIVE MIXER ── */
+.mixer-wrap {
+  max-width: 900px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.palette-row {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 28px;
+}
+.palette-dot-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+}
+.palette-dot {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.palette-dot-wrap:hover .palette-dot {
+  transform: scale(1.1);
+  box-shadow: var(--dot-glow, 0 4px 12px rgba(0,0,0,0.18));
+}
+.palette-label {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  color: rgba(26, 26, 26, 0.55);
+  text-align: center;
+}
+.mixing-zone {
+  background: rgba(26, 26, 26, 0.03);
+  border: 1.5px solid rgba(26, 26, 26, 0.1);
+  border-radius: 8px;
+  padding: 28px 32px;
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  position: relative;
+  transition: border-color 160ms ease, background 160ms ease;
+  /* Prevent result area from visually colliding */
+  overflow: visible;
+}
+.mixing-zone.drag-over {
+  border-color: rgba(26, 26, 26, 0.32);
+  background: rgba(26, 26, 26, 0.07);
+}
+.mixing-dots-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  min-height: 52px;
+}
+.mixing-dot {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform 200ms var(--ease-bloom), opacity 200ms var(--ease-bloom);
+}
+.mixing-dot:hover {
+  transform: scale(0.88);
+  opacity: 0.75;
+}
+.mixing-dot.removing {
+  animation: dotRemove 200ms var(--ease-bloom) forwards;
+}
+@keyframes dotRemove {
+  from { transform: scale(1);   opacity: 1; }
+  to   { transform: scale(0.4); opacity: 0; }
+}
+.mixing-placeholder {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: rgba(26, 26, 26, 0.4);
+  align-self: center;
+  pointer-events: none;
+}
+/* Ghost circle for fly-in animation */
+.ghost-circle {
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+}
+/* Result area */
+.mixing-result-area {
+  margin-top: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+.result-circle {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: background-color 300ms var(--ease-bloom);
+  background: rgba(26,26,26,0.06);
+}
+.result-empty {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 20px;
+  color: rgba(26,26,26,0.25);
+  line-height: 96px;
+  width: 96px;
+  text-align: center;
+  display: none;
+}
+.result-hex {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 16px;
+  letter-spacing: 0.06em;
+  color: #988771;
+  min-height: 20px;
+}
+.result-link {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: #1A1A1A;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  transition: opacity 180ms var(--ease-bloom);
+}
+.result-link:hover { opacity: 0.55; }
+
+/* ── WHY COLOR SECTION ── */
+.why-body {
+  font-family: "Noto Sans JP", sans-serif;
+  font-size: 15px;
+  line-height: 2;
+  color: #1A1A1A;
+  max-width: 720px;
+  white-space: pre-line;
+}
+
+/* ── FOOTER ── */
+footer {
+  text-align: center;
+  padding: 40px 48px 60px;
+  border-top: 1px solid rgba(26, 26, 26, 0.12);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.footer-text {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: rgba(26, 26, 26, 0.4);
+}
+.footer-back {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: #988771;
+  text-decoration: none;
+  transition: opacity 180ms var(--ease-bloom);
+}
+.footer-back:hover { opacity: 0.7; text-decoration: underline; }
+
+/* ── PALETTE DOT BREATHING ANIMATIONS ── */
+@keyframes breathe-1 {
+  0%, 100% { transform: scale(1.0); }
+  50%      { transform: scale(1.04); }
+}
+@keyframes breathe-2 {
+  0%, 100% { transform: scale(1.0); }
+  50%      { transform: scale(1.04); }
+}
+@keyframes breathe-3 {
+  0%, 100% { transform: scale(1.0); }
+  50%      { transform: scale(1.04); }
+}
+@keyframes breathe-4 {
+  0%, 100% { transform: scale(1.0); }
+  50%      { transform: scale(1.04); }
+}
+@keyframes breathe-5 {
+  0%, 100% { transform: scale(1.0); }
+  50%      { transform: scale(1.04); }
+}
+/* Each dot gets its own duration + delay via JS inline style */
+.palette-dot.breathing {
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-play-state: running;
+}
+/* Pause breathing on hover, drag, or active */
+.palette-dot-wrap:hover .palette-dot.breathing,
+.palette-dot-wrap.dragging .palette-dot.breathing {
+  animation-play-state: paused;
+}
+
+/* ── PALETTE DOT JP SUB-LABEL ── */
+.palette-dot-jp {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 9px;
+  letter-spacing: 0.03em;
+  color: rgba(26, 26, 26, 0.5);
+  text-align: center;
+}
+
+/* ── POP KEYFRAME ── */
+@keyframes popIn {
+  0%   { transform: scale(0.6); opacity: 0; }
+  60%  { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(1.0); opacity: 1; }
+}
+.mixing-dot.popping {
+  animation: popIn 280ms cubic-bezier(0.34, 1.4, 0.64, 1) forwards;
+}
+
+/* ── RESPONSIVE (<720px) ── */
+@media (max-width: 719px) {
+  header { padding: 18px 24px 12px; }
+  .wordmark { font-size: 34px; }
+  main { padding: 48px 24px 80px; }
+  .opening-headline { font-size: 34px; }
+  .section-title { font-size: 26px; }
+  .color-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  .mix-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  .palette-row { gap: 14px; }
+  .palette-dot { width: 40px; height: 40px; }
+  .mixing-zone { padding: 20px 20px; }
+  .result-circle { width: 64px; height: 64px; }
+}
+
+@media (max-width: 480px) {
+  .color-grid { grid-template-columns: 1fr; }
+  .mix-grid { grid-template-columns: 1fr; }
+}
+
+/* ── M1 — MOBILE RESPONSIVE (≤768px) ── */
+@media (max-width: 768px) {
+  /* Header */
+  header {
+    padding: 16px 20px 12px;
+  }
+  .wordmark { font-size: 36px; }
+  .header-back {
+    font-size: 10px;
+    white-space: nowrap;
+  }
+
+  /* Main padding */
+  main {
+    padding: 48px 20px 80px;
+  }
+
+  /* Pentagon composition: scale with viewport */
+  .center-composition {
+    --comp-size: min(420px, 90vw);
+    width: var(--comp-size);
+    height: var(--comp-size);
+  }
+  /* Center circle proportional to comp-size (was 110/420) */
+  .center-circle {
+    width: calc(var(--comp-size, 420px) * 0.2619);
+    height: calc(var(--comp-size, 420px) * 0.2619);
+  }
+  /* Outer circles proportional (was 72/420) */
+  .outer-circle {
+    width: calc(var(--comp-size, 420px) * 0.1714);
+    height: calc(var(--comp-size, 420px) * 0.1714);
+  }
+
+  /* Section 2 color grid: 3 cols → 2 cols */
+  .color-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+
+  /* Section 3 mix grid: 3 cols → 2 cols */
+  .mix-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+
+  /* Section 4: palette dots shrink to 44px to fit 5 in 375px row */
+  .palette-dot {
+    width: 44px;
+    height: 44px;
+  }
+  .palette-label {
+    font-size: 8px;
+  }
+  .palette-dot-jp {
+    font-size: 8px;
+  }
+  .palette-row {
+    gap: 12px;
+    flex-wrap: nowrap; /* keep all 5 in one row */
+    margin-bottom: 24px;
+  }
+  .mixing-zone {
+    padding: 20px 20px;
+  }
+  .mixing-result-area {
+    margin-top: 24px;
+  }
+
+  /* Body text padding so it doesn't touch screen edges */
+  .opening-body,
+  .mix-intro,
+  .why-body {
+    padding: 0 4px;
+  }
+
+  /* ── C: Section 3 mix cards — smaller on mobile ── */
+  .mix-grid {
+    row-gap: 24px;
+  }
+  .mix-card {
+    padding: 0; /* base has no padding but guard reduction ~30% */
+  }
+  .mix-swatches .swatch {
+    width: 40px;
+    height: 40px;
+  }
+  .mix-op {
+    font-size: 13px;
+  }
+  .mix-label-name {
+    font-size: 9px;
+  }
+  .mix-label-hex {
+    font-size: 9px;
+  }
+  .mix-caption {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .color-grid { grid-template-columns: 1fr; }
+  .mix-grid { grid-template-columns: 1fr; }
+
+  /* Palette row: 5 × 44px + 4 × 12px gap = 268px — fits 375 with padding */
+  .palette-row {
+    gap: 10px;
+    justify-content: center;
+  }
+  .palette-dot {
+    width: 44px;
+    height: 44px;
+  }
+
+  /* ── C: phones — mix card horizontal-ish layout ── */
+  .mix-card {
+    max-width: 100%;
+  }
+  .mix-swatches {
+    gap: 6px;
+  }
+  .mix-swatches .swatch {
+    width: 36px;
+    height: 36px;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header>
+  <a href="/index.html" class="wordmark">L3</a>
+  <a href="/index.html" class="header-back">← back to archive</a>
+</header>
+
+<!-- ── MAIN ── -->
+<main>
+
+  <!-- SECTION 1: Opening -->
+  <section class="section" id="opening">
+    <p class="opening-headline">L3 is spoken in color.</p>
+    <p class="opening-subtitle">色で語る、個人アーカイブ。</p>
+
+    <!-- Pentagram visual composition -->
+    <div class="center-composition" id="center-composition">
+      <!-- SVG lines from center to each outer circle (drawn by JS) -->
+      <svg class="composition-svg" id="composition-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+      <!-- Center circle: Syunto ground color -->
+      <div class="center-circle" id="center-circle"></div>
+      <!-- 5 outer circles at pentagon angles (90°, 162°, 234°, 306°, 18°) -->
+      <!-- Positioned by JS -->
+      <div class="outer-circle" id="outer-1" style="background:#87A96B;"></div>
+      <div class="outer-circle" id="outer-2" style="background:#D97A4A;"></div>
+      <div class="outer-circle" id="outer-3" style="background:#E4C26F;"></div>
+      <div class="outer-circle" id="outer-4" style="background:#8C7DB0;"></div>
+      <div class="outer-circle" id="outer-5" style="background:#4A6374;"></div>
+    </div>
+
+    <div class="opening-body">
+      <p>5つの色を光として重ねると、<br>
+      ひとつの淡い光が生まれる。<br>
+      <span class="hex-accent">#E3DBD1</span> ── これが僕の地、L3の光源です。</p>
+      <p>山、仕組み、教育、音楽、哲学 ──<br>
+      5つのテーマがそれぞれの色を纏い、<br>
+      作品はその色で配置されています。</p>
+    </div>
+  </section>
+
+  <!-- SECTION 2: Five Colors of Thought -->
+  <section class="section" id="seven-colors">
+    <h2 class="section-title">FIVE COLORS OF THOUGHT</h2>
+    <p class="section-subtitle-jp">5つの思想の色</p>
+
+    <div class="color-grid">
+
+      <!-- NATURE -->
+      <div class="color-card">
+        <div class="color-card-swatch" style="background:var(--c-nature);"></div>
+        <div class="color-card-label">
+          <span class="color-card-name">NATURE</span>
+          <span class="color-card-hex">#87A96B</span>
+          <span class="color-card-jp">山・自然</span>
+        </div>
+        <p class="color-card-desc">山と空気、土と植物、水の音。<br>自然のなかで感じたことを、言葉・写真・即興で記録する。</p>
+      </div>
+
+      <!-- SYSTEM -->
+      <div class="color-card">
+        <div class="color-card-swatch" style="background:var(--c-system);"></div>
+        <div class="color-card-label">
+          <span class="color-card-name">SYSTEM</span>
+          <span class="color-card-hex">#D97A4A</span>
+          <span class="color-card-jp">仕組み・AI</span>
+        </div>
+        <p class="color-card-desc">コードと自動化、AIとの共作。<br>仕組みを作る過程と、それが暮らしをどう変えるか。</p>
+      </div>
+
+      <!-- EDUCATION -->
+      <div class="color-card">
+        <div class="color-card-swatch" style="background:var(--c-education);"></div>
+        <div class="color-card-label">
+          <span class="color-card-name">EDUCATION</span>
+          <span class="color-card-hex">#E4C26F</span>
+          <span class="color-card-jp">教育・子ども</span>
+        </div>
+        <p class="color-card-desc">川崎学舎での日々、子どもとの対話。<br>学ぶこと、教えること、その境界の曖昧さ。</p>
+      </div>
+
+      <!-- MUSIC -->
+      <div class="color-card">
+        <div class="color-card-swatch" style="background:var(--c-music);"></div>
+        <div class="color-card-label">
+          <span class="color-card-name">MUSIC</span>
+          <span class="color-card-hex">#8C7DB0</span>
+          <span class="color-card-jp">音楽・即興</span>
+        </div>
+        <p class="color-card-desc">ピアノ、ラジオ、即興演奏。<br>言葉にならない時間を音で残す。</p>
+      </div>
+
+      <!-- PHILOSOPHY -->
+      <div class="color-card">
+        <div class="color-card-swatch" style="background:var(--c-philosophy);"></div>
+        <div class="color-card-label">
+          <span class="color-card-name">PHILOSOPHY</span>
+          <span class="color-card-hex">#4A6374</span>
+          <span class="color-card-jp">哲学・生き方</span>
+        </div>
+        <p class="color-card-desc">エッセイと長文思索。<br>生き方、場所、ルーツ、言葉 ─ 問いを残す。</p>
+      </div>
+
+      <!-- 6th cell intentionally empty -->
+
+    </div><!-- /.color-grid -->
+  </section>
+
+  <!-- SECTION 3: Colors Add, Like Light -->
+  <section class="section" id="colors-add">
+    <h2 class="section-title">COLORS ADD, LIKE LIGHT.</h2>
+    <p class="section-subtitle-jp">光のように、色は重なる</p>
+
+    <p class="mix-intro">2つ以上の思想にまたがる作品は、<br>その色を光のように混ぜ合わせます。<br>セージとコーラルを足した温かい金。<br>ラベンダーとスレートを足した霞色の紫。</p>
+
+    <div class="mix-grid">
+
+      <!-- 1: NATURE × SYSTEM -->
+      <div class="mix-card">
+        <div class="mix-swatches">
+          <div class="swatch" style="background:#87A96B;"></div>
+          <span class="mix-op">+</span>
+          <div class="swatch" style="background:#D97A4A;"></div>
+          <span class="mix-op">=</span>
+          <div class="swatch" style="background:#DBBF84;"></div>
+        </div>
+        <div class="mix-labels">
+          <div class="mix-label-item">
+            <span class="mix-label-name">NATURE</span>
+            <span class="mix-label-hex">#87A96B</span>
+          </div>
+          <div class="mix-label-op-spacer"></div>
+          <div class="mix-label-item">
+            <span class="mix-label-name">SYSTEM</span>
+            <span class="mix-label-hex">#D97A4A</span>
+          </div>
+          <div class="mix-label-op-spacer"></div>
+          <div class="mix-label-item">
+            <span class="mix-label-name">MIX</span>
+            <span class="mix-label-hex">#DBBF84</span>
+          </div>
+        </div>
+        <p class="mix-caption">「山で書いた自動化スクリプト」</p>
+      </div>
+
+      <!-- 2: NATURE × MUSIC -->
+      <div class="mix-card">
+        <div class="mix-swatches">
+          <div class="swatch" style="background:#87A96B;"></div>
+          <span class="mix-op">+</span>
+          <div class="swatch" style="background:#8C7DB0;"></div>
+          <span class="mix-op">=</span>
+          <div class="swatch" style="background:#BAB7C8;"></div>
+        </div>
+        <div class="mix-labels">
+          <div class="mix-label-item">
+            <span class="mix-label-name">NATURE</span>
+            <span class="mix-label-hex">#87A96B</span>
+          </div>
+          <div class="mix-label-op-spacer"></div>
+          <div class="mix-label-item">
+            <span class="mix-label-name">MUSIC</span>
+            <span class="mix-label-hex">#8C7DB0</span>
+          </div>
+          <div class="mix-label-op-spacer"></div>
+          <div class="mix-label-item">
+            <span class="mix-label-name">MIX</span>
+            <span class="mix-label-hex">#BAB7C8</span>
+          </div>
+        </div>
+        <p class="mix-caption">「山で弾いたピアノ」</p>
+      </div>
+
+      <!-- 3: NATURE × PHILOSOPHY -->
+      <div class="mix-card">
+        <div class="mix-swatches">
+          <div class="swatch" style="background:#87A96B;"></div>
+          <span class="mix-op">+</span>
+          <div class="swatch" style="background:#4A6374;"></div>
+          <span class="mix-op">=</span>
+          <div class="swatch" style="background:#96B69B;"></div>
+        </div>
+        <div class="mix-labels">
+          <div class="mix-label-item">
+            <span class="mix-label-name">NATURE</span>
+            <span class="mix-label-hex">#87A96B</span>
+          </div>
+          <div class="mix-label-op-spacer"></div>
+          <div class="mix-label-item">
+            <span class="mix-label-name">PHILOSOPHY</span>
+            <span class="mix-label-hex">#4A6374</span>
+          </div>
+          <div class="mix-label-op-spacer"></div>
+          <div class="mix-label-item">
+            <span class="mix-label-name">MIX</span>
+            <span class="mix-label-hex">#96B69B</span>
+          </div>
+        </div>
+        <p class="mix-caption">「山での内省エッセイ」</p>
+      </div>
+
+      <!-- 4: SYSTEM × EDUCATION -->
+      <div class="mix-card">
+        <div class="mix-swatches">
+          <div class="swatch" style="background:#D97A4A;"></div>
+          <span class="mix-op">+</span>
+          <div class="swatch" style="background:#E4C26F;"></div>
+          <span class="mix-op">=</span>
+          <div class="swatch" style="background:#F2CC87;"></div>
+        </div>
+        <div class="mix-labels">
+          <div class="mix-label-item">
+            <span class="mix-label-name">SYSTEM</span>
+            <span class="mix-label-hex">#D97A4A</span>
+          </div>
+          <div class="mix-label-op-spacer"></div>
+          <div class="mix-label-item">
+            <span class="mix-label-name">EDUCATION</span>
+            <span class="mix-label-hex">#E4C26F</span>
+          </div>
+          <div class="mix-label-op-spacer"></div>
+          <div class="mix-label-item">
+            <span class="mix-label-name">MIX</span>
+            <span class="mix-label-hex">#F2CC87</span>
+          </div>
+        </div>
+        <p class="mix-caption">「塾で使う仕組み」</p>
+      </div>
+
+      <!-- 5: MUSIC × PHILOSOPHY -->
+      <div class="mix-card">
+        <div class="mix-swatches">
+          <div class="swatch" style="background:#8C7DB0;"></div>
+          <span class="mix-op">+</span>
+          <div class="swatch" style="background:#4A6374;"></div>
+          <span class="mix-op">=</span>
+          <div class="swatch" style="background:#9B9AB7;"></div>
+        </div>
+        <div class="mix-labels">
+          <div class="mix-label-item">
+            <span class="mix-label-name">MUSIC</span>
+            <span class="mix-label-hex">#8C7DB0</span>
+          </div>
+          <div class="mix-label-op-spacer"></div>
+          <div class="mix-label-item">
+            <span class="mix-label-name">PHILOSOPHY</span>
+            <span class="mix-label-hex">#4A6374</span>
+          </div>
+          <div class="mix-label-op-spacer"></div>
+          <div class="mix-label-item">
+            <span class="mix-label-name">MIX</span>
+            <span class="mix-label-hex">#9B9AB7</span>
+          </div>
+        </div>
+        <p class="mix-caption">「即興の中の思考」</p>
+      </div>
+
+      <!-- 6: EDUCATION × PHILOSOPHY -->
+      <div class="mix-card">
+        <div class="mix-swatches">
+          <div class="swatch" style="background:#E4C26F;"></div>
+          <span class="mix-op">+</span>
+          <div class="swatch" style="background:#4A6374;"></div>
+          <span class="mix-op">=</span>
+          <div class="swatch" style="background:#D2C49E;"></div>
+        </div>
+        <div class="mix-labels">
+          <div class="mix-label-item">
+            <span class="mix-label-name">EDUCATION</span>
+            <span class="mix-label-hex">#E4C26F</span>
+          </div>
+          <div class="mix-label-op-spacer"></div>
+          <div class="mix-label-item">
+            <span class="mix-label-name">PHILOSOPHY</span>
+            <span class="mix-label-hex">#4A6374</span>
+          </div>
+          <div class="mix-label-op-spacer"></div>
+          <div class="mix-label-item">
+            <span class="mix-label-name">MIX</span>
+            <span class="mix-label-hex">#D2C49E</span>
+          </div>
+        </div>
+        <p class="mix-caption">「子どもとの対話から」</p>
+      </div>
+
+    </div><!-- /.mix-grid -->
+  </section>
+
+  <!-- SECTION 4: Try Yourself (interactive mixer) -->
+  <section class="section" id="try-yourself">
+    <h2 class="section-title">TRY YOURSELF</h2>
+    <p class="section-subtitle-jp">思想を混ぜる</p>
+
+    <div class="mixer-wrap">
+      <!-- Palette row: 5 dots at top -->
+      <div class="palette-row" id="palette-row">
+        <!-- injected by JS -->
+      </div>
+
+      <!-- Mixing zone: drop area + result -->
+      <div class="mixing-zone" id="mixing-zone">
+        <div class="mixing-dots-row" id="mixing-dots-row">
+          <span class="mixing-placeholder" id="mixing-placeholder">パレットから色を選んで送ってみて</span>
+        </div>
+      </div>
+
+      <!-- Result area below mixing zone -->
+      <div class="mixing-result-area" id="mixing-result-area">
+        <div class="result-circle" id="result-circle"></div>
+        <span class="result-hex" id="result-hex">—</span>
+        <a class="result-link" id="result-link" href="#" style="display:none;">→ この色の作品を見る</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 5: Why Color? -->
+  <section class="section" id="why-color">
+    <h2 class="section-title">WHY COLOR?</h2>
+    <p class="section-subtitle-jp">なぜ色なのか</p>
+
+    <p class="why-body">多摩美の図書館に、本の背表紙の色を分類した作品がある。
+目的の本を探すのではなく、色と偶然が新しい本との出会いを作る。
+
+L3も同じ発想で、作品を色で配置している。
+検索ではなく、色。
+問いではなく、偶然。
+
+あなたが今混ぜた色の作品を、見に行ってみてください。
+思想の散歩道、その入り口はいつも色から始まる。</p>
+  </section>
+
+</main>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <p class="footer-text">L3 ─ これはSyuntoの思想の散歩道です</p>
+  <a href="/index.html" class="footer-back">← back to archive</a>
+</footer>
+
+<script>
+/* ── THEME DATA ── */
+const THEMES = [
+  { key: 'nature',     hex: '#87A96B', en: 'NATURE',     jp: '山・自然'    },
+  { key: 'system',     hex: '#D97A4A', en: 'SYSTEM',     jp: '仕組み・AI'  },
+  { key: 'education',  hex: '#E4C26F', en: 'EDUCATION',  jp: '教育・子ども'},
+  { key: 'music',      hex: '#8C7DB0', en: 'MUSIC',      jp: '音楽・即興'  },
+  { key: 'philosophy', hex: '#4A6374', en: 'PHILOSOPHY', jp: '哲学・生き方'},
+];
+
+/* ── HELPERS ── */
+function hexToRgb(hex) {
+  const r = parseInt(hex.slice(1,3), 16);
+  const g = parseInt(hex.slice(3,5), 16);
+  const b = parseInt(hex.slice(5,7), 16);
+  return [r, g, b];
+}
+function rgbToHex(r, g, b) {
+  return '#' + [r, g, b].map(v => Math.round(v).toString(16).padStart(2, '0')).join('').toUpperCase();
+}
+/* β Soft Screen ×0.7 blend functions */
+function screenBlend(colors) {
+  let pR=1, pG=1, pB=1;
+  for (const c of colors) {
+    const [R,G,B] = hexToRgb(c);
+    pR *= (1 - R/255);
+    pG *= (1 - G/255);
+    pB *= (1 - B/255);
+  }
+  return [(1-pR)*255, (1-pG)*255, (1-pB)*255];
+}
+function avgBlend(colors) {
+  let r=0,g=0,b=0;
+  for (const c of colors) { const [R,G,B]=hexToRgb(c); r+=R; g+=G; b+=B; }
+  const n = colors.length;
+  return [r/n, g/n, b/n];
+}
+function softMix(colors, k=0.7) {
+  const s = screenBlend(colors);
+  const a = avgBlend(colors);
+  return rgbToHex(
+    s[0]*k + a[0]*(1-k),
+    s[1]*k + a[1]*(1-k),
+    s[2]*k + a[2]*(1-k)
+  );
+}
+function computeMix(hexes) {
+  if (hexes.length === 0) return null;
+  return softMix(hexes);
+}
+
+/* ── EASING (for ghost animation) ── */
+function easeSpring(t) {
+  // cubic-bezier(0.34, 1.4, 0.64, 1) approximation
+  return 1 - Math.pow(1 - t, 3) * Math.cos(t * Math.PI * 2.2);
+}
+
+/* ── STATE ── */
+let mixingSlots = []; // array of theme keys
+
+/* ── DOM REFS ── */
+const dotsRowEl    = document.getElementById('mixing-dots-row');
+const resultCircle = document.getElementById('result-circle');
+const resultHexEl  = document.getElementById('result-hex');
+const resultLinkEl = document.getElementById('result-link');
+
+/* ── DRAG STATE ── */
+let _dragTheme   = null;   // theme object being dragged
+let _dragGhost   = null;   // ghost element following cursor
+let _dragStartX  = 0;
+let _dragStartY  = 0;
+let _dragMoved   = false;  // distinguishes click from drag
+const DRAG_THRESHOLD = 4;  // px to consider a drag started
+
+/* ── BUILD PALETTE ── */
+/* breathing config per dot index: [animName, duration, delay] */
+const BREATHE_CFG = [
+  ['breathe-1', '4.2s', '0s'    ],
+  ['breathe-2', '5.8s', '-1.7s' ],
+  ['breathe-3', '4.9s', '-3.1s' ],
+  ['breathe-4', '6.0s', '-0.9s' ],
+  ['breathe-5', '5.3s', '-2.5s' ],
+];
+
+/* helper: convert hex to "r, g, b" triplet string */
+function hexToRgbStr(hex) {
+  const [r, g, b] = hexToRgb(hex);
+  return `${r}, ${g}, ${b}`;
+}
+
+function buildPalette() {
+  const row = document.getElementById('palette-row');
+  THEMES.forEach((theme, idx) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'palette-dot-wrap';
+    wrap.setAttribute('role', 'button');
+    wrap.setAttribute('tabindex', '0');
+    wrap.setAttribute('aria-label', theme.en);
+
+    /* set CSS custom property for glow color (pre-computed rgba) */
+    const rgbStr = hexToRgbStr(theme.hex);
+    wrap.style.setProperty('--dot-glow', `0 0 24px 4px rgba(${rgbStr}, 0.3)`);
+
+    const dot = document.createElement('div');
+    dot.className = 'palette-dot breathing';
+    dot.id = 'palette-dot-' + theme.key;
+    dot.style.background = theme.hex;
+
+    /* assign per-dot breathe animation */
+    const [animName, dur, delay] = BREATHE_CFG[idx];
+    dot.style.animationName     = animName;
+    dot.style.animationDuration = dur;
+    dot.style.animationDelay    = delay;
+
+    const lbl = document.createElement('span');
+    lbl.className = 'palette-label';
+    lbl.textContent = theme.en;
+
+    /* JP sub-label */
+    const jpLbl = document.createElement('div');
+    jpLbl.className = 'palette-dot-jp';
+    jpLbl.textContent = theme.jp;
+
+    wrap.append(dot, lbl, jpLbl);
+
+    /* click — only fire if no drag occurred */
+    wrap.addEventListener('click', () => {
+      if (_dragMoved) return;
+      if (mixingSlots.includes(theme.key)) {
+        shakeExistingSlot(theme.key);
+      } else if (mixingSlots.length < 5) {
+        animateDotToZone(theme, dot);
+      }
+    });
+    wrap.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        if (mixingSlots.includes(theme.key)) {
+          shakeExistingSlot(theme.key);
+        } else if (mixingSlots.length < 5) {
+          animateDotToZone(theme, dot);
+        }
+      }
+    });
+
+    /* mousedown — begin potential drag */
+    wrap.addEventListener('mousedown', e => {
+      if (e.button !== 0) return;
+      _dragTheme  = theme;
+      _dragStartX = e.clientX;
+      _dragStartY = e.clientY;
+      _dragMoved  = false;
+    });
+
+    /* touchstart */
+    wrap.addEventListener('touchstart', e => {
+      const t = e.touches[0];
+      _dragTheme  = theme;
+      _dragStartX = t.clientX;
+      _dragStartY = t.clientY;
+      _dragMoved  = false;
+    }, { passive: true });
+
+    row.appendChild(wrap);
+  });
+}
+
+/* ── DRAG GHOST HELPERS ── */
+function createDragGhost(theme, x, y) {
+  const sz = 40;
+  const ghost = document.createElement('div');
+  ghost.className = 'ghost-circle';
+  ghost.style.cssText = `
+    width: ${sz}px; height: ${sz}px;
+    background: ${theme.hex};
+    left: ${x - sz/2}px; top: ${y - sz/2}px;
+    transform: scale(1.15);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.22);
+    transition: transform 100ms ease, box-shadow 100ms ease;
+    cursor: grabbing;
+    pointer-events: none;
+  `;
+  document.body.appendChild(ghost);
+  return ghost;
+}
+
+function moveDragGhost(ghost, x, y) {
+  const sz = 40;
+  ghost.style.left = (x - sz/2) + 'px';
+  ghost.style.top  = (y - sz/2) + 'px';
+}
+
+function isOverZone(x, y, slack=40) {
+  const zone = document.getElementById('mixing-zone');
+  if (!zone) return false;
+  const r = zone.getBoundingClientRect();
+  return x >= r.left - slack && x <= r.right  + slack &&
+         y >= r.top  - slack && y <= r.bottom + slack;
+}
+
+/* ── GLOBAL MOUSEMOVE / MOUSEUP / TOUCHMOVE / TOUCHEND ── */
+/* helper: set/clear dragging class on all palette-dot-wraps */
+function setPaletteDragging(on) {
+  document.querySelectorAll('.palette-dot-wrap').forEach(w => {
+    w.classList.toggle('dragging', on);
+  });
+}
+
+document.addEventListener('mousemove', e => {
+  if (!_dragTheme) return;
+  const dx = e.clientX - _dragStartX;
+  const dy = e.clientY - _dragStartY;
+  if (!_dragMoved && Math.hypot(dx, dy) > DRAG_THRESHOLD) {
+    _dragMoved = true;
+    _dragGhost = createDragGhost(_dragTheme, e.clientX, e.clientY);
+    setPaletteDragging(true);
+  }
+  if (_dragMoved && _dragGhost) {
+    requestAnimationFrame(() => moveDragGhost(_dragGhost, e.clientX, e.clientY));
+    const zone = document.getElementById('mixing-zone');
+    if (zone) zone.classList.toggle('drag-over', isOverZone(e.clientX, e.clientY));
+  }
+});
+
+document.addEventListener('mouseup', e => {
+  if (!_dragTheme) return;
+  const theme = _dragTheme;
+  const moved = _dragMoved;
+  const ghost = _dragGhost;
+  _dragTheme = null;
+  _dragGhost = null;
+  _dragMoved = false;
+  setPaletteDragging(false);
+  const zone = document.getElementById('mixing-zone');
+  if (zone) zone.classList.remove('drag-over');
+  if (moved && ghost) {
+    if (isOverZone(e.clientX, e.clientY)) {
+      if (mixingSlots.includes(theme.key)) {
+        /* Duplicate: bounce ghost back and shake existing slot */
+        bounceBackGhost(ghost, theme);
+        shakeExistingSlot(theme.key);
+      } else if (mixingSlots.length < 5) {
+        ghost.remove();
+        mixingSlots.push(theme.key);
+        renderMixingZone();
+      } else {
+        ghost.remove();
+      }
+    } else {
+      ghost.remove();
+    }
+  }
+});
+
+document.addEventListener('touchmove', e => {
+  if (!_dragTheme) return;
+  const t = e.touches[0];
+  const dx = t.clientX - _dragStartX;
+  const dy = t.clientY - _dragStartY;
+  if (!_dragMoved && Math.hypot(dx, dy) > DRAG_THRESHOLD) {
+    _dragMoved = true;
+    _dragGhost = createDragGhost(_dragTheme, t.clientX, t.clientY);
+    setPaletteDragging(true);
+  }
+  if (_dragMoved && _dragGhost) {
+    requestAnimationFrame(() => moveDragGhost(_dragGhost, t.clientX, t.clientY));
+    const zone = document.getElementById('mixing-zone');
+    if (zone) zone.classList.toggle('drag-over', isOverZone(t.clientX, t.clientY));
+  }
+  if (_dragMoved) e.preventDefault(); // prevent scroll while dragging
+}, { passive: false });
+
+document.addEventListener('touchend', e => {
+  if (!_dragTheme) return;
+  const theme = _dragTheme;
+  const moved = _dragMoved;
+  const ghost = _dragGhost;
+  _dragTheme = null;
+  _dragGhost = null;
+  _dragMoved = false;
+  setPaletteDragging(false);
+  const zone = document.getElementById('mixing-zone');
+  if (zone) zone.classList.remove('drag-over');
+  if (moved && ghost) {
+    const t = e.changedTouches[0];
+    if (isOverZone(t.clientX, t.clientY)) {
+      if (mixingSlots.includes(theme.key)) {
+        bounceBackGhost(ghost, theme);
+        shakeExistingSlot(theme.key);
+      } else if (mixingSlots.length < 5) {
+        ghost.remove();
+        mixingSlots.push(theme.key);
+        renderMixingZone();
+      } else {
+        ghost.remove();
+      }
+    } else {
+      ghost.remove();
+    }
+  }
+});
+
+/* ── BOUNCE BACK GHOST (duplicate rejection) ── */
+function bounceBackGhost(ghost, theme) {
+  /* Find the palette dot's position to bounce back to */
+  const palDot = document.getElementById('palette-dot-' + theme.key);
+  if (!palDot) { ghost.remove(); return; }
+  const dotRect = palDot.getBoundingClientRect();
+  const sz = 40;
+  const targetLeft = dotRect.left + dotRect.width / 2 - sz / 2;
+  const targetTop  = dotRect.top  + dotRect.height / 2 - sz / 2;
+
+  ghost.style.transition = 'left 300ms cubic-bezier(0.34, 1.4, 0.64, 1), top 300ms cubic-bezier(0.34, 1.4, 0.64, 1), opacity 200ms ease 200ms';
+  ghost.style.left    = targetLeft + 'px';
+  ghost.style.top     = targetTop  + 'px';
+  ghost.style.opacity = '0';
+
+  setTimeout(() => ghost.remove(), 520);
+}
+
+/* ── SHAKE EXISTING SLOT (duplicate rejection) ── */
+function shakeExistingSlot(key) {
+  const dots = dotsRowEl.querySelectorAll('.mixing-dot');
+  const idx  = mixingSlots.indexOf(key);
+  if (idx < 0 || !dots[idx]) return;
+  const dot = dots[idx];
+  dot.classList.remove('slot-shake');
+  /* Force reflow to restart animation */
+  void dot.offsetWidth;
+  dot.classList.add('slot-shake');
+  setTimeout(() => dot.classList.remove('slot-shake'), 260);
+}
+
+/* ── GHOST ANIMATION: fly palette dot → mixing zone ── */
+function animateDotToZone(theme, sourceDot) {
+  const srcRect  = sourceDot.getBoundingClientRect();
+  const zone     = document.getElementById('mixing-zone');
+  const zoneRect = zone.getBoundingClientRect();
+
+  /* target slot: next available position in drop zone */
+  const slotIndex = mixingSlots.length;
+  const slotSize  = 40;
+  const slotGap   = 12;
+  const targetX   = zoneRect.left + 32 + slotIndex * (slotSize + slotGap) + slotSize / 2;
+  const targetY   = zoneRect.top  + 28 + slotSize / 2;
+
+  const startX = srcRect.left + srcRect.width  / 2;
+  const startY = srcRect.top  + srcRect.height / 2;
+
+  /* create ghost */
+  const ghost = document.createElement('div');
+  ghost.className = 'ghost-circle';
+  ghost.style.cssText = `
+    width: ${slotSize}px;
+    height: ${slotSize}px;
+    background: ${theme.hex};
+    left: ${startX - slotSize / 2}px;
+    top:  ${startY - slotSize / 2}px;
+  `;
+  document.body.appendChild(ghost);
+
+  const duration = 400;
+  const start    = performance.now();
+
+  function step(now) {
+    const elapsed = now - start;
+    const raw     = Math.min(elapsed / duration, 1);
+    const t       = easeSpring(raw);
+
+    const cx = startX + (targetX - startX) * t - slotSize / 2;
+    const cy = startY + (targetY - startY) * t - slotSize / 2;
+    ghost.style.left = cx + 'px';
+    ghost.style.top  = cy + 'px';
+
+    if (raw < 1) {
+      requestAnimationFrame(step);
+    } else {
+      ghost.remove();
+      /* add to state after animation */
+      mixingSlots.push(theme.key);
+      renderMixingZone();
+    }
+  }
+  requestAnimationFrame(step);
+}
+
+/* ── REMOVE FROM MIX ── */
+function removeFromMix(index, dotEl) {
+  dotEl.classList.add('removing');
+  dotEl.addEventListener('animationend', () => {
+    mixingSlots.splice(index, 1);
+    renderMixingZone();
+  }, { once: true });
+}
+
+/* ── RENDER MIXING ZONE ── */
+function renderMixingZone() {
+  dotsRowEl.innerHTML = '';
+
+  if (mixingSlots.length === 0) {
+    const ph = document.createElement('span');
+    ph.className = 'mixing-placeholder';
+    ph.id = 'mixing-placeholder';
+    ph.textContent = 'パレットから色を選んで送ってみて';
+    dotsRowEl.appendChild(ph);
+    resultCircle.style.background = 'rgba(26,26,26,0.06)';
+    resultHexEl.textContent = '—';
+    resultLinkEl.style.display = 'none';
+    return;
+  }
+
+  mixingSlots.forEach((key, i) => {
+    const theme = THEMES.find(t => t.key === key);
+    const dot = document.createElement('div');
+    dot.className = 'mixing-dot';
+    dot.style.background = theme.hex;
+    dot.setAttribute('role', 'button');
+    dot.setAttribute('tabindex', '0');
+    dot.setAttribute('aria-label', 'Remove ' + theme.en);
+    dot.title = 'クリックで削除';
+
+    dot.addEventListener('click', () => removeFromMix(i, dot));
+    dot.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); removeFromMix(i, dot); }
+    });
+    dotsRowEl.appendChild(dot);
+  });
+
+  /* compute and show result */
+  const hexes    = mixingSlots.map(k => THEMES.find(t => t.key === k).hex);
+  const mixedHex = computeMix(hexes);
+  resultCircle.style.background = mixedHex;
+  resultHexEl.textContent = mixedHex;
+  resultLinkEl.style.display = 'inline';
+  resultLinkEl.href = `/index.html#color=${mixedHex.replace('#', '')}`;
+}
+
+/* ── PENTAGON PHYSICS SIMULATION (Section 1) ── */
+
+/* Physics constants */
+const SPRING_K    = 0.06;   // spring toward rest
+const COUPLING_K  = 0.02;   // coupling between bodies
+const DAMPING     = 0.92;   // velocity damping per frame
+const BROWNIAN_F  = 0.15;   // random ambient force magnitude
+const CENTER_MASS = 3.0;    // center acts as anchor
+const OUTER_MASS  = 1.0;
+const IMPULSE_MAG = 20;     // tap impulse magnitude
+
+/* Bodies: 0-4 = outer circles, 5 = center circle */
+let bodies = [];
+/* SVG path elements (curved ropes), one per outer circle (center→outer) */
+let svgLines = [];
+/* rAF handle */
+let _physicsRafId = null;
+/* Whether the opening section is in viewport */
+let _openingVisible = false;
+
+function initBodies() {
+  const comp = document.getElementById('center-composition');
+  if (!comp) return;
+
+  const compW = comp.offsetWidth  || 420;
+  const compH = comp.offsetHeight || 420;
+  const cx    = compW / 2;
+  const cy    = compH / 2;
+  const scale = compW / 420;
+  const r     = 130 * scale;
+  const sz    = 72  * scale;
+
+  /* Update outer-circle CSS size */
+  const outerEls = document.querySelectorAll('.outer-circle');
+  outerEls.forEach(el => {
+    el.style.width  = sz + 'px';
+    el.style.height = sz + 'px';
+  });
+
+  /* Pentagon angles: 90°, 162°, 234°, 306°, 18° */
+  const angles = [90, 162, 234, 306, 18];
+
+  /* Compute rest positions and set initial CSS left/top */
+  bodies = [];
+
+  angles.forEach((deg, i) => {
+    const rad = (deg - 90) * Math.PI / 180;
+    const ox  = cx + r * Math.cos(rad);
+    const oy  = cy + r * Math.sin(rad);
+    const el  = document.getElementById('outer-' + (i + 1));
+    if (el) {
+      el.style.left = (ox - sz / 2) + 'px';
+      el.style.top  = (oy - sz / 2) + 'px';
+      el.style.transform = 'translate(0px, 0px)';
+    }
+    bodies.push({
+      el,
+      restX: ox, restY: oy,
+      x: ox, y: oy,
+      vx: (Math.random() * 2 - 1) * 0.4,  // tiny idle velocity
+      vy: (Math.random() * 2 - 1) * 0.4,
+      mass: OUTER_MASS,
+    });
+  });
+
+  /* Center circle */
+  const centerEl = document.querySelector('.center-circle');
+  bodies.push({
+    el: centerEl,
+    restX: cx, restY: cy,
+    x: cx, y: cy,
+    vx: 0, vy: 0,
+    mass: CENTER_MASS,
+  });
+
+  /* Compute rest distances for coupling */
+  /* center→outer rest dist = r */
+  /* outer→outer: adjacent edge length in regular pentagon = 2r*sin(π/5) */
+  const outerEdge = 2 * r * Math.sin(Math.PI / 5);
+  bodies._r          = r;
+  bodies._outerEdge  = outerEdge;
+  bodies._cx         = cx;
+  bodies._cy         = cy;
+  bodies._sz         = sz;
+
+  /* Build (or rebuild) SVG rope paths (quadratic Bezier curves) */
+  const svgEl = document.getElementById('composition-svg');
+  if (svgEl) {
+    svgEl.innerHTML = '';
+    svgLines = [];
+    angles.forEach((deg, i) => {
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      /* Initial straight d — will be updated each frame */
+      path.setAttribute('d', `M${cx} ${cy} Q${cx} ${cy} ${bodies[i].x} ${bodies[i].y}`);
+      path.setAttribute('stroke', 'rgba(26,26,26,0.12)');
+      path.setAttribute('stroke-width', '1');
+      path.setAttribute('fill', 'none');
+      svgEl.appendChild(path);
+      svgLines.push(path);
+    });
+  }
+}
+
+function physicsStep() {
+  const N = 6; // 5 outer + 1 center (index 5)
+  const r          = bodies._r;
+  const outerEdge  = bodies._outerEdge;
+  const cx         = bodies._cx;
+  const cy         = bodies._cy;
+  const now        = Date.now();
+
+  /* Accumulate forces */
+  const fx = new Float64Array(N);
+  const fy = new Float64Array(N);
+
+  for (let i = 0; i < N; i++) {
+    const b = bodies[i];
+    /* Spring toward rest */
+    fx[i] += (b.restX - b.x) * SPRING_K;
+    fy[i] += (b.restY - b.y) * SPRING_K;
+    /* Ambient Brownian motion — ceaseless gentle trembling */
+    fx[i] += (Math.random() * 2 - 1) * BROWNIAN_F;
+    fy[i] += (Math.random() * 2 - 1) * BROWNIAN_F;
+  }
+
+  /* Coupling forces between all pairs */
+  for (let i = 0; i < N; i++) {
+    for (let j = i + 1; j < N; j++) {
+      const bi = bodies[i];
+      const bj = bodies[j];
+      const dx = bj.x - bi.x;
+      const dy = bj.y - bi.y;
+      const d  = Math.sqrt(dx * dx + dy * dy) || 0.001;
+
+      /* Determine rest distance for this pair */
+      let restDist;
+      const centerIdx = 5;
+      if (i === centerIdx || j === centerIdx) {
+        /* center↔outer */
+        restDist = r;
+      } else {
+        /* outer↔outer: adjacent = outerEdge, non-adjacent = larger */
+        /* Use actual rest positions to compute rest dist */
+        const rxi = bi.restX - cx, ryi = bi.restY - cy;
+        const rxj = bj.restX - cx, ryj = bj.restY - cy;
+        restDist = Math.sqrt((rxj - rxi) ** 2 + (ryj - ryi) ** 2);
+      }
+
+      const stretch = d - restDist;
+      const fMag    = stretch * COUPLING_K;
+      const nx = dx / d;
+      const ny = dy / d;
+      fx[i] += fMag * nx;
+      fy[i] += fMag * ny;
+      fx[j] -= fMag * nx;
+      fy[j] -= fMag * ny;
+    }
+  }
+
+  /* Integrate */
+  for (let i = 0; i < N; i++) {
+    const b = bodies[i];
+    b.vx = (b.vx + fx[i] / b.mass) * DAMPING;
+    b.vy = (b.vy + fy[i] / b.mass) * DAMPING;
+    b.x += b.vx;
+    b.y += b.vy;
+  }
+
+  /* Apply to DOM via transform relative to rest position */
+  const centerBody = bodies[5];
+  for (let i = 0; i < N; i++) {
+    const b = bodies[i];
+    const dx = b.x - b.restX;
+    const dy = b.y - b.restY;
+    if (b.el) {
+      b.el.style.transform = `translate(${dx.toFixed(2)}px, ${dy.toFixed(2)}px)`;
+    }
+    /* Update SVG rope paths (outer circles only, index 0-4) with curved Bezier */
+    if (i < 5 && svgLines[i]) {
+      const ox = b.x;
+      const oy = b.y;
+      const cBx = centerBody.x;
+      const cBy = centerBody.y;
+      /* Midpoint between center and outer */
+      const midX = (cBx + ox) / 2;
+      const midY = (cBy + oy) / 2;
+      /* Perpendicular direction to the line */
+      const lineDx = ox - cBx;
+      const lineDy = oy - cBy;
+      const len = Math.hypot(lineDx, lineDy) || 1;
+      const perpX = -lineDy;
+      const perpY =  lineDx;
+      /* Animated sag: oscillates gently per rope */
+      const sag = 8 + Math.sin(now / 1000 + i * Math.PI / 3) * 4;
+      const qcX = midX + perpX / len * sag;
+      const qcY = midY + perpY / len * sag;
+      svgLines[i].setAttribute('d',
+        `M${cBx.toFixed(2)} ${cBy.toFixed(2)} Q${qcX.toFixed(2)} ${qcY.toFixed(2)} ${ox.toFixed(2)} ${oy.toFixed(2)}`
+      );
+    }
+  }
+}
+
+function startPhysicsLoop() {
+  if (_physicsRafId) return;
+  function loop() {
+    physicsStep();
+    _physicsRafId = requestAnimationFrame(loop);
+  }
+  _physicsRafId = requestAnimationFrame(loop);
+}
+
+function stopPhysicsLoop() {
+  if (_physicsRafId) {
+    cancelAnimationFrame(_physicsRafId);
+    _physicsRafId = null;
+  }
+}
+
+/* Intersection Observer: run physics only when opening section is visible */
+function setupOpeningObserver() {
+  const openingEl = document.getElementById('opening');
+  if (!openingEl || !('IntersectionObserver' in window)) {
+    /* Fallback: always run */
+    startPhysicsLoop();
+    return;
+  }
+  const obs = new IntersectionObserver(entries => {
+    const visible = entries[0].isIntersecting;
+    _openingVisible = visible;
+    if (visible) {
+      startPhysicsLoop();
+    } else {
+      stopPhysicsLoop();
+    }
+  }, { threshold: 0.01 });
+  obs.observe(openingEl);
+}
+
+/* Apply impulse to a body at index, with brief visual flash */
+function applyImpulse(bodyIndex) {
+  if (bodyIndex < 0 || bodyIndex >= bodies.length) return;
+  const b = bodies[bodyIndex];
+  b.vx += (Math.random() * 2 - 1) * IMPULSE_MAG;
+  b.vy += (Math.random() * 2 - 1) * IMPULSE_MAG;
+  /* Visual feedback: briefly scale the element */
+  if (b.el) {
+    const el = b.el;
+    el.style.transition = 'transform 80ms ease-out';
+    const baseDx = b.x - b.restX;
+    const baseDy = b.y - b.restY;
+    el.style.transform = `translate(${baseDx.toFixed(2)}px, ${baseDy.toFixed(2)}px) scale(1.15)`;
+    setTimeout(() => {
+      el.style.transition = '';
+    }, 200);
+  }
+}
+
+/* Wire click / touchstart on each outer circle and center */
+function wireCircleInteraction() {
+  /* outer circles */
+  for (let i = 0; i < 5; i++) {
+    const el = document.getElementById('outer-' + (i + 1));
+    if (!el) continue;
+    const idx = i;
+    el.style.cursor = 'pointer';
+    el.addEventListener('click',       () => applyImpulse(idx));
+    el.addEventListener('touchstart',  () => applyImpulse(idx), { passive: true });
+    el.setAttribute('role', 'button');
+    el.setAttribute('tabindex', '0');
+    el.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); applyImpulse(idx); }
+    });
+  }
+  /* center circle */
+  const centerEl = document.querySelector('.center-circle');
+  if (centerEl) {
+    centerEl.style.cursor = 'pointer';
+    centerEl.addEventListener('click',      () => applyImpulse(5));
+    centerEl.addEventListener('touchstart', () => applyImpulse(5), { passive: true });
+    centerEl.setAttribute('role', 'button');
+    centerEl.setAttribute('tabindex', '0');
+    centerEl.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); applyImpulse(5); }
+    });
+  }
+}
+
+/* Re-initialise on resize (recalculate rest positions, preserve velocities) */
+function reinitBodiesOnResize() {
+  /* Save velocities */
+  const savedV = bodies.slice(0, 6).map(b => ({ vx: b.vx, vy: b.vy }));
+  initBodies();
+  /* Restore velocities */
+  savedV.forEach((v, i) => {
+    if (bodies[i]) { bodies[i].vx = v.vx; bodies[i].vy = v.vy; }
+  });
+}
+
+/* M1: Re-run on resize so composition stays scaled */
+window.addEventListener('resize', reinitBodiesOnResize, { passive: true });
+
+/* ── INIT ── */
+initBodies();
+wireCircleInteraction();
+setupOpeningObserver();
+buildPalette();
+</script>
+
+</body>
+</html>

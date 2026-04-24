@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <rect width="1200" height="630" fill="#F2EBD5"/>
+  <text x="100" y="300" font-family="Fraunces, serif" font-weight="300" font-size="120" fill="#1A1A1A">L3</text>
+  <text x="100" y="380" font-family="Noto Sans JP, sans-serif" font-size="28" fill="rgba(26,26,26,0.7)">思想の散歩道</text>
+  <text x="100" y="420" font-family="Noto Sans JP, sans-serif" font-size="18" fill="rgba(26,26,26,0.5)">Syuntoの個人アーカイブ / 5つの色で配置される作品集</text>
+  <!-- 5 colored dots -->
+  <circle cx="100" cy="530" r="18" fill="#87A96B"/>
+  <circle cx="160" cy="530" r="18" fill="#D97A4A"/>
+  <circle cx="220" cy="530" r="18" fill="#E4C26F"/>
+  <circle cx="280" cy="530" r="18" fill="#8C7DB0"/>
+  <circle cx="340" cy="530" r="18" fill="#4A6374"/>
+</svg>
