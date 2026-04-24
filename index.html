@@ -158,6 +158,35 @@ header {
   transition: transform 400ms var(--ease-bloom),
               opacity   500ms var(--ease-bloom);
   /* no border, no shadow, no radius per spec */
+  overflow: hidden; /* clip the title scrim (::before) to the chip box */
+}
+/* Title readability scrim: a soft diagonal dark gradient behind the title
+   zone only. On light/mixed chip backgrounds (where white 65% title text
+   fades out) the scrim restores legibility without touching the rest of
+   the chip body. Dark pure-theme chips already have enough contrast and
+   the low-opacity gradient sits quietly on them. */
+.chip::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+.chip.title-scrim-left::before {
+  left: 0;
+  width: 62%;
+  height: 38%;
+  background: linear-gradient(135deg,
+    rgba(0,0,0,0.28) 0%,
+    rgba(0,0,0,0)   78%);
+}
+.chip.title-scrim-right::before {
+  right: 0;
+  width: 32%;
+  height: 72%;
+  background: linear-gradient(225deg,
+    rgba(0,0,0,0.28) 0%,
+    rgba(0,0,0,0)   78%);
 }
 .chip:focus { outline: none; }
 /* tap-selected state: subtle scale to indicate preview is open for this chip */
@@ -176,10 +205,7 @@ header {
   font-weight: 400;
   font-size: 16px;
   line-height: 1;
-  /* Option A: use per-chip ink color (JS sets --ink-on-chip based on
-     background luminance). Fallback preserves the washed-white look on
-     chips that pre-date the migration. */
-  color: var(--ink-on-chip, rgba(255,255,255,0.65));
+  color: rgba(255,255,255,0.65);
   pointer-events: none;
   user-select: none;
   text-align: right;
@@ -197,11 +223,10 @@ header {
   position: absolute;
   pointer-events: none;
   user-select: none;
-  /* Option A: luminance-aware ink color set per chip via JS.
-     On light/mixed backgrounds the color flips to a dark ink so the
-     title stays readable without scrims or shadows. Fallback matches
-     the original washed white. */
-  color: var(--ink-on-chip, rgba(255, 255, 255, 0.65));
+  /* Match .chip-glyph exactly: same alpha (0.65) and no text-shadow so the
+     title inherits the faded, "半紙 (hanshi)" washed-ink texture that the
+     bottom-right media-type word already carries. */
+  color: rgba(255, 255, 255, 0.65);
   /* Match .chip-caption (IBM Plex Mono + JP system fallback) for a unified
      thin, airy feel with the date/tag line below the chip. */
   font-family: "IBM Plex Mono", monospace;
@@ -280,36 +305,32 @@ header {
   width: 2px;
 }
 
-/* Horizontal stripe patterns (linear-gradient direction = 90deg).
-   Option A: use currentColor so the underline inherits the title's
-   luminance-aware ink color. opacity 0.55 keeps it softer than the text. */
-.chip-title.title-horizontal::after  { opacity: 0.55; }
-.chip-title.title-horizontal[data-mt="text"]::after  { background: currentColor; }
-.chip-title.title-horizontal[data-mt="video"]::after { background: currentColor; height: 3px; }
+/* Horizontal stripe patterns (linear-gradient direction = 90deg) */
+.chip-title.title-horizontal[data-mt="text"]::after  { background: rgba(255,255,255,0.4); }
+.chip-title.title-horizontal[data-mt="video"]::after { background: rgba(255,255,255,0.4); height: 3px; }
 .chip-title.title-horizontal[data-mt="photo"]::after {
   background: repeating-linear-gradient(90deg,
-    currentColor 0, currentColor 6px,
+    rgba(255,255,255,0.4) 0, rgba(255,255,255,0.4) 6px,
     transparent 6px, transparent 10px);
 }
 .chip-title.title-horizontal[data-mt="audio"]::after {
   background: repeating-linear-gradient(90deg,
-    currentColor 0, currentColor 2px,
+    rgba(255,255,255,0.4) 0, rgba(255,255,255,0.4) 2px,
     transparent 2px, transparent 6px);
 }
 
 /* Vertical stripe patterns (rotated: direction = 0deg so the pattern repeats
    along the vertical axis of the tategaki column). */
-.chip-title.title-vertical::after  { opacity: 0.55; }
-.chip-title.title-vertical[data-mt="text"]::after  { background: currentColor; }
-.chip-title.title-vertical[data-mt="video"]::after { background: currentColor; width: 3px; }
+.chip-title.title-vertical[data-mt="text"]::after  { background: rgba(255,255,255,0.4); }
+.chip-title.title-vertical[data-mt="video"]::after { background: rgba(255,255,255,0.4); width: 3px; }
 .chip-title.title-vertical[data-mt="photo"]::after {
   background: repeating-linear-gradient(0deg,
-    currentColor 0, currentColor 6px,
+    rgba(255,255,255,0.4) 0, rgba(255,255,255,0.4) 6px,
     transparent 6px, transparent 10px);
 }
 .chip-title.title-vertical[data-mt="audio"]::after {
   background: repeating-linear-gradient(0deg,
-    currentColor 0, currentColor 2px,
+    rgba(255,255,255,0.4) 0, rgba(255,255,255,0.4) 2px,
     transparent 2px, transparent 6px);
 }
 
@@ -1823,18 +1844,6 @@ function chipBleedShadow(chip) {
   return `inset 0 0 8px 4px rgba(${dr},${dg},${db},0.35)`;
 }
 
-/* Option A — luminance-aware ink color.
-   Returns the ink-on-chip color string for --ink-on-chip. WCAG relative
-   luminance > 0.55 (pale mix chips) → dark ink; otherwise keep the washed
-   white. Mirrors the logic prototyped in dev/title-contrast-compare.html. */
-function inkOnChip(chip) {
-  const hex = getChipDisplayColor(chip.theme);
-  const [r, g, b] = hexToRgb(hex);
-  const toLin = c => { const s = c / 255; return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4); };
-  const L = 0.2126 * toLin(r) + 0.7152 * toLin(g) + 0.0722 * toLin(b);
-  return L > 0.55 ? 'rgba(26, 26, 26, 0.72)' : 'rgba(255, 255, 255, 0.72)';
-}
-
 /* A4 — weighted average hex of non-dimmed chips */
 function computeCoord(placed, dimmedSet) {
   const W = { L:3, M:2, S:1 };
@@ -2330,9 +2339,6 @@ function buildChipEl(chip, x, y, chipW, chipH, sz, placedIdx, animIdx, isClone) 
   el.style.height     = chipH + 'px';
   el.style.background = chipBg(chip);
   el.style.boxShadow  = chipBleedShadow(chip);
-  /* Option A: luminance-aware ink color drives .chip-title + .chip-glyph +
-     underline currentColor so text stays readable on pale mixed chips. */
-  el.style.setProperty('--ink-on-chip', inkOnChip(chip));
 
   /* P2 — kanji glyph */
   const glyph = document.createElement('span');
@@ -2353,6 +2359,9 @@ function buildChipEl(chip, x, y, chipW, chipH, sz, placedIdx, animIdx, isClone) 
     titleEl.dataset.mt = chip.mediaType;
     titleEl.textContent = chip.title;
     el.appendChild(titleEl);
+    /* B: tag the chip so .chip::before paints the title-readability scrim
+       in the correct corner (top-left for horizontal, top-right for tategaki) */
+    el.classList.add(isVertical ? 'title-scrim-right' : 'title-scrim-left');
   }
 
   /* E3 — source dots for multi-theme chips only */
