@@ -581,7 +581,7 @@ header {
 #detail-close:hover { color: #fff; }
 #detail-close.visible { display: block; }
 
-/* Change B: color band grows from chip upward to fill 35vh */
+/* Change B: color band grows from chip upward to fill 24vh (28vh on mobile) */
 #detail-color-band {
   display: none; /* shown only when detail is open (JS sets display:block) */
   position: fixed;
@@ -623,15 +623,20 @@ header {
   display: none;
 }
 
-/* Push detail body below the 35vh band */
+/* Push detail body below the color band (24vh desktop, 28vh mobile) */
 .detail-body-wrap {
   max-width: 640px;
   margin: 0 auto;
-  padding-top: calc(35vh + 40px);
+  padding-top: calc(24vh + 40px);
   padding-left: 24px;
   padding-right: 24px;
   padding-bottom: 120px;
   text-align: center;
+}
+@media (max-width: 768px) {
+  .detail-body-wrap {
+    padding-top: calc(28vh + 40px);
+  }
 }
 
 /* Change B: body + band content visibility is now handled by .detail-content-stack.
@@ -643,14 +648,20 @@ header {
   top: 0;
   left: 0;
   right: 0;
-  height: 35vh;
+  height: 24vh;
   z-index: 302;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
-  padding-bottom: 56px;
+  padding-bottom: 40px;
   pointer-events: none;
+}
+@media (max-width: 768px) {
+  #detail-band-content {
+    height: 28vh;
+    padding-bottom: 36px;
+  }
 }
 .detail-title {
   font-family: "IBM Plex Mono", monospace;
@@ -1138,7 +1149,7 @@ body.is-scrolling .chip { pointer-events: none; }
   <div id="detail-strip"></div>
   <div class="detail-body-wrap" id="detail-body"></div>
 </div>
-<!-- Change B: fixed color band overlay (35vh) -->
+<!-- Change B: fixed color band overlay (24vh desktop / 28vh mobile) -->
 <div id="detail-color-band"></div>
 <!-- band content: title + meta inside the color band -->
 <div id="detail-band-content" style="display:none;opacity:0;"></div>
@@ -2422,7 +2433,8 @@ function openDetail(chip, chipEl, idx) {
   const cr    = chipEl.getBoundingClientRect();
   const color = getChipDisplayColor(chip.theme); /* E3: use mixed color for multi-theme */
   const vh    = window.innerHeight;
-  const bandTargetH = Math.round(vh * 0.35);
+  const bandFraction = window.innerWidth <= 768 ? 0.28 : 0.24;
+  const bandTargetH = Math.round(vh * bandFraction);
 
   /* hide hover panel immediately — reset β clip-path to hidden state */
   prevPanel.classList.remove('visible', 'content-visible', 'blooming', 'retracting');
@@ -2472,7 +2484,7 @@ function openDetail(chip, chipEl, idx) {
 
   /* Band grows via transition — setTimeout(0) lets height:0 / transition:none paint first,
      then apply the spring cubic-bezier transition and set target height in px.
-     cubic-bezier(0.34, 1.56, 0.64, 1) has y-peak >1 → natural overshoot past 35vh → settles at 35vh. */
+     cubic-bezier(0.34, 1.56, 0.64, 1) has y-peak >1 → natural overshoot past target → settles at bandTargetH. */
   setTimeout(() => {
     detailColorBand.style.transition = 'height 900ms var(--ease-spring)';
     detailColorBand.style.height     = bandTargetH + 'px';

@@ -1521,12 +1521,14 @@ function renderMixingZone() {
 /* ── PENTAGON PHYSICS SIMULATION (Section 1) ── */
 
 /* Physics constants */
-const SPRING_K    = 0.06;   // spring toward rest
-const COUPLING_K  = 0.02;   // coupling between bodies
-const DAMPING     = 0.92;   // velocity damping per frame
-const BROWNIAN_F  = 0.15;   // random ambient force magnitude
+const SPRING_CENTER = 0.12;  // spring stiffness for center body (anchor-like)
+const SPRING_OUTER  = 0.025; // spring stiffness for outer bodies (floaty/water-like)
+const COUPLING_K  = 0.015;  // coupling between bodies (reduced for softer water feel)
+const DAMPING     = 0.95;   // velocity damping per frame (more viscous, slower decay)
+const BROWNIAN_F  = 0.10;   // random ambient force magnitude (gentler water currents)
 const CENTER_MASS = 3.0;    // center acts as anchor
 const OUTER_MASS  = 1.0;
+const OUTER_COLLISION_K = 0.15; // outer-outer soft contact repulsion
 const IMPULSE_MAG = 20;     // tap impulse magnitude
 
 /* Bodies: 0-4 = outer circles, 5 = center circle */
@@ -1580,6 +1582,8 @@ function initBodies() {
       vx: (Math.random() * 2 - 1) * 0.4,  // tiny idle velocity
       vy: (Math.random() * 2 - 1) * 0.4,
       mass: OUTER_MASS,
+      isCenter: false,
+      r: sz / 2,
     });
   });
 
@@ -1591,6 +1595,8 @@ function initBodies() {
     x: cx, y: cy,
     vx: 0, vy: 0,
     mass: CENTER_MASS,
+    isCenter: true,
+    r: sz / 2,
   });
 
   /* Compute rest distances for coupling */
@@ -1635,9 +1641,10 @@ function physicsStep() {
 
   for (let i = 0; i < N; i++) {
     const b = bodies[i];
-    /* Spring toward rest */
-    fx[i] += (b.restX - b.x) * SPRING_K;
-    fy[i] += (b.restY - b.y) * SPRING_K;
+    /* Spring toward rest — per-ball stiffness (center anchors firmly, outers float) */
+    const springK = b.isCenter ? SPRING_CENTER : SPRING_OUTER;
+    fx[i] += (b.restX - b.x) * springK;
+    fy[i] += (b.restY - b.y) * springK;
     /* Ambient Brownian motion — ceaseless gentle trembling */
     fx[i] += (Math.random() * 2 - 1) * BROWNIAN_F;
     fy[i] += (Math.random() * 2 - 1) * BROWNIAN_F;
@@ -1674,6 +1681,28 @@ function physicsStep() {
       fy[i] += fMag * ny;
       fx[j] -= fMag * nx;
       fy[j] -= fMag * ny;
+    }
+  }
+
+  /* Outer-outer collision repulsion (water-like soft contact).
+     bodies[0..4] are outer; bodies[5] is center. Skip center. */
+  for (let i = 0; i < N - 1; i++) {
+    for (let j = i + 1; j < N - 1; j++) {
+      const a = bodies[i], b = bodies[j];
+      const dx = b.x - a.x;
+      const dy = b.y - a.y;
+      const d  = Math.sqrt(dx * dx + dy * dy) || 0.001;
+      const minD = a.r + b.r;
+      if (d < minD) {
+        const overlap = minD - d;
+        const nx = dx / d;
+        const ny = dy / d;
+        const f = overlap * OUTER_COLLISION_K;
+        fx[i] -= nx * f;
+        fy[i] -= ny * f;
+        fx[j] += nx * f;
+        fy[j] += ny * f;
+      }
     }
   }
 
