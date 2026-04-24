@@ -1898,7 +1898,12 @@ function horizontalLayout(chips, seed) {
     /* collision-aware x placement — up to 5 retries against same-lane chips,
        then a single final cross-all bbox safety pass.
        Same-lane retries avoid cascading cross-lane pushes from the L chip
-       (which spans multiple lanes by design due to its 320px height). */
+       (which spans multiple lanes by design due to its 320px height).
+       CAPTION_RESERVE extends each placed chip's effective height so the
+       caption strip below it (".chip-wrap": chipH + 8px gap + ~15px text)
+       is treated as occupied space — prevents the next chip from landing
+       on top of a previous chip's "2025.8.25 / PHILOSOPHY" caption. */
+    const CAPTION_RESERVE = 28;
     let x;
     let localCurX = curX;
     for (let attempt = 0; attempt < 5; attempt++) {
@@ -1908,8 +1913,9 @@ function horizontalLayout(chips, seed) {
       let hasOverlap = false;
       placed.forEach((p, pi) => {
         if (pi % LANES !== lane) return; /* same-lane only for retry loop */
+        const pBottom = p.y + p.chipH + CAPTION_RESERVE;
         if (x < p.x + p.chipW && x + chipW > p.x &&
-            y < p.y + p.chipH && y + chipH > p.y) {
+            y < pBottom && y + chipH > p.y) {
           hasOverlap = true;
           maxPush = Math.max(maxPush, (p.x + p.chipW) - x);
         }
@@ -1920,8 +1926,9 @@ function horizontalLayout(chips, seed) {
     /* final safety: cross-all bbox check — single push to eliminate any
        remaining overlap with chips from other lanes (e.g. the L chip) */
     for (const p of placed) {
+      const pBottom = p.y + p.chipH + CAPTION_RESERVE;
       if (x < p.x + p.chipW && x + chipW > p.x &&
-          y < p.y + p.chipH && y + chipH > p.y) {
+          y < pBottom && y + chipH > p.y) {
         x = p.x + p.chipW + 12;
       }
     }
