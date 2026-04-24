@@ -182,6 +182,58 @@ header {
   text-align: right;
 }
 
+/* ── CHIP TITLE (inside chip) ──
+   Shape-aware:
+     - horizontal (W > H): top-left, horizontal text
+     - vertical   (H > W): top-right, vertical-rl (Japanese tategaki)
+     - square     (W === H): top-left, horizontal text
+   Color is white-ish with text-shadow for legibility across all theme colors. */
+.chip-title {
+  position: absolute;
+  pointer-events: none;
+  user-select: none;
+  color: rgba(255, 255, 255, 0.94);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.22), 0 0 4px rgba(0, 0, 0, 0.12);
+  font-family: "Noto Sans JP", sans-serif;
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 1.35;
+  letter-spacing: 0.02em;
+  overflow: hidden;
+  z-index: 1;
+}
+/* horizontal + square: top-left, two-line ellipsis */
+.chip-title.title-horizontal {
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  max-height: 2.7em; /* ~2 lines */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  white-space: normal;
+  word-break: break-word;
+}
+/* vertical: top-right, tategaki */
+.chip-title.title-vertical {
+  top: 12px;
+  right: 12px;
+  bottom: 40px; /* leave clearance for glyph + trail at bottom-right */
+  writing-mode: vertical-rl;
+  -webkit-writing-mode: vertical-rl;
+  max-width: 2.8em; /* up to ~2 columns */
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+/* Shrink title on small chips so it stays readable without overflow */
+.chip-title.title-size-s {
+  font-size: 11px;
+  line-height: 1.3;
+}
+.chip-title.title-size-m {
+  font-size: 12px;
+}
+
 /* caption + trail wrapper — sits outside the chip, below it */
 .chip-wrap {
   position: absolute;
@@ -1487,7 +1539,7 @@ const TAG_JP = {
 const MEDIA_JP = { text:'text', photo:'photo', video:'video', audio:'audio', music:'audio' };
 
 /* Size in px */
-const SZ = { L:320, M:200, S:120 };
+const SZ = { L:280, M:200, S:120 };
 
 /* ===================================================================
    DATA — loaded dynamically from /api/content on page start.
@@ -1739,7 +1791,7 @@ function horizontalLayout(chips, seed) {
   /* A3: mobile uses smaller chip sizes */
   const isMobileSz = window.innerWidth <= 480;
   const SZ_USE = isMobileSz
-    ? { L: 200, M: 140, S: 96 }
+    ? { L: 180, M: 140, S: 96 }
     : SZ;
 
   /* pre-compute chip dimensions */
@@ -1781,7 +1833,13 @@ function horizontalLayout(chips, seed) {
     const laneBot = laneTop + LANE_H;
     const yMin    = Math.max(PAD_Y_TOP, laneTop + 20);
     const yMax    = Math.min(PAD_Y_TOP + usableH - chipH, laneBot - chipH - 40);
-    const y       = Math.round(yMin + rng() * Math.max(0, yMax - yMin));
+    let y         = Math.round(yMin + rng() * Math.max(0, yMax - yMin));
+    /* Final safety clamp: L chip (height > LANE_H) in lane 2 can produce
+       yMin > yMax, causing y to fall back to yMin which may exceed the
+       viewport. Clamp y so the chip never extends past the visible area. */
+    const yAbsMax = PAD_Y_TOP + usableH - chipH;
+    if (y > yAbsMax) y = yAbsMax;
+    if (y < PAD_Y_TOP) y = PAD_Y_TOP;
 
     /* collision-aware x placement — up to 5 retries against same-lane chips,
        then a single final cross-all bbox safety pass.
@@ -1904,7 +1962,14 @@ function onEnter(chip, el, x, y, chipW, chipH, placedIdx) {
   previewChipIdx  = placedIdx;
   el.style.transform = 'scale(1.04)';
   el.style.zIndex    = '50';
-  allPlaced.forEach(p => { if (p.el !== el) p.el.style.opacity = '0.28'; });
+  /* dim primaries AND their matching clones so the fade is symmetric across
+     the looped strip (otherwise clones stay at 1 and look brighter when the
+     scroll passes into the clone range). */
+  allPlaced.forEach(p => {
+    if (p.el !== el) p.el.style.opacity = '0.28';
+    if (p.elC && p.el !== el) p.elC.style.opacity = '0.28';
+    else if (p.elC && p.el === el) p.elC.style.opacity = '1';
+  });
 
   /* populate panel content */
   if (chip.mediaType === 'photo' && chip.mediaKey) {
@@ -2002,7 +2067,15 @@ function onLeave() {
   previewChipData = null;
   if (previewChipEl) { previewChipEl.classList.remove('preview-selected'); previewChipEl = null; }
   previewChipIdx  = null;
-  allPlaced.forEach(p => { p.el.style.transform = ''; p.el.style.zIndex = ''; });
+  allPlaced.forEach(p => {
+    p.el.style.transform = '';
+    p.el.style.zIndex = '';
+    /* Defensive: clear any stale opacity on both primary and clone so that
+       applyFilter() below can fully restore state even if flags (e.g. filter)
+       happen to short-circuit the reset pass. */
+    p.el.style.opacity = '';
+    if (p.elC) p.elC.style.opacity = '';
+  });
 
   bridgeEl.classList.remove('visible');
   connEl.classList.remove('visible');
@@ -2049,12 +2122,10 @@ function chipMatchesFilter(chip) {
 function applyFilter() {
   if (hoverEl) return;
   if (colorFilterActive) return; /* color filter owns opacity while active */
-  allPlaced.forEach(({ chip, el }, i) => {
+  allPlaced.forEach(({ chip, el, elC }) => {
     const opacity = (activeFilters.size === 0 || chipMatchesFilter(chip)) ? '1' : '0.12';
     el.style.opacity = opacity;
-    /* also apply to clone chip at same index */
-    const cloneEl = scatterClone ? scatterClone.children[i] : null;
-    if (cloneEl) cloneEl.style.opacity = opacity;
+    if (elC) elC.style.opacity = opacity; /* keep clone in lock-step with primary */
   });
   /* re-apply proximity dim so it composes correctly */
   scheduleProximityDim();
@@ -2184,6 +2255,19 @@ function buildChipEl(chip, x, y, chipW, chipH, sz, placedIdx, animIdx, isClone) 
   glyph.className   = 'chip-glyph';
   glyph.textContent = GLYPHS[chip.mediaType] || '?';
   el.appendChild(glyph);
+
+  /* Title inside chip — orientation follows chip shape.
+     - horizontal (W > H): horizontal text, top-left, 2-line clamp
+     - vertical   (H > W): tategaki (vertical-rl), top-right
+     - square     (W === H): horizontal, top-left */
+  if (chip.title) {
+    const titleEl = document.createElement('div');
+    const isVertical = chipH > chipW;
+    const sizeClass = chip.size === 'S' ? ' title-size-s' : (chip.size === 'M' ? ' title-size-m' : '');
+    titleEl.className = 'chip-title ' + (isVertical ? 'title-vertical' : 'title-horizontal') + sizeClass;
+    titleEl.textContent = chip.title;
+    el.appendChild(titleEl);
+  }
 
   /* P3 — bottom stripe */
   const stripe = document.createElement('div');
@@ -2352,12 +2436,16 @@ function render() {
       const { el, wrap } = buildChipEl(chip, x, y, chipW, chipH, sz, placedIdx, animIdx++, false);
       scatter.appendChild(el);
       scatter.appendChild(wrap);
-      allPlaced.push({ chip, el, wrap, x, y, sz, chipW, chipH });
 
       /* clone copy (no animation) */
       const { el: elC, wrap: wrapC } = buildChipEl(chip, x, y, chipW, chipH, sz, placedIdx, 0, true);
       scatterClone.appendChild(elC);
       scatterClone.appendChild(wrapC);
+
+      /* store both chip elements so opacity / filter passes can target the
+         clone directly. scatterClone.children[i] is NOT a 1:1 mapping because
+         each iteration appends BOTH chip and wrap (children are interleaved). */
+      allPlaced.push({ chip, el, elC, wrap, wrapC, x, y, sz, chipW, chipH });
     });
   }
 
@@ -3111,31 +3199,28 @@ function applyColorFilter(targetHex) {
   /* find matching chips by color distance on their displayed color */
   const matches = [];
   const nonMatches = [];
-  allPlaced.forEach(({ chip, el }, i) => {
+  allPlaced.forEach(({ chip, el, elC }) => {
     const displayColor = getChipDisplayColor(chip.theme);
     const dist = colorDistance(displayColor, fullHex);
     if (dist <= COLOR_FILTER_THRESHOLD) {
-      matches.push({ chip, el, i });
+      matches.push({ chip, el, elC });
     } else {
-      nonMatches.push({ chip, el, i });
+      nonMatches.push({ chip, el, elC });
     }
   });
 
   colorFilterActive = true;
 
-  /* dim non-matches */
-  nonMatches.forEach(({ el, i }) => {
+  /* dim non-matches (primary + clone together) */
+  nonMatches.forEach(({ el, elC }) => {
     el.style.opacity = '0.18';
-    /* also dim clone (i = original allPlaced index) */
-    const cloneEl = scatterClone ? scatterClone.children[i] : null;
-    if (cloneEl) cloneEl.style.opacity = '0.18';
+    if (elC) elC.style.opacity = '0.18';
   });
 
-  /* keep matches at full opacity */
-  matches.forEach(({ el, i }) => {
+  /* keep matches at full opacity (primary + clone together) */
+  matches.forEach(({ el, elC }) => {
     el.style.opacity = '1';
-    const cloneEl = scatterClone ? scatterClone.children[i] : null;
-    if (cloneEl) cloneEl.style.opacity = '1';
+    if (elC) elC.style.opacity = '1';
   });
 
   /* show notice */
@@ -3242,7 +3327,7 @@ function applyProximityDim() {
   const sbRect = sidebar.getBoundingClientRect();
   const sbRight = sbRect.right;
 
-  allPlaced.forEach(({ chip, el }) => {
+  allPlaced.forEach(({ chip, el, elC }) => {
     const cr = el.getBoundingClientRect();
     const isNear = cr.left < sbRight + PROXIMITY_THRESHOLD;
 
@@ -3254,11 +3339,17 @@ function applyProximityDim() {
       const composed = Math.min(filterOpacity, 0.35);
       el.dataset.proximityDimmed = '1';
       el.style.opacity = String(composed);
+      /* Note: clone stays at filterOpacity — proximity only affects primary
+         because only the primary can be in the sidebar's near zone at once.
+         This prevents the "whole strip goes dim after wrap" symptom where
+         clones would otherwise retain a stale dim value. */
+      if (elC) elC.style.opacity = String(filterOpacity);
     } else {
       el.dataset.proximityDimmed = '';
       /* restore filter opacity only if not hovered */
       if (!hoverEl) {
         el.style.opacity = String(filterOpacity);
+        if (elC) elC.style.opacity = String(filterOpacity);
       }
     }
   });
