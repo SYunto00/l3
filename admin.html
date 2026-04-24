@@ -1351,7 +1351,10 @@ document.getElementById('upload-form').addEventListener('submit', async (e) => {
 
   setFormError(null);
 
-  const token = tokenInput.value.trim();
+  /* Use getActiveToken() — resilient to mobile Safari ITP / autofill wipes
+     that can clear `tokenInput.value` even when the token is still held in
+     `_activeToken` / localStorage. */
+  const token = getActiveToken();
   if (!token) {
     setFormError('トークンを入力してください（一番上のフィールド）');
     return;
