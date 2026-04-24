@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>L3 Admin — 投稿</title>
+<title>L3 Admin</title>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -452,16 +452,309 @@ select {
   .admin-header { padding: 20px 16px 14px; }
   .admin-wordmark { font-size: 28px; }
 }
+
+/* ── TAB BAR ── */
+.tab-bar {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--line-solid);
+  background: var(--bg);
+  padding: 0 24px;
+  margin: 0;
+  max-width: 640px;
+  margin: 0 auto;
+}
+.tab-btn {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 14px 16px 12px;
+  cursor: pointer;
+  transition: color 150ms ease, border-color 150ms ease;
+  margin-bottom: -1px; /* overlap container border */
+}
+.tab-btn:hover { color: var(--ink); }
+.tab-btn[aria-selected="true"] {
+  color: var(--ink);
+  border-bottom-color: var(--accent);
+}
+
+/* ── TAB PANELS ── */
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ── LIST VIEW ── */
+.list-container {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 32px 24px 0;
+}
+.list-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.list-count {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--ink-mute);
+}
+.btn-reload {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: none;
+  border: 1px solid var(--line-solid);
+  border-radius: var(--radius);
+  color: var(--ink-mute);
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: color 120ms, border-color 120ms;
+}
+.btn-reload:hover { color: var(--ink); border-color: var(--accent); }
+
+.list-loading,
+.list-error {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  padding: 24px 0;
+  text-align: center;
+}
+.list-loading { color: var(--ink-mute); }
+.list-error   { color: var(--c-system); }
+
+/* ── WORK ROW ── */
+.work-row {
+  border-bottom: 1px solid var(--line-solid);
+  transition: background 120ms ease;
+}
+.work-row:first-child { border-top: 1px solid var(--line-solid); }
+.work-row:hover > .work-row-main { background: rgba(26,26,26,0.025); }
+
+.work-row-main {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 0;
+  transition: background 120ms ease;
+}
+
+/* Thumbnail */
+.work-thumb {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius);
+  flex-shrink: 0;
+  object-fit: cover;
+  display: block;
+}
+.work-thumb-placeholder {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 16px;
+  color: rgba(255,255,255,0.75);
+  opacity: 0.75;
+}
+
+/* Middle info */
+.work-info {
+  flex: 1;
+  min-width: 0;
+}
+.work-title {
+  font-family: "Noto Sans JP", sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 4px;
+}
+.work-meta {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: var(--ink-mute);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.work-meta-dot {
+  margin: 0 5px;
+  opacity: 0.4;
+}
+
+/* Action buttons */
+.work-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.btn-edit,
+.btn-delete {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  background: none;
+  border: 1px solid var(--line-solid);
+  border-radius: var(--radius);
+  padding: 4px 9px;
+  cursor: pointer;
+  transition: color 120ms, border-color 120ms, background 120ms;
+  white-space: nowrap;
+}
+.btn-edit  { color: var(--ink-mute); }
+.btn-edit:hover  { color: var(--ink); border-color: var(--accent); }
+.btn-delete { color: var(--ink-mute); }
+.btn-delete:hover { color: #C0392B; border-color: #C0392B; background: rgba(192,57,43,0.05); }
+
+/* ── INLINE EDIT PANEL ── */
+.work-edit-panel {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 300ms ease-out;
+  background: rgba(152,135,113,0.04);
+  border-top: 1px solid transparent;
+}
+.work-edit-panel.open {
+  max-height: 600px;
+  border-top-color: var(--line-solid);
+}
+.work-edit-inner {
+  padding: 18px 0 18px 70px; /* 56px thumb + 14px gap */
+}
+.edit-field {
+  margin-bottom: 14px;
+}
+.edit-field label {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  margin-bottom: 6px;
+  display: block;
+}
+.edit-field input[type="text"],
+.edit-field input[type="date"],
+.edit-field select,
+.edit-field textarea {
+  width: 100%;
+  background: var(--bg-card);
+  border: 1px solid var(--line-solid);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  font-family: "Noto Sans JP", sans-serif;
+  font-size: 14px;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.edit-field input[type="text"]:focus,
+.edit-field input[type="date"]:focus,
+.edit-field select:focus,
+.edit-field textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(152,135,113,0.18);
+}
+.edit-field textarea {
+  resize: vertical;
+  min-height: 80px;
+  line-height: 1.65;
+}
+.edit-field select {
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M0 0l6 8 6-8z' fill='%23988771'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 28px;
+}
+.edit-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 4px;
+}
+.btn-save {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  background: var(--ink);
+  color: var(--bg);
+  border: none;
+  border-radius: var(--radius);
+  padding: 8px 18px;
+  cursor: pointer;
+  transition: opacity 150ms ease;
+}
+.btn-save:hover    { opacity: 0.82; }
+.btn-save:disabled { opacity: 0.35; cursor: not-allowed; }
+.btn-cancel {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  background: none;
+  border: 1px solid var(--line-solid);
+  border-radius: var(--radius);
+  color: var(--ink-mute);
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: color 120ms, border-color 120ms;
+}
+.btn-cancel:hover { color: var(--ink); border-color: var(--accent); }
+.edit-error {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--c-system);
+  margin-left: 10px;
+}
+
+@media (max-width: 480px) {
+  .list-container { padding: 24px 16px 0; }
+  .work-edit-inner { padding-left: 0; }
+  .tab-bar { padding: 0 16px; }
+}
 </style>
 </head>
 <body>
 
 <header class="admin-header">
   <div class="admin-wordmark">L3</div>
-  <span class="admin-subtitle">投稿管理</span>
+  <span class="admin-subtitle">管理</span>
   <a href="/" class="admin-back">← archive</a>
 </header>
 
+<!-- ── TAB BAR ── -->
+<nav class="tab-bar" role="tablist">
+  <button class="tab-btn" role="tab" aria-selected="true"  aria-controls="panel-post"  id="tab-post">投稿</button>
+  <button class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-list"  id="tab-list">一覧</button>
+</nav>
+
+<!-- ── TAB: 投稿 ── -->
+<div class="tab-panel active" id="panel-post" role="tabpanel" aria-labelledby="tab-post">
 <main class="container">
 
   <!-- ─────────────────── TOKEN ─────────────────── -->
@@ -647,6 +940,20 @@ select {
 
   </form>
 </main>
+</div><!-- /panel-post -->
+
+<!-- ── TAB: 一覧 ── -->
+<div class="tab-panel" id="panel-list" role="tabpanel" aria-labelledby="tab-list">
+  <div class="list-container">
+    <div class="list-toolbar">
+      <span class="list-count" id="list-count">— 件</span>
+      <button class="btn-reload" id="btn-reload">再読込</button>
+    </div>
+    <div id="list-body">
+      <div class="list-loading">読み込み中…</div>
+    </div>
+  </div>
+</div><!-- /panel-list -->
 
 <div id="toast"></div>
 
@@ -974,6 +1281,306 @@ function resetForm() {
 
 /* ── Init ── */
 loadToken();
+
+/* ==========================================================================
+   TAB SWITCHING
+   ========================================================================== */
+const tabs   = document.querySelectorAll('.tab-btn');
+const panels = document.querySelectorAll('.tab-panel');
+
+tabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    tabs.forEach(t => t.setAttribute('aria-selected', 'false'));
+    panels.forEach(p => p.classList.remove('active'));
+
+    tab.setAttribute('aria-selected', 'true');
+    const panelId = tab.getAttribute('aria-controls');
+    document.getElementById(panelId).classList.add('active');
+
+    /* Lazy-load list when switching to 一覧 tab */
+    if (panelId === 'panel-list') loadList();
+  });
+});
+
+/* ==========================================================================
+   LIST VIEW
+   ========================================================================== */
+
+/* Theme colors for placeholder squares */
+const THEME_COLORS = {
+  nature:     '#87A96B',
+  system:     '#D97A4A',
+  education:  '#E4C26F',
+  music:      '#8C7DB0',
+  philosophy: '#4A6374',
+};
+const THEME_LABELS = {
+  nature:     '山・自然',
+  system:     '仕組み・AI',
+  education:  '教育・子ども',
+  music:      '音楽・即興',
+  philosophy: '哲学・生き方',
+};
+const TYPE_GLYPHS = { text: '文', photo: '写', video: '動', audio: '音' };
+const VALID_THEMES = ['nature', 'system', 'education', 'music', 'philosophy'];
+
+let _listData = [];
+
+async function loadList() {
+  const body    = document.getElementById('list-body');
+  const counter = document.getElementById('list-count');
+  body.innerHTML = '<div class="list-loading">読み込み中…</div>';
+  counter.textContent = '— 件';
+
+  try {
+    const res = await fetch('/api/content');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    _listData = await res.json();
+    counter.textContent = `${_listData.length} 件`;
+    renderList(_listData);
+  } catch (err) {
+    body.innerHTML = `<div class="list-error">読み込みエラー: ${escHtml(err.message)}</div>`;
+  }
+}
+
+function renderList(entries) {
+  const body = document.getElementById('list-body');
+  if (!entries.length) {
+    body.innerHTML = '<div class="list-loading">投稿がありません</div>';
+    return;
+  }
+  body.innerHTML = '';
+  entries.forEach(entry => body.appendChild(buildRow(entry)));
+}
+
+function buildRow(entry) {
+  const row = document.createElement('div');
+  row.className = 'work-row';
+  row.dataset.id = entry.id;
+
+  /* ── Thumbnail ── */
+  let thumbHtml;
+  if (entry.mediaType === 'photo' && entry.mediaKey) {
+    thumbHtml = `<img class="work-thumb" src="/media/${escHtml(entry.mediaKey)}" alt="${escHtml(entry.title)}" loading="lazy">`;
+  } else {
+    const color = THEME_COLORS[entry.themes?.[0]] || '#988771';
+    const glyph = TYPE_GLYPHS[entry.mediaType] || '?';
+    thumbHtml = `<div class="work-thumb-placeholder" style="background:${color};">${glyph}</div>`;
+  }
+
+  /* ── Meta line ── */
+  const themeStr = (entry.themes || []).map(t => THEME_LABELS[t] || t).join(' / ');
+  const metaHtml = `${escHtml(entry.date || '')}<span class="work-meta-dot">·</span>${escHtml(entry.mediaType || '')}<span class="work-meta-dot">·</span>${escHtml(themeStr)}`;
+
+  /* ── Row main ── */
+  row.innerHTML = `
+    <div class="work-row-main">
+      ${thumbHtml}
+      <div class="work-info">
+        <div class="work-title">${escHtml(entry.title || '(無題)')}</div>
+        <div class="work-meta">${metaHtml}</div>
+      </div>
+      <div class="work-actions">
+        <button class="btn-edit" type="button" aria-label="編集: ${escHtml(entry.title || '')}">編集</button>
+        <button class="btn-delete" type="button" aria-label="削除: ${escHtml(entry.title || '')}">削除</button>
+      </div>
+    </div>
+    <div class="work-edit-panel" id="edit-panel-${escHtml(entry.id)}">
+      ${buildEditPanelHtml(entry)}
+    </div>`;
+
+  /* Bind edit toggle */
+  row.querySelector('.btn-edit').addEventListener('click', () => toggleEditPanel(entry.id));
+
+  /* Bind delete */
+  row.querySelector('.btn-delete').addEventListener('click', () => deleteEntry(entry.id, row));
+
+  /* Bind save / cancel inside panel */
+  const panel = row.querySelector('.work-edit-panel');
+  panel.querySelector('.btn-save').addEventListener('click',   () => saveEntry(entry.id, panel));
+  panel.querySelector('.btn-cancel').addEventListener('click', () => closeEditPanel(entry.id));
+
+  return row;
+}
+
+function buildEditPanelHtml(entry) {
+  /* Theme checkboxes */
+  const themeCheckboxes = VALID_THEMES.map(t => {
+    const checked = entry.themes?.includes(t) ? 'checked' : '';
+    return `<label class="checkbox-label" style="font-size:12px;padding:4px 10px 4px 7px;">
+      <input type="checkbox" value="${t}" ${checked} style="appearance:none;-webkit-appearance:none;width:0;height:0;margin:0;padding:0;border:none;position:absolute;">
+      <span class="theme-dot" style="background:${THEME_COLORS[t]};"></span>
+      ${escHtml(THEME_LABELS[t])}
+    </label>`;
+  }).join('');
+
+  /* Body textarea only for text media (photo/audio/video have captions but less critical — show for all non-photo/audio/video would be confusing; per spec: show if mediaType is not photo/audio/video) */
+  const showBody = !['photo', 'audio', 'video'].includes(entry.mediaType);
+  const bodyField = showBody ? `
+    <div class="edit-field">
+      <label>BODY</label>
+      <textarea class="ep-body" placeholder="本文">${escHtml(entry.body || '')}</textarea>
+    </div>` : '';
+
+  return `
+    <div class="work-edit-inner">
+      <div class="edit-field">
+        <label>TITLE</label>
+        <input type="text" class="ep-title" value="${escAttr(entry.title || '')}">
+      </div>
+      <div class="edit-field">
+        <label>DATE</label>
+        <input type="date" class="ep-date" value="${escAttr(entry.date || '')}">
+      </div>
+      <div class="edit-field">
+        <label>THEMES</label>
+        <div class="checkbox-group ep-themes">${themeCheckboxes}</div>
+      </div>
+      ${bodyField}
+      <div class="edit-field">
+        <label>SIZE</label>
+        <select class="ep-size">
+          <option value="S" ${entry.size === 'S' ? 'selected' : ''}>S — small</option>
+          <option value="M" ${entry.size === 'M' ? 'selected' : ''}>M — standard</option>
+          <option value="L" ${entry.size === 'L' ? 'selected' : ''}>L — hero</option>
+        </select>
+      </div>
+      <div class="edit-actions">
+        <button class="btn-save" type="button">保存</button>
+        <button class="btn-cancel" type="button">キャンセル</button>
+        <span class="edit-error" style="display:none;"></span>
+      </div>
+    </div>`;
+}
+
+function toggleEditPanel(id) {
+  const panel = document.getElementById(`edit-panel-${id}`);
+  if (!panel) return;
+  const isOpen = panel.classList.contains('open');
+  if (isOpen) {
+    closeEditPanel(id);
+  } else {
+    panel.classList.add('open');
+    /* Update btn-edit label */
+    const row = panel.closest('.work-row');
+    if (row) row.querySelector('.btn-edit').textContent = '閉じる';
+  }
+}
+
+function closeEditPanel(id) {
+  const panel = document.getElementById(`edit-panel-${id}`);
+  if (!panel) return;
+  panel.classList.remove('open');
+  const row = panel.closest('.work-row');
+  if (row) row.querySelector('.btn-edit').textContent = '編集';
+}
+
+async function saveEntry(id, panel) {
+  const token = tokenInput.value.trim();
+  if (!token) { showEditError(panel, 'トークンが未入力です'); return; }
+  if (!/^[\x21-\x7E]+$/.test(token)) { showEditError(panel, 'トークンに無効な文字が含まれています'); return; }
+
+  const title  = panel.querySelector('.ep-title')?.value.trim();
+  const date   = panel.querySelector('.ep-date')?.value.trim();
+  const themes = [...panel.querySelectorAll('.ep-themes input:checked')].map(c => c.value);
+  const bodyEl = panel.querySelector('.ep-body');
+  const size   = panel.querySelector('.ep-size')?.value;
+
+  if (!title)          { showEditError(panel, 'タイトルを入力してください'); return; }
+  if (!date)           { showEditError(panel, '日付を選択してください'); return; }
+  if (!themes.length)  { showEditError(panel, 'テーマを1つ以上選択してください'); return; }
+
+  const patch = { title, date, themes, size };
+  if (bodyEl) patch.body = bodyEl.value.trim() || null;
+
+  const saveBtn = panel.querySelector('.btn-save');
+  saveBtn.disabled = true;
+  hideEditError(panel);
+
+  try {
+    const res = await fetch(`/api/posts/${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(patch),
+    });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || `HTTP ${res.status}`);
+
+    /* Update in-memory list and re-render row */
+    const idx = _listData.findIndex(e => e.id === id);
+    if (idx !== -1) {
+      _listData[idx] = data.entry;
+      const oldRow = document.querySelector(`.work-row[data-id="${id}"]`);
+      if (oldRow) {
+        const newRow = buildRow(data.entry);
+        oldRow.replaceWith(newRow);
+      }
+    }
+    document.getElementById('list-count').textContent = `${_listData.length} 件`;
+    showToast('保存しました');
+  } catch (err) {
+    showEditError(panel, err.message || '保存に失敗しました');
+  } finally {
+    /* saveBtn may be gone after replaceWith; guard */
+    if (saveBtn.isConnected) saveBtn.disabled = false;
+  }
+}
+
+async function deleteEntry(id, row) {
+  const token = tokenInput.value.trim();
+  if (!token) { showToast('トークンが未入力です', true); return; }
+  if (!/^[\x21-\x7E]+$/.test(token)) { showToast('トークンに無効な文字が含まれています', true); return; }
+
+  if (!confirm('この作品を削除しますか？')) return;
+
+  try {
+    const res = await fetch(`/api/posts/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${token}` },
+    });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || `HTTP ${res.status}`);
+
+    /* Remove from DOM and in-memory list */
+    row.remove();
+    _listData = _listData.filter(e => e.id !== id);
+    document.getElementById('list-count').textContent = `${_listData.length} 件`;
+    if (!_listData.length) {
+      document.getElementById('list-body').innerHTML = '<div class="list-loading">投稿がありません</div>';
+    }
+    showToast('削除しました');
+  } catch (err) {
+    showToast(err.message || '削除に失敗しました', true);
+  }
+}
+
+function showEditError(panel, msg) {
+  const el = panel.querySelector('.edit-error');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.display = 'inline';
+}
+function hideEditError(panel) {
+  const el = panel.querySelector('.edit-error');
+  if (el) el.style.display = 'none';
+}
+
+/* ── HTML escape helpers ── */
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+function escAttr(str) { return escHtml(str); }
+
+/* Reload button */
+document.getElementById('btn-reload').addEventListener('click', loadList);
 </script>
 </body>
 </html>

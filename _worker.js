@@ -29,6 +29,14 @@ export default {
       return handleUpload(request, env);
     }
 
+    /* ── /api/posts/:id ── */
+    const postsMatch = path.match(/^\/api\/posts\/([^/]+)$/);
+    if (postsMatch) {
+      const id = postsMatch[1];
+      if (request.method === 'DELETE') return handleDeletePost(request, env, id);
+      if (request.method === 'PATCH')  return handlePatchPost(request, env, id);
+    }
+
     /* ── /media/<key> ── */
     if (path.startsWith('/media/')) {
       return handleMedia(path, env);
@@ -303,7 +311,7 @@ const INITIAL_CONTENT = [
    ========================================================================== */
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Methods': 'GET, POST, PATCH, DELETE, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
@@ -486,6 +494,182 @@ async function handleUpload(request, env) {
 
   return corsResponse(JSON.stringify({ ok: true, id: newId, mediaKey }), {
     status: 201,
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
+
+/* ==========================================================================
+   DELETE /api/posts/:id
+   Auth: Authorization: Bearer <ADMIN_TOKEN>
+   Removes the entry from content.json; also deletes the media file from R2
+   if the entry has a mediaKey.
+   ========================================================================== */
+async function handleDeletePost(request, env, id) {
+  /* ── Auth check ── */
+  const authHeader = request.headers.get('Authorization') || '';
+  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
+  if (!env.ADMIN_TOKEN || token !== env.ADMIN_TOKEN) {
+    return corsResponse(JSON.stringify({ ok: false, error: 'Unauthorized' }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  /* ── Load content.json ── */
+  let entries;
+  try {
+    const obj = await env.MEDIA.get('content.json');
+    entries = obj ? JSON.parse(await obj.text()) : [...INITIAL_CONTENT];
+  } catch (err) {
+    return corsResponse(JSON.stringify({ ok: false, error: 'Failed to read content' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  const idx = entries.findIndex(e => e.id === id);
+  if (idx === -1) {
+    return corsResponse(JSON.stringify({ ok: false, error: 'Not found' }), {
+      status: 404,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  const entry = entries[idx];
+
+  /* ── Delete media file from R2 if present ── */
+  if (entry.mediaKey) {
+    try {
+      await env.MEDIA.delete(`media/${entry.mediaKey}`);
+    } catch (err) {
+      console.error('R2 media delete error (non-fatal):', err);
+      /* Non-fatal: continue to remove metadata even if file delete fails */
+    }
+  }
+
+  /* ── Remove entry and write back ── */
+  entries.splice(idx, 1);
+  try {
+    await env.MEDIA.put('content.json', JSON.stringify(entries), {
+      httpMetadata: { contentType: 'application/json' },
+    });
+  } catch (err) {
+    return corsResponse(JSON.stringify({ ok: false, error: 'Failed to save content' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  return corsResponse(JSON.stringify({ ok: true, id }), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
+
+/* ==========================================================================
+   PATCH /api/posts/:id
+   Auth: Authorization: Bearer <ADMIN_TOKEN>
+   Accepts JSON body with any subset of: title, date, themes, body, size.
+   Immutable fields (id, createdAt, mediaType, mediaKey) are silently ignored.
+   ========================================================================== */
+async function handlePatchPost(request, env, id) {
+  /* ── Auth check ── */
+  const authHeader = request.headers.get('Authorization') || '';
+  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
+  if (!env.ADMIN_TOKEN || token !== env.ADMIN_TOKEN) {
+    return corsResponse(JSON.stringify({ ok: false, error: 'Unauthorized' }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  /* ── Parse JSON body ── */
+  let patch;
+  try {
+    patch = await request.json();
+  } catch (err) {
+    return corsResponse(JSON.stringify({ ok: false, error: 'Invalid JSON body' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  /* ── Validate patch fields ── */
+  const validThemes = ['nature', 'system', 'education', 'music', 'philosophy'];
+  const validSizes  = ['S', 'M', 'L'];
+  const dateRe      = /^\d{4}-\d{2}-\d{2}$/;
+
+  if ('title' in patch && (typeof patch.title !== 'string' || !patch.title.trim())) {
+    return corsResponse(JSON.stringify({ ok: false, error: 'title must be a non-empty string' }), {
+      status: 400, headers: { 'Content-Type': 'application/json' },
+    });
+  }
+  if ('date' in patch && !dateRe.test(patch.date)) {
+    return corsResponse(JSON.stringify({ ok: false, error: 'date must match YYYY-MM-DD' }), {
+      status: 400, headers: { 'Content-Type': 'application/json' },
+    });
+  }
+  if ('themes' in patch) {
+    if (!Array.isArray(patch.themes) || patch.themes.length === 0) {
+      return corsResponse(JSON.stringify({ ok: false, error: 'themes must be a non-empty array' }), {
+        status: 400, headers: { 'Content-Type': 'application/json' },
+      });
+    }
+    const bad = patch.themes.find(t => !validThemes.includes(t));
+    if (bad) {
+      return corsResponse(JSON.stringify({ ok: false, error: `Unknown theme: ${bad}` }), {
+        status: 400, headers: { 'Content-Type': 'application/json' },
+      });
+    }
+  }
+  if ('size' in patch && !validSizes.includes(patch.size)) {
+    return corsResponse(JSON.stringify({ ok: false, error: 'size must be S, M or L' }), {
+      status: 400, headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  /* ── Load content.json ── */
+  let entries;
+  try {
+    const obj = await env.MEDIA.get('content.json');
+    entries = obj ? JSON.parse(await obj.text()) : [...INITIAL_CONTENT];
+  } catch (err) {
+    return corsResponse(JSON.stringify({ ok: false, error: 'Failed to read content' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  const idx = entries.findIndex(e => e.id === id);
+  if (idx === -1) {
+    return corsResponse(JSON.stringify({ ok: false, error: 'Not found' }), {
+      status: 404,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  /* ── Merge allowed fields only ── */
+  const allowed = ['title', 'date', 'themes', 'body', 'size'];
+  const updated  = { ...entries[idx] };
+  for (const key of allowed) {
+    if (key in patch) updated[key] = key === 'title' ? patch[key].trim() : patch[key];
+  }
+  entries[idx] = updated;
+
+  /* ── Write back ── */
+  try {
+    await env.MEDIA.put('content.json', JSON.stringify(entries), {
+      httpMetadata: { contentType: 'application/json' },
+    });
+  } catch (err) {
+    return corsResponse(JSON.stringify({ ok: false, error: 'Failed to save content' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  return corsResponse(JSON.stringify({ ok: true, entry: updated }), {
+    status: 200,
     headers: { 'Content-Type': 'application/json' },
   });
 }
