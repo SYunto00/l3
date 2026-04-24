@@ -216,6 +216,36 @@ header {
   clip-path: circle(0% at 0% 50%);
   filter: blur(8px);
   /* geometry (left/top) set via JS */
+  /* Task 7: colored border + elevation shadow (color set via --accent-chip JS) */
+  border: 2px solid var(--accent-chip, var(--accent, #988771));
+  box-shadow: 0 12px 40px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.08);
+}
+
+/* Task 7: top accent bar (4px) using chip color */
+#preview::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 6px; /* leave room for accent strip */
+  right: 0;
+  height: 4px;
+  background: var(--accent-chip, var(--accent, #988771));
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Task 6: mobile preview backdrop */
+#preview-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.25);
+  z-index: 198; /* below #preview (200) */
+  pointer-events: none;
+}
+#preview-backdrop.active {
+  display: block;
+  pointer-events: auto;
 }
 #preview.blooming {
   clip-path: circle(180% at 0% 50%);
@@ -1143,6 +1173,9 @@ body.is-scrolling .chip { pointer-events: none; }
 <!-- Change A: color bridge strip between chip and preview panel -->
 <div id="preview-bridge"></div>
 
+<!-- Task 6: mobile backdrop — dim behind preview on mobile -->
+<div id="preview-backdrop"></div>
+
 <!-- Hover preview — Decision 2 β: clip-path reveal from left, 6px accent strip -->
 <div id="preview">
   <div id="preview-accent"></div>
@@ -1629,6 +1662,9 @@ function onEnter(chip, el, x, y, chipW, chipH, placedIdx) {
   const chipColor = getChipDisplayColor(chip.theme);
   prevAccent.style.background = chipColor;
 
+  /* Task 7: set chip color as CSS variable for border + top bar */
+  prevPanel.style.setProperty('--accent-chip', chipColor);
+
   /* compute panel position */
   const pw  = 280;
   const ph  = 340;
@@ -1636,12 +1672,33 @@ function onEnter(chip, el, x, y, chipW, chipH, placedIdx) {
   const vw  = window.innerWidth;
   const vh  = window.innerHeight;
 
-  let finalLeft = cr.right + 16;
-  if (finalLeft + pw > vw - 8) finalLeft = cr.left - pw - 16;
-  finalLeft = Math.max(8, Math.min(finalLeft, vw - pw - 8));
+  /* Task 6: mobile → fixed center; desktop → near chip */
+  const isMobilePreview = vw <= 768;
+  const backdropEl = document.getElementById('preview-backdrop');
 
-  let finalTop = cr.top + cr.height/2 - ph/2;
-  finalTop = Math.max(80, Math.min(finalTop, vh - ph - 8));
+  if (isMobilePreview) {
+    prevPanel.style.position  = 'fixed';
+    prevPanel.style.left      = '50%';
+    prevPanel.style.top       = '50%';
+    prevPanel.style.transform = 'translate(-50%, -50%)';
+    prevPanel.style.width     = 'min(360px, 90vw)';
+    if (backdropEl) backdropEl.classList.add('active');
+  } else {
+    prevPanel.style.position  = '';
+    prevPanel.style.transform = '';
+    prevPanel.style.width     = '';
+    if (backdropEl) backdropEl.classList.remove('active');
+
+    let finalLeft = cr.right + 16;
+    if (finalLeft + pw > vw - 8) finalLeft = cr.left - pw - 16;
+    finalLeft = Math.max(8, Math.min(finalLeft, vw - pw - 8));
+
+    let finalTop = cr.top + cr.height/2 - ph/2;
+    finalTop = Math.max(80, Math.min(finalTop, vh - ph - 8));
+
+    prevPanel.style.left = finalLeft + 'px';
+    prevPanel.style.top  = finalTop  + 'px';
+  }
 
   /* clear any pending retract */
   if (_previewRetractTimer) { clearTimeout(_previewRetractTimer); _previewRetractTimer = null; }
@@ -1659,8 +1716,8 @@ function onEnter(chip, el, x, y, chipW, chipH, placedIdx) {
   prevPanel.style.transition = 'none';
   prevPanel.style.clipPath   = 'circle(0% at 0% 50%)';
   prevPanel.style.filter     = 'blur(8px)';
-  prevPanel.style.left       = finalLeft + 'px';
-  prevPanel.style.top        = finalTop  + 'px';
+  /* left/top already set in the positioning block above (desktop only);
+     mobile uses transform:translate(-50%,-50%) — no additional left/top needed */
   void prevPanel.offsetWidth; /* force reflow to commit start state */
 
   setTimeout(() => {
@@ -1688,6 +1745,10 @@ function onLeave() {
 
   bridgeEl.classList.remove('visible');
   connEl.classList.remove('visible');
+
+  /* Task 6: dismiss mobile backdrop */
+  const backdropEl = document.getElementById('preview-backdrop');
+  if (backdropEl) backdropEl.classList.remove('active');
 
   if (_previewContentTimer) { clearTimeout(_previewContentTimer); _previewContentTimer = null; }
 
@@ -2215,12 +2276,9 @@ function buildDetailContent(chip, idx) {
   /* ── white body area ── */
   detailBody.innerHTML = '';
 
-  /* 3 paragraphs from body field */
-  const paragraphs = [
-    chip.body,
-    chip.body + '　' + chip.body.slice(0, Math.ceil(chip.body.length / 2)),
-    chip.body.slice(Math.floor(chip.body.length / 3)) + '　思考は常に未完成である。',
-  ];
+  /* Split body on double newlines; fall back to whole body as single paragraph */
+  const paragraphs = chip.body.split(/\n\n+/).filter(s => s.trim());
+  if (paragraphs.length === 0) paragraphs.push(chip.body);
 
   const textWrap = document.createElement('div');
   paragraphs.forEach(txt => {
@@ -2979,6 +3037,14 @@ hamburgerBtn.addEventListener('click', () => {
 });
 
 drawerBackdrop.addEventListener('click', closeDrawer);
+
+/* Task 6: preview backdrop tap closes preview */
+document.getElementById('preview-backdrop').addEventListener('click', () => {
+  if (previewOpenForChipId !== null) {
+    onLeave();
+    setTimeout(() => { driftPaused = false; }, 1200);
+  }
+});
 
 /* Close drawer on ESC */
 document.addEventListener('keydown', (e) => {

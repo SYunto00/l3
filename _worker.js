@@ -37,6 +37,13 @@ export default {
       if (request.method === 'PATCH')  return handlePatchPost(request, env, id);
     }
 
+    /* ── /api/posts/:id/media ── */
+    const mediaReplaceMatch = path.match(/^\/api\/posts\/([^/]+)\/media$/);
+    if (mediaReplaceMatch && request.method === 'PUT') {
+      const id = mediaReplaceMatch[1];
+      return handleReplaceMedia(request, env, id);
+    }
+
     /* ── /media/<key> ── */
     if (path.startsWith('/media/')) {
       return handleMedia(path, env);
@@ -311,7 +318,7 @@ const INITIAL_CONTENT = [
    ========================================================================== */
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, PATCH, DELETE, OPTIONS',
+  'Access-Control-Allow-Methods': 'GET, POST, PATCH, DELETE, PUT, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
@@ -702,6 +709,119 @@ async function handleMedia(path, env) {
       'Cache-Control': 'public, max-age=31536000, immutable',
       'ETag': obj.etag || '',
     },
+  });
+}
+
+/* ==========================================================================
+   PUT /api/posts/:id/media
+   Auth: Authorization: Bearer <ADMIN_TOKEN>
+   Body: multipart/form-data with field `file` (required).
+   Replaces the media file for an existing non-text entry.
+   ========================================================================== */
+async function handleReplaceMedia(request, env, id) {
+  /* ── Auth check ── */
+  const authHeader = request.headers.get('Authorization') || '';
+  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
+  if (!env.ADMIN_TOKEN || token !== env.ADMIN_TOKEN) {
+    return corsResponse(JSON.stringify({ ok: false, error: 'Unauthorized' }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  /* ── Load content.json ── */
+  let entries;
+  try {
+    const obj = await env.MEDIA.get('content.json');
+    entries = obj ? JSON.parse(await obj.text()) : [...INITIAL_CONTENT];
+  } catch (err) {
+    return corsResponse(JSON.stringify({ ok: false, error: 'Failed to read content' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  const idx = entries.findIndex(e => e.id === id);
+  if (idx === -1) {
+    return corsResponse(JSON.stringify({ ok: false, error: 'Not found' }), {
+      status: 404,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  const entry = entries[idx];
+  if (entry.mediaType === 'text') {
+    return corsResponse(JSON.stringify({ ok: false, error: 'テキスト投稿にはメディアがありません' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  /* ── Parse multipart form data ── */
+  let formData;
+  try {
+    formData = await request.formData();
+  } catch (err) {
+    return corsResponse(JSON.stringify({ ok: false, error: 'Invalid form data' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  const file = formData.get('file');
+  if (!file || typeof file === 'string') {
+    return corsResponse(JSON.stringify({ ok: false, error: 'file フィールドが必要です' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  /* ── Upload new file to R2 ── */
+  const ext = deriveExtension(file.name, file.type);
+  const newKey = `${crypto.randomUUID()}.${ext}`;
+  const r2Key  = `media/${newKey}`;
+  const fileBuffer = await file.arrayBuffer();
+
+  try {
+    await env.MEDIA.put(r2Key, fileBuffer, {
+      httpMetadata: { contentType: file.type || 'application/octet-stream' },
+    });
+  } catch (err) {
+    console.error('R2 put error:', err);
+    return corsResponse(JSON.stringify({ ok: false, error: 'File upload failed' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  /* ── Delete old media file (non-fatal) ── */
+  const oldKey = entry.mediaKey;
+  if (oldKey) {
+    try {
+      await env.MEDIA.delete(`media/${oldKey}`);
+    } catch (err) {
+      console.error('R2 old media delete error (non-fatal):', err);
+    }
+  }
+
+  /* ── Update entry and write back ── */
+  const updated = { ...entry, mediaKey: newKey };
+  entries[idx] = updated;
+
+  try {
+    await env.MEDIA.put('content.json', JSON.stringify(entries), {
+      httpMetadata: { contentType: 'application/json' },
+    });
+  } catch (err) {
+    return corsResponse(JSON.stringify({ ok: false, error: 'Failed to save content' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  return corsResponse(JSON.stringify({ ok: true, entry: updated }), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' },
   });
 }
 

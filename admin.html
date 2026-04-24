@@ -634,7 +634,7 @@ select {
   border-top: 1px solid transparent;
 }
 .work-edit-panel.open {
-  max-height: 600px;
+  max-height: 960px;
   border-top-color: var(--line-solid);
 }
 .work-edit-inner {
@@ -736,6 +736,68 @@ select {
   .list-container { padding: 24px 16px 0; }
   .work-edit-inner { padding-left: 0; }
   .tab-bar { padding: 0 16px; }
+}
+
+/* ── MEDIA PREVIEW (edit panel) ── */
+.edit-media-preview .media-preview-box {
+  border: 1px solid var(--line-solid);
+  border-radius: var(--radius);
+  overflow: hidden;
+  max-height: 240px;
+  background: var(--bg-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  margin-bottom: 8px;
+}
+.media-preview-box img {
+  max-width: 100%;
+  max-height: 230px;
+  object-fit: contain;
+  display: block;
+}
+.media-preview-box audio {
+  width: 100%;
+}
+.media-preview-box video {
+  max-width: 100%;
+  max-height: 200px;
+  display: block;
+}
+.no-media {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--ink-light);
+  padding: 16px;
+}
+.media-replace-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.btn-replace-media {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: none;
+  border: 1px solid var(--line-solid);
+  border-radius: var(--radius);
+  color: var(--ink-mute);
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: color 120ms, border-color 120ms;
+  white-space: nowrap;
+}
+.btn-replace-media:hover { color: var(--ink); border-color: var(--accent); }
+.media-replace-status {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: var(--c-nature);
 }
 </style>
 </head>
@@ -1400,7 +1462,43 @@ function buildRow(entry) {
   panel.querySelector('.btn-save').addEventListener('click',   () => saveEntry(entry.id, panel));
   panel.querySelector('.btn-cancel').addEventListener('click', () => closeEditPanel(entry.id));
 
+  /* Bind media replace button (non-text entries only) */
+  const replaceBtn = panel.querySelector('.btn-replace-media');
+  if (replaceBtn) {
+    const fileInput = panel.querySelector('.ep-media-file');
+    replaceBtn.addEventListener('click', () => { if (fileInput) fileInput.click(); });
+    if (fileInput) {
+      fileInput.addEventListener('change', () => {
+        const file = fileInput.files[0];
+        if (file) replaceMedia(entry.id, panel, file);
+        fileInput.value = ''; /* reset so same file can be re-selected */
+      });
+    }
+  }
+
   return row;
+}
+
+/* ── Media preview helpers ── */
+function renderMediaPreview(entry) {
+  if (!entry.mediaKey) return '<div class="no-media">メディアなし</div>';
+  if (entry.mediaType === 'photo') {
+    return `<img src="/media/${escHtml(entry.mediaKey)}" alt="${escAttr(entry.title || '')}">`;
+  }
+  if (entry.mediaType === 'audio') {
+    return `<audio controls src="/media/${escHtml(entry.mediaKey)}"></audio>`;
+  }
+  if (entry.mediaType === 'video') {
+    return `<video controls src="/media/${escHtml(entry.mediaKey)}" style="max-width:100%;max-height:200px;"></video>`;
+  }
+  return '<div class="no-media">メディアなし</div>';
+}
+
+function mediaAcceptFor(type) {
+  if (type === 'photo') return 'image/*';
+  if (type === 'audio') return 'audio/*';
+  if (type === 'video') return 'video/*';
+  return '*/*';
 }
 
 function buildEditPanelHtml(entry) {
@@ -1414,16 +1512,29 @@ function buildEditPanelHtml(entry) {
     </label>`;
   }).join('');
 
-  /* Body textarea only for text media (photo/audio/video have captions but less critical — show for all non-photo/audio/video would be confusing; per spec: show if mediaType is not photo/audio/video) */
-  const showBody = !['photo', 'audio', 'video'].includes(entry.mediaType);
-  const bodyField = showBody ? `
+  /* Body / caption textarea — always shown for all media types */
+  const bodyField = `
     <div class="edit-field">
-      <label>BODY</label>
-      <textarea class="ep-body" placeholder="本文">${escHtml(entry.body || '')}</textarea>
-    </div>` : '';
+      <label>BODY / CAPTION</label>
+      <textarea class="ep-body" placeholder="本文・キャプション（任意）">${escHtml(entry.body || '')}</textarea>
+    </div>`;
+
+  const mediaPreviewHtml = entry.mediaType === 'text' ? '' : `
+    <div class="edit-field edit-media-preview">
+      <label>MEDIA</label>
+      <div class="media-preview-box">
+        ${renderMediaPreview(entry)}
+      </div>
+      <div class="media-replace-row">
+        <input type="file" class="ep-media-file" style="display:none" accept="${mediaAcceptFor(entry.mediaType)}">
+        <button type="button" class="btn-replace-media">メディアを差し替え</button>
+        <span class="media-replace-status"></span>
+      </div>
+    </div>`;
 
   return `
     <div class="work-edit-inner">
+      ${mediaPreviewHtml}
       <div class="edit-field">
         <label>TITLE</label>
         <input type="text" class="ep-title" value="${escAttr(entry.title || '')}">
@@ -1476,8 +1587,14 @@ function closeEditPanel(id) {
 }
 
 async function saveEntry(id, panel) {
-  const token = tokenInput.value.trim();
-  if (!token) { showEditError(panel, 'トークンが未入力です'); return; }
+  const token = getActiveToken();
+  if (!token) {
+    showEditError(panel, 'トークン未入力 — 投稿タブで設定してください');
+    /* auto-switch to 投稿 tab and focus token input */
+    document.getElementById('tab-post').click();
+    setTimeout(() => { tokenInput.focus(); tokenInput.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 60);
+    return;
+  }
   if (!/^[\x21-\x7E]+$/.test(token)) { showEditError(panel, 'トークンに無効な文字が含まれています'); return; }
 
   const title  = panel.querySelector('.ep-title')?.value.trim();
@@ -1491,7 +1608,7 @@ async function saveEntry(id, panel) {
   if (!themes.length)  { showEditError(panel, 'テーマを1つ以上選択してください'); return; }
 
   const patch = { title, date, themes, size };
-  if (bodyEl) patch.body = bodyEl.value.trim() || null;
+  patch.body = bodyEl ? (bodyEl.value.trim() || null) : null;
 
   const saveBtn = panel.querySelector('.btn-save');
   saveBtn.disabled = true;
@@ -1530,8 +1647,13 @@ async function saveEntry(id, panel) {
 }
 
 async function deleteEntry(id, row) {
-  const token = tokenInput.value.trim();
-  if (!token) { showToast('トークンが未入力です', true); return; }
+  const token = getActiveToken();
+  if (!token) {
+    showToast('トークン未入力 — 投稿タブで設定してください', true);
+    document.getElementById('tab-post').click();
+    setTimeout(() => { tokenInput.focus(); tokenInput.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 60);
+    return;
+  }
   if (!/^[\x21-\x7E]+$/.test(token)) { showToast('トークンに無効な文字が含まれています', true); return; }
 
   if (!confirm('この作品を削除しますか？')) return;
@@ -1557,6 +1679,75 @@ async function deleteEntry(id, row) {
   }
 }
 
+async function replaceMedia(id, panel, file) {
+  const token = getActiveToken();
+  if (!token) {
+    const statusEl = panel.querySelector('.media-replace-status');
+    if (statusEl) { statusEl.style.color = 'var(--c-system)'; statusEl.textContent = 'トークン未入力'; }
+    document.getElementById('tab-post').click();
+    setTimeout(() => { tokenInput.focus(); tokenInput.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 60);
+    return;
+  }
+  if (!/^[\x21-\x7E]+$/.test(token)) {
+    const statusEl = panel.querySelector('.media-replace-status');
+    if (statusEl) { statusEl.style.color = 'var(--c-system)'; statusEl.textContent = 'トークンに無効な文字が含まれています'; }
+    return;
+  }
+
+  const statusEl = panel.querySelector('.media-replace-status');
+  const replaceBtn = panel.querySelector('.btn-replace-media');
+  if (replaceBtn) replaceBtn.disabled = true;
+  if (statusEl) { statusEl.style.color = 'var(--ink-mute)'; statusEl.textContent = '0%'; }
+
+  const fd = new FormData();
+  fd.append('file', file);
+
+  try {
+    const data = await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('PUT', `/api/posts/${encodeURIComponent(id)}/media`);
+      xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+      xhr.upload.addEventListener('progress', (e) => {
+        if (e.lengthComputable && statusEl) {
+          statusEl.textContent = Math.round((e.loaded / e.total) * 100) + '%';
+        }
+      });
+      xhr.addEventListener('load', () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try { resolve(JSON.parse(xhr.responseText)); } catch (_) { resolve({}); }
+        } else {
+          let msg = `エラー ${xhr.status}`;
+          try { const b = JSON.parse(xhr.responseText); if (b.error) msg = b.error; } catch (_) {}
+          reject(new Error(msg));
+        }
+      });
+      xhr.addEventListener('error',  () => reject(new Error('ネットワークエラー')));
+      xhr.addEventListener('abort',  () => reject(new Error('中断されました')));
+      xhr.send(fd);
+    });
+
+    if (!data.ok) throw new Error(data.error || '差し替え失敗');
+
+    /* Update in-memory list */
+    const idx = _listData.findIndex(e => e.id === id);
+    if (idx !== -1 && data.entry) _listData[idx] = data.entry;
+
+    /* Update preview DOM inside the panel */
+    const previewBox = panel.querySelector('.media-preview-box');
+    if (previewBox && data.entry) {
+      previewBox.innerHTML = renderMediaPreview(data.entry);
+    }
+
+    if (statusEl) { statusEl.style.color = 'var(--c-nature)'; statusEl.textContent = '差し替え完了'; }
+    showToast('メディアを差し替えました');
+  } catch (err) {
+    if (statusEl) { statusEl.style.color = 'var(--c-system)'; statusEl.textContent = err.message || '失敗'; }
+    showToast(err.message || 'メディア差し替えに失敗しました', true);
+  } finally {
+    if (replaceBtn && replaceBtn.isConnected) replaceBtn.disabled = false;
+  }
+}
+
 function showEditError(panel, msg) {
   const el = panel.querySelector('.edit-error');
   if (!el) return;
@@ -1566,6 +1757,18 @@ function showEditError(panel, msg) {
 function hideEditError(panel) {
   const el = panel.querySelector('.edit-error');
   if (el) el.style.display = 'none';
+}
+
+/* ── Token retrieval (robust: falls back to localStorage if input is empty) ── */
+function getActiveToken() {
+  const fromInput = (tokenInput.value || '').trim();
+  if (fromInput) return fromInput;
+  const fromStorage = (localStorage.getItem(TOKEN_KEY) || '').trim();
+  if (fromStorage) {
+    tokenInput.value = fromStorage; /* sync back to input */
+    return fromStorage;
+  }
+  return '';
 }
 
 /* ── HTML escape helpers ── */
