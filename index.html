@@ -1283,7 +1283,7 @@ body.is-scrolling .chip { pointer-events: none; }
   cursor: pointer;
   transition: color 200ms, border-color 200ms, background 200ms;
   display: block;
-  margin: 20px auto 0;
+  margin: 8px auto 0;
 }
 .btn-comment-expand:hover {
   color: #1A1A1A;
@@ -2778,10 +2778,10 @@ function buildDetailContent(chip, idx) {
   commentSection.className = 'detail-comments';
   const pickerH = window.innerWidth <= 768 ? 70 : 55;
   commentSection.innerHTML = `
-    <h3 class="detail-comments-title">つぶやき</h3>
+    <h3 class="detail-comments-title">誰かのひとこと</h3>
     <div id="detail-comments-list"></div>
     <div class="detail-comments-form-collapsed">
-      <button id="btn-comment-expand" class="btn-comment-expand" type="button">+ つぶやく</button>
+      <button id="btn-comment-expand" class="btn-comment-expand" type="button">+ あなたのひとこと</button>
     </div>
     <div class="detail-comments-form" id="detail-comments-form" aria-hidden="true">
       <button class="btn-comment-collapse" type="button" id="btn-comment-collapse" aria-label="閉じる">×</button>
