@@ -112,9 +112,23 @@ body{background:var(--wine);color:var(--kinari);font-family:var(--font-min);over
 
 @media (max-width:700px){
   #card{left:12px;bottom:22px}
-  #margin{max-width:58vw;top:9vh}
-  #margin .mq{font-size:11px;line-height:1.9}
-  #margin .mc{font-size:11px}
+  /* スマホ欄外注: 固定下帯（スクラバー上）・全幅・z-index最前面 */
+  #margin{
+    position:fixed;
+    top:auto;bottom:48px;
+    right:0;left:0;
+    max-width:100%;
+    text-align:center;
+    padding:10px 16px 8px;
+    background:rgba(28,11,13,.82);
+    border-top:1px solid rgba(241,236,228,.12);
+    z-index:60;
+    pointer-events:none;
+  }
+  #margin .mq{font-size:12px;line-height:1.8;letter-spacing:.06em;text-align:left}
+  #margin .ms{font-size:11px;text-align:left}
+  #margin .mc{font-size:12px;line-height:1.7;text-align:left}
+  #margin .mt{display:none}
   #thread{font-size:11px;letter-spacing:.1em;white-space:normal;width:88vw}
   .anno{max-width:38vw;white-space:normal}
   .anno[style*="translateX"]{max-width:84vw}
@@ -451,19 +465,67 @@ function frame(now) {
     el.classList.toggle('frozen', isFrozen);
     el.classList.toggle('pre', preEcho && v <= 0.04);
 
-    /* 位置: 右から流入 → 帯内をゆっくり左へ → 死後は左上へ抜ける */
+    /* 位置計算 */
     const span = Math.max(1, w.last - w.first + 1);
     const lifeF = clamp((t - w.first + .6) / (span + 1.2), 0, 1);
-    let x;
+    let x, y, fade = 1;
+
+    if (isMobile) {
+      /* ===== スマホ: 縦フロー（下→自帯→上へ抜ける）・x=帯固定 ===== */
+      /* x: 帯ごとの横位置（黄金比散布）、流れない。左右マージン確保 */
+      const bandX = { hobby: [8, 62], thought: [10, 65], emotion: [6, 60], ops: [5, 72], ritual: [12, 58] };
+      const [xa, xb] = bandX[l] || [8, 62];
+      const rawX = xa + ((w.i * 0.618034) % 1) * (xb - xa);
+      /* 語幅ぶん右端クリップ回避 */
+      const wpct = Math.min(55, w.text.length * sizeOf(w, t) / innerWidth * 100);
+      x = Math.min(rawX, 94 - wpct);
+
+      /* y: 誕生前=108%（画面下）→ 生存中=自帯y → 死後=上へ抜ける */
+      const bandYsp = yOf(w, l); // 帯y%（PC同じSSOT）
+      if (preEcho) {
+        /* 霧の岸: 画面下から少し湧き上がった輪郭 */
+        y = 95 + (w.first - t) * 6;
+      } else if (t < w.first) {
+        y = 108; // 画面外下
+      } else if (l === 'ops' || isFrozen) {
+        /* ops=無風通奏低音: 下帯に固定、死後も上に抜けない */
+        y = isFrozen ? (80 + rnd(w.i, 9) * 8) : bandYsp;
+      } else {
+        y = bandYsp;
+        if (t > w.last + .6 && st !== 'active') { // 死後: 上空へ薄れる
+          const d = clamp((t - w.last - .6) / 1.8, 0, 1);
+          y -= d * 22; fade = 1 - d * .8;
+        }
+      }
+
+      /* 風（縦軸メイン・横はごくわずか） */
+      const noWind = l === 'ops' || isFrozen || preEcho;
+      const amp = noWind ? 0 : windBase * (4 + w.emotion * 7);
+      const ph = rnd(w.i, 1) * 6.283, f1 = .5 + rnd(w.i, 2) * .5;
+      const gust = Math.sin(clock * .13 + ph) * .5 + .5;
+      /* スマホ: 縦揺れを主軸、横はPC比30%のみ */
+      const wx = amp * .3 * (Math.sin(clock * f1 + ph)) * (1 + gust) * wd.dir;
+      const wy = amp * (Math.cos(clock * f1 * .8 + ph) + .4 * Math.cos(clock * f1 * 2.7 + ph * 2)) * (1 + gust)
+               + vel * (noWind ? 0 : -9); // vel縦適用（逆スクロール=下へ戻る）
+      const breathe = noWind ? 1 : 1 + Math.sin(clock * .8 + ph) * .08;
+      let size = sizeOf(w, t);
+      if (l === 'ops') size = Math.min(size, STEPS[2]);
+      const rot = l === 'emotion' ? -1.5 - rnd(w.i, 4) * 1.5 : 0;
+      const weight = 300 + Math.round(w.selfMade * 300);
+      el.style.transform = `translate(${x * innerWidth / 100 + wx}px, ${y * innerHeight / 100 + wy}px)`
+        + ` rotate(${rot}deg) scale(${breathe})`;
+      el.style.fontSize = size + 'px';
+      if (el._wt !== weight) { el.style.fontWeight = weight; el._wt = weight; }
+      el.style.opacity = alphaState * fade * (l === 'ops' ? .62 : 1);
+
+    } else {
+    /* ===== PC: 元の横フロー（1pxも変えない） ===== */
+
+    /* 位置: 右から流入 → 帯内をゆっくり左へ → 死後は左上へ抜ける */
     if (preEcho) x = Math.min(90, 78 + (w.first - t) * 5);   // 霧の中、右奥
     else if (t < w.first) x = 104;
     else x = lerp(80, 18, lifeF) + (rnd(w.i, 7) - .5) * (l === 'ops' ? 46 : 30);
-    if (isMobile && t >= w.first) { // SP右端クリップ回避: 語幅(字数×サイズ)ぶん引き込む
-      const wpct = Math.min(60, w.text.length * sizeOf(w, t) / innerWidth * 100);
-      x = Math.min(x, 94 - wpct);
-    }
-    let y = yOf(w, l);
-    let fade = 1;
+    y = yOf(w, l);
     if (t > w.last + .6 && !isFrozen && st !== 'active') { // 死後: 上空へ薄れる
       const d = clamp((t - w.last - .6) / 1.8, 0, 1);
       y -= d * 9; x -= d * 12; fade = 1 - d * .8;
@@ -490,13 +552,15 @@ function frame(now) {
     if (el._wt !== weight) { el.style.fontWeight = weight; el._wt = weight; }
     el.style.opacity = alphaState * fade * (l === 'ops' ? .62 : 1);
 
-    /* 鋳造演出: 生引用→blur→核語 */
+    } /* end else PC */
+
+    /* 鋳造演出: 生引用→blur→核語（PC/SP共通） */
     if (w.qEl) {
       const bq = smooth(1 - Math.abs(t - w.bornT) / .4);
       w.qEl.style.opacity = bq * .85;
       w.qEl.style.filter = `blur(${(1 - bq) * 4}px)`;
     }
-    /* 朱下線 draw-in（pの純関数=逆走で巻き戻る） */
+    /* 朱下線 draw-in（pの純関数=逆走で巻き戻る）（PC/SP共通） */
     if (w.uEl) w.uEl.style.transform = `scaleX(${clamp((t - w.bornT) * 2.2, 0, 1)})`;
   }
 
