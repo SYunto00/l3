@@ -976,6 +976,19 @@ header {
 #sidebar-about:hover {
   text-decoration: underline;
 }
+#sidebar-kazaokuri {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  color: #988771;
+  cursor: pointer;
+  margin-top: 8px;
+  text-decoration: none;
+  display: block;
+}
+#sidebar-kazaokuri:hover {
+  text-decoration: underline;
+}
 
 /* Decision 3 γ: scroll suppression — pointer-events off on all chips while scrolling */
 body.is-scrolling .chip { pointer-events: none; }
@@ -2257,6 +2270,13 @@ function buildSidebar() {
   about.textContent = 'ABOUT COLORS →';
   about.href = '/about-colors';
   sb.appendChild(about);
+
+  /* 風送り → 言葉の変容ランドスケープ（実験） */
+  const kaza = document.createElement('a');
+  kaza.id = 'sidebar-kazaokuri';
+  kaza.textContent = '風送り →';
+  kaza.href = '/dev/kazaokuri.html';
+  sb.appendChild(kaza);
 }
 
 /* ===================================================================

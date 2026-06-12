@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>風送り | L3</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600&text=-0123456789AGITXaegilmnopry%E2%80%94%E2%80%A6%E3%80%81%E3%80%82%E3%80%85%E3%80%8C%E3%80%8D%E3%80%8E%E3%80%8F%E3%81%84%E3%81%86%E3%81%88%E3%81%8A%E3%81%8B%E3%81%8C%E3%81%8D%E3%81%8E%E3%81%8F%E3%81%91%E3%81%93%E3%81%98%E3%81%99%E3%81%9D%E3%81%9F%E3%81%A3%E3%81%A4%E3%81%A6%E3%81%A7%E3%81%A8%E3%81%A9%E3%81%AA%E3%81%AB%E3%81%AE%E3%81%AF%E3%81%B0%E3%81%B2%E3%81%B3%E3%81%B5%E3%81%B6%E3%81%BE%E3%81%BF%E3%82%81%E3%82%82%E3%82%84%E3%82%86%E3%82%89%E3%82%8A%E3%82%8B%E3%82%8C%E3%82%8F%E3%82%92%E3%82%93%E3%82%A1%E3%82%A2%E3%82%A3%E3%82%A4%E3%82%A6%E3%82%A7%E3%82%A8%E3%82%AB%E3%82%AF%E3%82%B1%E3%82%B3%E3%82%B5%E3%82%B7%E3%82%B9%E3%82%BD%E3%82%BF%E3%83%81%E3%83%83%E3%83%84%E3%83%86%E3%83%87%E3%83%88%E3%83%89%E3%83%8A%E3%83%8B%E3%83%8E%E3%83%93%E3%83%95%E3%83%97%E3%83%9C%E3%83%9E%E3%83%A1%E3%83%A3%E3%83%A4%E3%83%A9%E3%83%AA%E3%83%AB%E3%83%AC%E3%83%AF%E3%83%B3%E3%83%B6%E3%83%BC%E4%B8%89%E4%B8%8B%E4%B8%96%E4%B8%AD%E4%B8%BB%E4%B9%97%E4%BA%94%E4%BA%BA%E4%BB%8B%E4%BB%95%E4%BB%96%E4%BB%A3%E4%BC%9A%E4%BD%95%E4%BD%9C%E4%BE%8B%E4%BF%A1%E5%80%92%E5%83%95%E5%85%AB%E5%85%AD%E5%85%B1%E5%87%BA%E5%88%86%E5%88%87%E5%89%B5%E5%8B%95%E5%8C%96%E5%8F%96%E5%8F%A3%E5%90%88%E5%95%8F%E5%96%84%E5%9B%9B%E5%9C%A7%E5%9D%82%E5%9F%9F%E5%A0%B4%E5%A3%B2%E5%A4%89%E5%A4%9A%E5%AA%92%E5%AD%A6%E5%AE%97%E5%AE%A2%E5%AE%B3%E5%AE%B6%E5%AE%B9%E5%B0%82%E5%B1%9E%E5%B1%B1%E5%B2%B3%E5%B3%A0%E5%B8%B8%E5%B9%B4%E5%BC%B7%E5%BF%83%E6%80%9D%E6%80%A7%E6%82%A9%E6%83%B3%E6%84%8F%E6%84%9F%E6%85%8B%E6%88%A6%E6%89%8B%E6%89%B9%E6%8A%98%E6%92%A4%E6%94%BE%E6%95%99%E6%96%B9%E6%97%A5%E6%99%82%E6%99%AF%E6%9C%88%E6%9C%9D%E6%9E%9C%E6%A0%BC%E6%A3%92%E6%A7%8B%E6%A7%98%E6%A9%8B%E6%B1%BA%E6%B3%81%E6%B3%89%E6%B5%81%E6%B8%A9%E7%82%B9%E7%84%B6%E7%89%A9%E7%8A%B6%E7%8F%BE%E7%94%9F%E7%95%8C%E7%99%BB%E7%9A%84%E7%9B%B2%E7%9B%B8%E7%9E%AC%E7%A4%8E%E7%A4%BE%E7%A5%89%E7%A6%8F%E7%AB%8B%E7%AD%8B%E7%AE%A1%E7%B4%99%E7%B4%B0%E7%B5%84%E7%B5%90%E7%B8%A6%E7%BE%8E%E8%80%85%E8%80%BD%E8%81%96%E8%82%B2%E8%87%AA%E8%91%89%E8%A1%8C%E8%A6%8B%E8%A7%A3%E8%A7%A6%E8%A8%80%E8%A8%88%E8%A8%AD%E8%A9%95%E8%A9%B1%E8%AA%AD%E8%B0%B7%E8%B1%A1%E8%B3%AA%E8%B5%B0%E8%B5%B7%E8%B7%A1%E9%80%80%E9%80%81%E9%80%A0%E9%81%8A%E9%81%93%E9%85%8D%E9%87%8C%E9%87%8E%E9%87%8F%E9%96%80%E9%96%93%E9%9A%9C%E9%A0%98%E9%A1%A7%E9%A2%A8%E9%A3%9F%EF%BC%81%EF%BC%88%EF%BC%89%EF%BC%9D%EF%BC%9F&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Yusei+Magic&text=/0123456789%E2%80%93%E2%80%94%E2%80%A6%E3%80%81%E3%80%82%E3%81%82%E3%81%84%E3%81%86%E3%81%88%E3%81%8A%E3%81%8B%E3%81%8C%E3%81%8D%E3%81%8E%E3%81%8F%E3%81%91%E3%81%93%E3%81%95%E3%81%97%E3%81%99%E3%81%9D%E3%81%9F%E3%81%A0%E3%81%A1%E3%81%A3%E3%81%A4%E3%81%A5%E3%81%A6%E3%81%A7%E3%81%A8%E3%81%AA%E3%81%AB%E3%81%AE%E3%81%AF%E3%81%B2%E3%81%B8%E3%81%BE%E3%81%BF%E3%82%81%E3%82%82%E3%82%83%E3%82%88%E3%82%89%E3%82%8A%E3%82%8B%E3%82%8C%E3%82%8D%E3%82%8F%E3%82%92%E3%82%93%E3%82%A2%E3%82%A6%E3%82%AD%E3%82%AF%E3%82%B8%E3%83%87%E3%83%88%E3%83%89%E3%83%95%E3%83%9E%E3%83%A0%E3%83%A2%E3%83%AB%E3%83%AC%E3%83%AD%E3%83%B3%E3%83%BB%E3%83%BC%E4%B8%80%E4%B8%89%E4%B8%BB%E4%B9%97%E4%BA%8B%E4%BA%A1%E4%BA%BA%E4%BB%8B%E4%BB%96%E4%BC%91%E4%BD%99%E4%BF%82%E4%BF%9D%E4%BF%BA%E5%84%80%E5%85%B1%E5%86%85%E5%86%8D%E5%87%BA%E5%88%97%E5%89%B5%E5%8B%95%E5%8C%96%E5%8D%81%E5%8F%8E%E5%8F%A3%E5%8F%AF%E5%8F%B7%E5%90%8C%E5%91%8A%E5%91%B3%E5%92%8C%E5%93%B2%E5%99%B4%E5%9B%9E%E5%A4%89%E5%A4%9C%E5%A4%A7%E5%A5%AE%E5%A5%BD%E5%A6%99%E5%AA%92%E5%AD%A3%E5%AD%A6%E5%AE%9A%E5%AE%9F%E5%AE%A3%E5%AE%BF%E5%B1%85%E5%BA%8F%E5%BA%A6%E5%BC%8F%E5%BD%99%E5%BE%92%E5%BE%AE%E6%80%9D%E6%82%AA%E6%83%85%E6%83%B3%E6%88%92%E6%89%8B%E6%8A%80%E6%8E%A2%E6%8F%9B%E6%8F%BA%E6%95%B0%E6%95%B4%E6%96%AD%E6%99%AF%E6%9C%80%E6%9C%88%E6%9C%9B%E6%9D%9F%E6%A5%AD%E6%A7%8B%E6%AC%B2%E6%AD%B3%E6%AE%8B%E6%B1%BA%E6%B2%88%E6%B3%81%E6%B5%81%E6%B5%AE%E6%B8%A9%E6%B8%AC%E6%BB%91%E7%82%B9%E7%86%B1%E7%94%9F%E7%95%99%E7%96%B2%E7%99%BD%E7%9A%84%E7%9C%81%E7%9C%A0%E7%9D%A1%E7%A4%8E%E7%A7%B0%E7%AE%A1%E7%AF%80%E7%B4%99%E7%B5%82%E7%B6%BA%E7%BD%AE%E8%80%85%E8%88%88%E8%A1%93%E8%A3%85%E8%A6%B3%E8%A7%92%E8%A8%80%E8%A8%88%E8%A8%98%E8%A8%AD%E8%A8%B1%E8%A9%9E%E8%AA%9E%E8%AD%A6%E8%B3%AA%E8%B6%A3%E8%BB%A2%E8%BC%AA%E9%80%83%E9%80%86%E9%80%9A%E9%80%A0%E9%80%B1%E9%81%94%E9%81%A9%E9%83%AD%E9%85%8D%E9%87%8D%E9%87%8F%E9%8B%B3%E9%8C%B2%E9%96%A2%E9%99%8D%E9%9D%A2%E9%A0%82%E9%A0%AD%E9%A2%A8%E9%A3%BD%E9%A3%BE%E9%AB%98%E9%AD%82%E9%BA%97%EF%BC%81%EF%BC%9F&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@300;400;500&text=-./0123456789AIWabcdefgilmnoprstuw%E2%80%94%E2%80%A6%E3%80%81%E3%80%82%E3%80%8C%E3%80%8D%E3%80%8E%E3%80%8F%E3%80%9C%E3%81%81%E3%81%84%E3%81%86%E3%81%88%E3%81%8B%E3%81%8C%E3%81%8D%E3%81%8E%E3%81%8F%E3%81%90%E3%81%91%E3%81%93%E3%81%95%E3%81%97%E3%81%98%E3%81%99%E3%81%9F%E3%81%A0%E3%81%A1%E3%81%A3%E3%81%A5%E3%81%A6%E3%81%A7%E3%81%A8%E3%81%A9%E3%81%AA%E3%81%AB%E3%81%AD%E3%81%AE%E3%81%AF%E3%81%B8%E3%81%BF%E3%82%80%E3%82%81%E3%82%82%E3%82%83%E3%82%84%E3%82%88%E3%82%89%E3%82%8A%E3%82%8B%E3%82%8C%E3%82%8F%E3%82%92%E3%82%93%E3%82%A1%E3%82%A2%E3%82%A5%E3%82%AF%E3%82%B0%E3%82%B3%E3%82%B7%E3%82%B9%E3%82%BF%E3%83%81%E3%83%83%E3%83%84%E3%83%88%E3%83%89%E3%83%8B%E3%83%8D%E3%83%8F%E3%83%90%E3%83%96%E3%83%97%E3%83%9E%E3%83%A1%E3%83%A2%E3%83%A5%E3%83%A9%E3%83%AA%E3%83%AB%E3%83%AD%E3%83%B3%E3%83%BB%E3%83%BC%E4%B8%8A%E4%B8%8B%E4%B8%A6%E4%B8%AD%E4%B8%BB%E4%B9%97%E4%BA%8B%E4%BA%A1%E4%BA%BA%E4%BB%8A%E4%BB%8B%E4%BB%96%E4%BB%A5%E4%BC%91%E4%BD%95%E4%BD%9C%E4%BE%A1%E4%BF%8A%E4%BF%A1%E5%80%A4%E5%83%95%E5%85%A5%E5%85%B1%E5%86%8D%E5%87%8D%E5%87%BA%E5%88%86%E5%88%97%E5%88%A5%E5%89%8D%E5%89%B5%E5%8B%99%E5%8C%96%E5%8F%A3%E5%90%88%E5%95%8F%E5%9D%82%E5%A0%B4%E5%A1%BE%E5%A3%81%E5%A3%AB%E5%A4%89%E5%A4%9A%E5%A4%A7%E5%AB%8C%E5%AD%A6%E5%AE%B6%E5%AF%BE%E5%B1%B1%E5%B7%A5%E5%B7%B1%E5%B9%A3%E5%B9%B4%E5%BA%95%E5%BA%A6%E5%BC%95%E5%BC%B7%E5%BE%8B%E5%BF%83%E6%80%9D%E6%82%AA%E6%83%B3%E6%84%9F%E6%85%8B%E6%86%B6%E6%88%90%E6%88%BB%E6%89%93%E6%89%95%E6%89%B9%E6%8E%A1%E6%8F%9B%E6%95%99%E6%95%B0%E6%96%87%E6%96%97%E6%96%B9%E6%97%A5%E6%99%82%E6%99%B4%E6%9C%80%E6%9C%9D%E6%9D%90%E6%9D%91%E6%9E%90%E6%9E%9C%E6%A0%A1%E6%A0%BC%E6%A5%AD%E6%A7%8B%E6%AC%A1%E6%AD%A9%E6%B1%82%E6%B6%88%E6%B8%AC%E7%82%B9%E7%89%A9%E7%8A%B6%E7%8F%BE%E7%90%86%E7%94%9F%E7%94%A8%E7%9A%84%E7%9B%AE%E7%A2%BA%E7%A7%81%E7%A8%8B%E7%A8%8E%E7%AE%A1%E7%B4%A0%E7%B4%B9%E7%B5%90%E7%B5%B1%E7%B6%99%E8%80%85%E8%87%AA%E8%A1%8C%E8%A3%85%E8%A6%8B%E8%A6%8F%E8%A6%B3%E8%A7%92%E8%A8%80%E8%A8%98%E8%A9%95%E8%A9%B1%E8%AA%8D%E8%AA%AD%E8%AA%B0%E8%AB%8B%E8%B2%A8%E8%B2%BB%E8%B3%AA%E8%B5%A4%E8%BC%94%E9%80%83%E9%80%A0%E9%80%B1%E9%81%A9%E9%85%8D%E9%87%8E%E9%87%8F%E9%8F%A1%E9%96%80%E9%96%93%E9%A0%82%E9%A1%8D%E9%A2%A8%E9%A3%BE%E9%A7%BF%E9%AD%82%E9%B6%B4%EF%BC%81%EF%BC%88%EF%BC%89%EF%BC%9D%EF%BC%9F&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,400;1,600&display=swap">
+<style>
+:root{
+  --wine:#6a2a2e; --wine-hi:#833537; --wine-dim:#4e1e22; --wine-night:#371316;
+  --kinari:#f1ece4; --kinari-mid:#e8e2d8; --kinari-dim:#d0c8b8;
+  --gold:#b08840; --shu:#b04a3a; --shu-hi:#d97a5e; --ember:#d99a7e;
+  --font-min:"Shippori Mincho","Hiragino Mincho ProN",serif;
+  --font-got:"Zen Kaku Gothic New","Hiragino Kaku Gothic ProN",sans-serif;
+  --font-hand:"Yusei Magic","Hiragino Maru Gothic ProN",cursive;
+  --font-en:"Cormorant Garamond",Georgia,serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:auto}
+body{background:var(--wine);color:var(--kinari);font-family:var(--font-min);overflow-x:hidden}
+#track{height:840vh;position:relative}
+#stage{position:sticky;top:0;height:100vh;overflow:hidden}
+
+/* ===== 背景: 2層固定グラデのopacityクロスフェード + 夜 ===== */
+.bg{position:absolute;inset:0;pointer-events:none}
+#bg-cool{background:linear-gradient(160deg,#5a2226 0%,var(--wine-dim) 60%,#421a1e 100%)}
+#bg-warm{background:linear-gradient(160deg,var(--wine-hi) 0%,var(--wine) 55%,#5c2428 100%)}
+#bg-night{background:radial-gradient(ellipse 120% 90% at 50% 70%,#2e1013 0%,#1f0a0c 60%,#150507 100%)}
+#fog{position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(100deg,transparent 20%,rgba(241,236,228,.085) 45%,rgba(241,236,228,.13) 50%,rgba(241,236,228,.085) 55%,transparent 80%);
+  opacity:0;width:160%;left:-30%}
+
+/* ===== 語 ===== */
+#words{position:absolute;inset:0}
+.w{position:absolute;left:0;top:0;white-space:nowrap;will-change:transform,opacity;
+  line-height:1.25;letter-spacing:.06em;cursor:default;visibility:hidden}
+.w.on{visibility:visible}
+.w-thought{font-family:var(--font-min);color:var(--kinari)}
+.w-hobby{font-family:var(--font-min);font-weight:400;color:var(--kinari-mid)}
+.w-emotion{font-family:var(--font-hand);color:var(--ember)}
+.w-ops{font-family:var(--font-got);font-weight:300;color:var(--kinari-dim);letter-spacing:.12em}
+.w-ritual{font-family:var(--font-hand);color:var(--shu-hi)} /* 昇格: 事務語が肉声になる */
+.w.frozen,.w.pre{color:transparent !important;-webkit-text-stroke:1px rgba(241,236,228,.34)}
+.w.pre{-webkit-text-stroke:1px rgba(241,236,228,.16)}
+.w .quote-birth{position:absolute;left:0;top:-1.6em;font-family:var(--font-got);font-weight:300;
+  font-size:12px;letter-spacing:.08em;color:var(--kinari-dim);white-space:nowrap;pointer-events:none}
+/* 朱下線: 全ページ唯一 */
+.w .shu-line{position:absolute;left:-2%;bottom:-.12em;height:2px;width:104%;background:var(--shu-hi);
+  transform-origin:left center;transform:scaleX(0)}
+
+/* ===== 縦糸: 30代の問い ===== */
+#annos{position:absolute;inset:0;z-index:20;pointer-events:none}
+#thread{position:absolute;top:3.2vh;left:50%;transform:translateX(-50%);text-align:center;
+  font-family:var(--font-min);font-weight:500;font-size:clamp(13px,1.5vw,17px);
+  letter-spacing:.18em;color:rgba(241,236,228,.5);white-space:nowrap;pointer-events:none;opacity:0}
+/* ===== 注記（朱手書き）と温度 ===== */
+.anno{position:absolute;font-family:var(--font-hand);color:var(--shu-hi);
+  font-size:clamp(13px,1.7vw,18px);letter-spacing:.1em;line-height:1.9;
+  pointer-events:none;opacity:0;white-space:pre-line}
+/* ===== 欄外の思想注（右上）: 引用/出典/中心/温度 ===== */
+#margin{position:absolute;top:11vh;right:4vw;max-width:30vw;text-align:right;
+  pointer-events:none;z-index:21}
+#margin .mq{font-family:var(--font-min);font-weight:400;font-size:clamp(12px,1.4vw,15px);
+  line-height:2.1;letter-spacing:.1em;color:rgba(241,236,228,.78)}
+#margin .ms{margin-top:.5em;font-family:var(--font-got);font-weight:300;font-size:11px;
+  letter-spacing:.22em;color:var(--kinari-dim)}
+#margin .mc{margin-top:1.1em;font-family:var(--font-hand);font-size:clamp(12px,1.4vw,14px);
+  letter-spacing:.12em;line-height:1.9;color:var(--shu-hi)}
+#margin .mt{margin-top:1.2em;font-family:var(--font-hand);font-size:12px;
+  letter-spacing:.14em;color:var(--shu-hi);opacity:0}
+#margin .mt .tw{display:block;font-family:var(--font-en);font-style:italic;font-size:.82em;
+  color:rgba(241,236,228,.5);letter-spacing:.2em;margin-top:.3em}
+
+/* ===== 月ラベル ===== */
+#month{position:absolute;bottom:9vh;left:5vw;font-family:var(--font-en);font-style:italic;
+  font-size:clamp(40px,7vw,84px);color:rgba(241,236,228,.13);letter-spacing:.06em;pointer-events:none}
+#month b{font-family:var(--font-min);font-weight:500;font-size:.42em;letter-spacing:.3em;
+  color:rgba(241,236,228,.3);vertical-align:.5em;margin-left:.4em}
+
+/* ===== プロローグ ===== */
+#prologue{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;
+  align-items:center;text-align:center;pointer-events:none}
+#prologue h1{font-family:var(--font-min);font-weight:600;font-size:clamp(44px,8vw,96px);
+  letter-spacing:.3em;text-indent:.3em;color:var(--kinari)}
+#prologue .sub{margin-top:2.2vh;font-family:var(--font-min);font-weight:400;
+  font-size:clamp(13px,1.8vw,17px);letter-spacing:.22em;color:var(--kinari-dim)}
+#prologue .legend{margin-top:6vh;font-family:var(--font-hand);color:var(--shu-hi);
+  font-size:clamp(12px,1.5vw,15px);letter-spacing:.12em;line-height:2.4}
+#prologue .hint{margin-top:5vh;font-family:var(--font-got);font-weight:300;
+  font-size:11px;letter-spacing:.34em;color:rgba(241,236,228,.45)}
+
+/* ===== ホタル（マロンモード） ===== */
+#firefly{position:absolute;left:0;top:0;font-family:var(--font-hand);font-size:13px;color:var(--gold);
+  opacity:0;pointer-events:none;text-shadow:0 0 14px rgba(176,136,64,.9),0 0 4px rgba(176,136,64,.8)}
+
+/* ===== hoverカード ===== */
+#card{position:fixed;left:24px;bottom:34px;max-width:min(460px,80vw);padding:14px 18px;
+  background:rgba(28,11,13,.88);border:1px solid rgba(241,236,228,.16);border-radius:2px;
+  font-family:var(--font-got);font-weight:300;font-size:13px;line-height:1.9;letter-spacing:.06em;
+  color:var(--kinari-mid);opacity:0;transition:opacity .25s;pointer-events:none;z-index:40}
+#card .q{display:block;font-family:"Hiragino Mincho ProN",var(--font-min);color:var(--kinari);font-size:14px}
+#card .meta{display:block;margin-top:.4em;font-size:11px;color:rgba(241,236,228,.5);letter-spacing:.14em}
+
+/* ===== スクラバー ===== */
+#bar{position:fixed;left:0;bottom:0;width:100%;height:3px;background:rgba(241,236,228,.1);z-index:50}
+#bar i{position:absolute;left:0;top:0;height:100%;width:0;background:var(--shu-hi);display:block}
+#bar s{position:absolute;top:-1px;width:1px;height:5px;background:rgba(241,236,228,.35)}
+
+@media (max-width:700px){
+  #card{left:12px;bottom:22px}
+  #margin{max-width:58vw;top:9vh}
+  #margin .mq{font-size:11px;line-height:1.9}
+  #margin .mc{font-size:11px}
+  #thread{font-size:11px;letter-spacing:.1em;white-space:normal;width:88vw}
+  .anno{max-width:38vw;white-space:normal}
+  .anno[style*="translateX"]{max-width:84vw}
+}
+</style>
+</head>
+<body>
+<div id="track">
+ <div id="stage">
+  <div class="bg" id="bg-cool"></div>
+  <div class="bg" id="bg-warm"></div>
+  <div class="bg" id="bg-night"></div>
+  <div id="fog"></div>
+  <div id="month"><span id="month-en"></span><b id="month-ja"></b></div>
+  <div id="thread"></div>
+  <div id="words"></div>
+  <div id="annos"></div>
+  <div id="margin">
+    <div class="mq" id="m-quote"></div>
+    <div class="ms" id="m-src"></div>
+    <div class="mc" id="m-center"></div>
+    <div class="mt" id="m-temp"><span id="temp-name"></span><span class="tw" id="temp-meta"></span></div>
+  </div>
+  <div id="firefly">マロンモード</div>
+  <div id="prologue">
+    <h1>風送り</h1>
+    <div class="sub">2026年3月から6月、ひとりの言葉が変わっていく風景</div>
+    <div class="legend">大きさは、その週に言われた回数。
+揺れている語は、生きている。
+輪郭だけの語は、眠っている。</div>
+    <div class="hint">下へスクロール — 風は、戻すこともできる</div>
+  </div>
+ </div>
+</div>
+<div id="card"><span class="q"></span><span class="meta"></span></div>
+<div id="bar"><i></i></div>
+
+<script>
+const DATA = {"title":"風送り","period":{"from":"2026-03","to":"2026-06-12"},"weekRange":["W14","W24"],"note":"W14-W18=memory由来の定性強度(0-5,回顧的) / W19-W24=チャットログ実カウント。3月(W10-13)は記録なし=霧の岸","words":[{"text":"質量","layer":"thought","born":null,"weeks":{"W14":1,"W15":1,"W16":2,"W17":4,"W18":5,"W19":0,"W20":0,"W21":0,"W22":0,"W23":0,"W24":0},"states":[{"fromW":"W14","status":"active"},{"fromW":"W20","status":"frozen"}],"selfMade":0.9,"emotion":0.7,"quote":"質量にしてみせる","quoteDate":"2026-04-25","source":"memory","verified":true},{"text":"媒介者","layer":"thought","born":"2026-04-09","weeks":{"W14":0,"W15":1,"W16":1,"W17":3,"W18":4,"W19":0,"W20":0,"W21":0,"W22":0,"W23":0,"W24":0},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W15","status":"active"},{"fromW":"W20","status":"frozen"}],"selfMade":0.6,"emotion":0.5,"quote":null,"quoteDate":null,"source":"memory","verified":true},{"text":"批評家になるな。創造主になれ","layer":"thought","born":"2026-04-16","weeks":{"W14":0,"W15":0,"W16":1,"W17":3,"W18":5,"W19":0,"W20":0,"W21":0,"W22":3,"W23":0,"W24":0},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W16","status":"active"},{"fromW":"W20","status":"dormant"},{"fromW":"W22","status":"active"},{"fromW":"W23","status":"dormant"}],"selfMade":0.85,"emotion":0.8,"quote":"批評家になるな。創造主になれ","quoteDate":"2026-04-25","source":"both","verified":true},{"text":"他者と共に質量を生み出す（30代の問い）","layer":"thought","born":"2026-04-23","weeks":{"W14":0,"W15":0,"W16":0,"W17":1,"W18":4,"W19":0,"W20":0,"W21":0,"W22":0,"W23":1,"W24":0},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W17","status":"active"}],"selfMade":0.95,"emotion":0.8,"quote":"他者と共に質量を生み出すとはどういうことか？","quoteDate":"2026-04-28","source":"both","verified":true},{"text":"悩みを解決できる悩みまで細分化する","layer":"thought","born":null,"weeks":{"W14":1,"W15":2,"W16":2,"W17":2,"W18":2,"W19":0,"W20":0,"W21":0,"W22":0,"W23":0,"W24":0},"states":[{"fromW":"W14","status":"active"},{"fromW":"W20","status":"dormant"}],"selfMade":0.95,"emotion":0.5,"quote":"悩みを解決できる悩みまで細分化する","quoteDate":"2026-04-15","source":"memory","verified":true},{"text":"跡取り","layer":"thought","born":"2026-05-14","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":1,"W21":0,"W22":0,"W23":0,"W24":0},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W20","status":"active"},{"fromW":"W21","status":"dormant"}],"selfMade":0.4,"emotion":0.75,"quote":"今村家の跡取りとして","quoteDate":"2026-05-14","source":"both","verified":true},{"text":"撤退戦","layer":"thought","born":"2026-05-23","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":0,"W22":0,"W23":0,"W24":0},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W21","status":"active"}],"selfMade":0.85,"emotion":0.65,"quote":null,"quoteDate":null,"source":"memory","verified":true},{"text":"橋","layer":"thought","born":"2026-05-23","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":0,"W22":0,"W23":0,"W24":0},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W21","status":"active"}],"selfMade":0.6,"emotion":0.6,"quote":null,"quoteDate":null,"source":"memory","verified":true},{"text":"聖域","layer":"thought","born":"2026-05-23","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":0,"W22":0,"W23":0,"W24":0},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W21","status":"active"}],"selfMade":0.65,"emotion":0.7,"quote":null,"quoteDate":null,"source":"memory","verified":true},{"text":"配管","layer":"thought","born":"2026-05-23","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":1,"W22":0,"W23":1,"W24":0},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W21","status":"active"}],"selfMade":0.85,"emotion":0.8,"migrations":[{"atW":"W22","toLayer":"emotion"},{"atW":"W24","toLayer":"ops"}],"quote":"価値を貨幣に変換する配管が嫌い","quoteDate":"2026-05-29","source":"both","verified":true},{"text":"現場の善意を、AIで解放する","layer":"thought","born":"2026-05-23","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":0,"W22":0,"W23":1,"W24":0},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W21","status":"active"}],"selfMade":0.95,"emotion":0.75,"quote":"現場の人は人に時間をかけたいのに事務作業が多い。AIで消す","quoteDate":"2026-05-23","source":"both","verified":true},{"text":"メディアアーティスト","layer":"thought","born":"2026-05-23","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":1,"W22":0,"W23":1,"W24":0},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W21","status":"active"}],"selfMade":0.3,"emotion":0.7,"quote":"自分の本当の興味は、大学・研究室に出入りするメディアアーティスト的なポジション","quoteDate":"2026-05-23","source":"both","verified":true},{"text":"礎","layer":"thought","born":"2026-06-10","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":0,"W22":0,"W23":0,"W24":3},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W24","status":"active"}],"selfMade":0.7,"emotion":0.85,"quote":"今村個人としての思想は常に揺れ動くものだし情動的だし、制度や継続とは程遠い存在。でもその思想が僕の会社を運営する上で礎、先をゆく先駆者としてあれば理想","quoteDate":"2026-06-10","source":"both","verified":true},{"text":"僕や門野坂が","layer":"thought","born":"2026-05-29","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":0,"W22":1,"W23":0,"W24":2},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W22","status":"active"}],"selfMade":0.9,"emotion":0.85,"quote":"僕や門野坂が心の底から素晴らしい、と思える文化でなくてはならない","quoteDate":"2026-06-10","source":"both","verified":true},{"text":"風の谷構想","layer":"thought","born":null,"weeks":{"W14":1,"W15":0,"W16":0,"W17":1,"W18":1,"W19":0,"W20":2,"W21":3,"W22":0,"W23":2,"W24":0},"states":[{"fromW":"W14","status":"active"},{"fromW":"W15","status":"dormant"},{"fromW":"W17","status":"active"}],"selfMade":0.2,"emotion":0.7,"quote":"俺の考えている地方創生とか風の谷構想あるでしょ？","quoteDate":"2026-05-13","source":"both","verified":true},{"text":"宗教","layer":"thought","born":"2026-05-14","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":2,"W21":1,"W22":0,"W23":0,"W24":0},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W20","status":"active"},{"fromW":"W22","status":"dormant"}],"selfMade":0.1,"emotion":0.6,"quote":"宗教そのものに興味があり","quoteDate":"2026-05-14","source":"jsonl","verified":true},{"text":"何を信じ、何を想い、どう生きるか","layer":"thought","born":"2026-05-14","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":1,"W21":0,"W22":0,"W23":0,"W24":0},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W20","status":"active"},{"fromW":"W21","status":"dormant"}],"selfMade":0.9,"emotion":0.8,"quote":"「何を信じ、何を想い、どう生きるか」という問いを生み","quoteDate":"2026-05-14","source":"jsonl","verified":true},{"text":"合格点の作り方","layer":"thought","born":"2026-05-17","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":1,"W21":0,"W22":0,"W23":0,"W24":0},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W20","status":"active"},{"fromW":"W21","status":"dormant"}],"selfMade":0.85,"emotion":0.5,"quote":"この塾は、学校紹介をしているのではなく、合格点の作り方を分析している","quoteDate":"2026-05-17","source":"jsonl","verified":true},{"text":"仕組み化","layer":"thought","born":"2026-05-18","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":2,"W22":0,"W23":0,"W24":0},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W21","status":"active"},{"fromW":"W22","status":"dormant"}],"selfMade":0.3,"emotion":0.4,"quote":"ラジオはすでに仕組み化されている","quoteDate":"2026-05-18","source":"jsonl","verified":true},{"text":"下界","layer":"thought","born":"2026-05-20","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":1,"W22":0,"W23":0,"W24":0},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W21","status":"active"},{"fromW":"W22","status":"dormant"}],"selfMade":0.4,"emotion":0.6,"quote":"川崎のことを「下界」と呼んでいる割には下界に住みつき","quoteDate":"2026-05-20","source":"jsonl","verified":true},{"text":"乗り物","layer":"thought","born":"2026-05-20","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":1,"W22":0,"W23":0,"W24":0},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W21","status":"active"},{"fromW":"W22","status":"dormant"}],"selfMade":0.85,"emotion":0.7,"quote":"山の中を歩くことで私＝今村駿斗という乗り物を再確認できる","quoteDate":"2026-05-20","source":"jsonl","verified":true},{"text":"属人性","layer":"thought","born":"2026-05-19","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":3,"W22":4,"W23":0,"W24":1},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W21","status":"active"}],"selfMade":0.4,"emotion":0.5,"quote":"属人性が分配できる構造であることが条件","quoteDate":"2026-05-23","source":"jsonl","verified":true},{"text":"スケール","layer":"thought","born":"2026-05-19","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":17,"W22":6,"W23":7,"W24":1},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W21","status":"active"}],"selfMade":0.15,"emotion":0.6,"quote":"自分のかけた時間に対してスケールしていかない事業である","quoteDate":"2026-05-22","source":"both","verified":true},{"text":"手触り","layer":"thought","born":"2026-05-23","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":1,"W22":3,"W23":0,"W24":0},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W21","status":"active"},{"fromW":"W23","status":"dormant"}],"selfMade":0.55,"emotion":0.8,"quote":"手触りとかが大好きだから","quoteDate":"2026-05-23","source":"jsonl","verified":true},{"text":"障害福祉","layer":"thought","born":"2026-05-23","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":1,"W22":0,"W23":1,"W24":0},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W21","status":"active"}],"selfMade":0.1,"emotion":0.8,"quote":"自発とか就労支援とか訪問介護とかに関してはかなりこれやりたいなと思いました","quoteDate":"2026-05-23","source":"both","verified":true},{"text":"時間の切り売り","layer":"thought","born":"2026-05-29","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":0,"W22":2,"W23":0,"W24":0},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W22","status":"active"},{"fromW":"W23","status":"dormant"}],"selfMade":0.6,"emotion":0.6,"quote":"時間を切り売りしてるって言う。この構造から抜け出す","quoteDate":"2026-05-29","source":"jsonl","verified":true},{"text":"美学","layer":"thought","born":"2026-05-29","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":0,"W22":1,"W23":0,"W24":0},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W22","status":"active"},{"fromW":"W23","status":"dormant"}],"selfMade":0.3,"emotion":0.7,"quote":"自分のその美学とかをやっぱ追求できるかどうか","quoteDate":"2026-05-29","source":"jsonl","verified":true},{"text":"社会の盲点","layer":"thought","born":"2026-05-23","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":1,"W22":1,"W23":1,"W24":0},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W21","status":"active"}],"selfMade":0.55,"emotion":0.7,"quote":"社会の盲点を見つけて起業してく","quoteDate":"2026-05-30","source":"jsonl","verified":true},{"text":"専門領域","layer":"thought","born":"2026-05-29","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":0,"W22":2,"W23":0,"W24":0},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W22","status":"active"},{"fromW":"W23","status":"dormant"}],"selfMade":0.15,"emotion":0.65,"quote":"僕はね正直専門領域はないんですよ","quoteDate":"2026-05-29","source":"jsonl","verified":true},{"text":"里山教育","layer":"thought","born":"2026-05-19","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":1,"W22":4,"W23":0,"W24":0},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W21","status":"active"},{"fromW":"W23","status":"dormant"}],"selfMade":0.35,"emotion":0.75,"quote":"里山教育みたいなのをやりたくて本当理想の話をすれば","quoteDate":"2026-05-29","source":"jsonl","verified":true},{"text":"圧倒的な共感","layer":"thought","born":"2026-05-29","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":0,"W22":1,"W23":0,"W24":0},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W22","status":"active"},{"fromW":"W23","status":"dormant"}],"selfMade":0.8,"emotion":0.8,"quote":"圧倒的な分析能力。そして圧倒的な共感。","quoteDate":"2026-05-29","source":"jsonl","verified":true},{"text":"顧客リスト＝ファン","layer":"thought","born":"2026-05-29","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":0,"W22":2,"W23":5,"W24":0},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W22","status":"active"}],"selfMade":0.6,"emotion":0.6,"quote":"僕が言っているのは顧客リスト＝僕らのファンという認識です","quoteDate":"2026-06-06","source":"jsonl","verified":true},{"text":"見られている状態","layer":"thought","born":"2026-06-06","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":0,"W22":0,"W23":3,"W24":0},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W23","status":"active"}],"selfMade":0.85,"emotion":0.6,"quote":"この自己規律アプリの目的は誰かに見られている状態をアプリ上で作る","quoteDate":"2026-06-07","source":"both","verified":true},{"text":"切り口","layer":"thought","born":"2026-05-28","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":0,"W22":1,"W23":5,"W24":5},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W22","status":"active"}],"selfMade":0.35,"emotion":0.5,"quote":"やっぱり切り口が大事だと思ってるので","quoteDate":"2026-06-01","source":"both","verified":true},{"text":"くすぶってる","layer":"thought","born":"2026-06-01","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":0,"W22":0,"W23":2,"W24":0},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W23","status":"active"}],"selfMade":0.3,"emotion":0.75,"quote":"なんかくすぶっててここで思いっきり頑張ってやりたいなって思ってる子たち","quoteDate":"2026-06-01","source":"jsonl","verified":true},{"text":"カルチャーコード","layer":"thought","born":"2026-06-10","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":0,"W22":0,"W23":0,"W24":2},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W24","status":"active"}],"selfMade":0.5,"emotion":0.6,"quote":"思想っていうのはカルチャーコード、すなわち文化でなくてはならないと思う","quoteDate":"2026-06-10","source":"both","verified":true},{"text":"思想変容","layer":"thought","born":"2026-06-12","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":0,"W22":0,"W23":0,"W24":1},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W24","status":"active"}],"selfMade":0.8,"emotion":0.8,"quote":"思想の変容が見れるのが1番面白いですよね","quoteDate":"2026-06-12","source":"jsonl","verified":true},{"text":"見にいく","layer":"thought","born":"2026-05-19","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":1,"W22":0,"W23":0,"W24":2},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W21","status":"active"},{"fromW":"W22","status":"dormant"},{"fromW":"W24","status":"active"}],"selfMade":0.7,"emotion":0.7,"quote":"「本気で見にいく」「道を共に歩く」が素晴らしくいい","quoteDate":"2026-06-10","source":"both","verified":true},{"text":"結果的に強い","layer":"thought","born":"2026-06-11","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":0,"W22":0,"W23":0,"W24":1},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W24","status":"active"}],"selfMade":0.85,"emotion":0.65,"quote":"別に強いことを言いたいわけじゃなくて、結果的に強くなってるって言うような感じですね","quoteDate":"2026-06-11","source":"both","verified":true},{"text":"遊び心","layer":"thought","born":"2026-06-10","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":0,"W22":0,"W23":0,"W24":11},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W24","status":"active"}],"selfMade":0.25,"emotion":0.75,"quote":"遊び心があって、一目見ただけであっとなるページにしたい","quoteDate":"2026-06-10","source":"jsonl","verified":true},{"text":"ゆらぎ","layer":"thought","born":"2026-06-11","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":0,"W22":0,"W23":0,"W24":3},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W24","status":"active"}],"selfMade":0.5,"emotion":0.7,"quote":"言葉のゆらぎみたいな動き風のゆらぎみたいなところに関しては非常に良い効果だなぁ","quoteDate":"2026-06-11","source":"jsonl","verified":true},{"text":"ワインレッド","layer":"thought","born":"2026-06-11","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":0,"W22":0,"W23":0,"W24":5},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W24","status":"active"}],"selfMade":0.3,"emotion":0.7,"quote":"ワインレッドって言うところで、ちょっと高級感と強気な姿勢と情熱みたいな、まぁ本気って言う意味を持たせる","quoteDate":"2026-06-11","source":"both","verified":true},{"text":"ストーリー仕立て","layer":"thought","born":"2026-05-23","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":1,"W22":0,"W23":0,"W24":5},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W21","status":"active"},{"fromW":"W22","status":"dormant"},{"fromW":"W24","status":"active"}],"selfMade":0.3,"emotion":0.6,"quote":"ストーリー仕立てでデザインとストーリーを融合させるっていうところにあると思ってるのね","quoteDate":"2026-06-11","source":"jsonl","verified":true},{"text":"モアっと","layer":"emotion","born":null,"weeks":{"W14":2,"W15":3,"W16":3,"W17":3,"W18":2,"W19":0,"W20":0,"W21":0,"W22":0,"W23":0,"W24":0},"states":[{"fromW":"W14","status":"active"},{"fromW":"W20","status":"dormant"}],"selfMade":0.95,"emotion":0.7,"migrations":[],"quote":null,"quoteDate":null,"source":"memory","verified":true},{"text":"和紙","layer":"emotion","born":null,"weeks":{"W14":1,"W15":2,"W16":3,"W17":2,"W18":1,"W19":0,"W20":0,"W21":0,"W22":0,"W23":0,"W24":0},"states":[{"fromW":"W14","status":"active"},{"fromW":"W20","status":"dormant"}],"selfMade":0.6,"emotion":0.6,"migrations":[],"quote":null,"quoteDate":null,"source":"memory","verified":true},{"text":"魂が乗りきらない","layer":"emotion","born":"2026-05-24","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":0,"W22":0,"W23":0,"W24":0},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W21","status":"active"}],"selfMade":0.9,"emotion":0.85,"migrations":[],"quote":"魂が乗りきらない構造","quoteDate":"2026-05-24","source":"memory","verified":true},{"text":"ウキウキ","layer":"emotion","born":"2026-05-22","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":2,"W22":0,"W23":0,"W24":0},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W21","status":"active"},{"fromW":"W22","status":"dormant"}],"selfMade":0.5,"emotion":0.9,"migrations":[],"quote":"そういう姿を見るのはすごくウキウキがするしそういう施策そういうサービス作っていきたいなぁってほんとに心の底から思うよね","quoteDate":"2026-05-22","source":"both","verified":true},{"text":"逃亡しちゃってください","layer":"emotion","born":"2026-05-24","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":1,"W22":0,"W23":0,"W24":0},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W21","status":"active"},{"fromW":"W22","status":"dormant"}],"selfMade":0.9,"emotion":0.95,"migrations":[],"quote":"じゃぁ逃亡しちゃってください。統合統合しちゃってください","quoteDate":"2026-05-24","source":"both","verified":true},{"text":"くそ重い","layer":"emotion","born":"2026-05-12","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":2,"W21":0,"W22":0,"W23":0,"W24":0},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W20","status":"active"},{"fromW":"W21","status":"dormant"}],"selfMade":0.4,"emotion":0.8,"migrations":[],"quote":"なんかこの指示くそ重いんだけどなんでだ？","quoteDate":"2026-05-12","source":"jsonl","verified":true},{"text":"こんな俺が","layer":"emotion","born":"2026-05-13","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":1,"W21":0,"W22":0,"W23":0,"W24":0},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W20","status":"active"},{"fromW":"W21","status":"dormant"}],"selfMade":0.7,"emotion":0.85,"migrations":[],"quote":"こんな俺が毎週決まった生活ができるようになるためには","quoteDate":"2026-05-13","source":"jsonl","verified":true},{"text":"ありがとう","layer":"emotion","born":"2026-05-12","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":6,"W21":0,"W22":2,"W23":0,"W24":4},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W20","status":"active"}],"selfMade":0.2,"emotion":0.6,"migrations":[],"quote":"ありがとう。反映された。","quoteDate":"2026-05-12","source":"jsonl","verified":true},{"text":"わくわく","layer":"emotion","born":"2026-05-23","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":1,"W22":0,"W23":0,"W24":0},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W21","status":"active"},{"fromW":"W22","status":"dormant"}],"selfMade":0.3,"emotion":0.85,"migrations":[],"quote":"そういう話を聞いてる時が一番わくわくする","quoteDate":"2026-05-23","source":"jsonl","verified":true},{"text":"頭が動かなかった","layer":"emotion","born":"2026-05-18","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":2,"W22":0,"W23":0,"W24":0},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W21","status":"active"},{"fromW":"W22","status":"dormant"}],"selfMade":0.5,"emotion":0.7,"migrations":[],"quote":"今週は本当に頭が動かなかった","quoteDate":"2026-05-18","source":"jsonl","verified":true},{"text":"最終通告","layer":"emotion","born":"2026-05-20","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":1,"W22":0,"W23":0,"W24":0},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W21","status":"active"},{"fromW":"W22","status":"dormant"}],"selfMade":0.8,"emotion":0.9,"migrations":[],"quote":"これは僕からの僕への最終通告","quoteDate":"2026-05-20","source":"jsonl","verified":true},{"text":"めっちゃ","layer":"emotion","born":"2026-05-12","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":1,"W21":5,"W22":5,"W23":3,"W24":8},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W20","status":"active"}],"selfMade":0.2,"emotion":0.75,"migrations":[],"quote":"トランゴアルパインGTXがめっちゃ履き心地よかったわ流石に","quoteDate":"2026-05-27","source":"jsonl","verified":true},{"text":"面白い","layer":"emotion","born":"2026-05-17","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":1,"W21":13,"W22":11,"W23":1,"W24":10},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W20","status":"active"}],"selfMade":0.4,"emotion":0.8,"migrations":[],"quote":"1が一番面白いな","quoteDate":"2026-05-29","source":"jsonl","verified":true},{"text":"飽きる","layer":"emotion","born":"2026-05-29","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":0,"W22":2,"W23":0,"W24":0},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W22","status":"active"},{"fromW":"W23","status":"dormant"}],"selfMade":0.4,"emotion":0.7,"migrations":[],"quote":"作られるという感覚がないと飽きると思います","quoteDate":"2026-05-29","source":"jsonl","verified":true},{"text":"口が悪いのは装飾","layer":"emotion","born":"2026-05-30","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":0,"W22":1,"W23":0,"W24":0},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W22","status":"active"},{"fromW":"W23","status":"dormant"}],"selfMade":1,"emotion":0.65,"migrations":[],"quote":"口が悪いのは装飾だと思ってて","quoteDate":"2026-05-30","source":"jsonl","verified":true},{"text":"微妙すぎる","layer":"emotion","born":"2026-06-01","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":0,"W22":0,"W23":2,"W24":0},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W23","status":"active"}],"selfMade":0.4,"emotion":0.85,"migrations":[],"quote":null,"quoteDate":null,"source":"jsonl","verified":true},{"text":"マジで","layer":"emotion","born":"2026-05-20","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":1,"W22":2,"W23":2,"W24":1},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W21","status":"active"}],"selfMade":0.2,"emotion":0.8,"migrations":[],"quote":"AIっぽいデザインはマジでやめてほしい","quoteDate":"2026-06-02","source":"jsonl","verified":true},{"text":"なんなん","layer":"emotion","born":"2026-06-03","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":0,"W22":0,"W23":2,"W24":0},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W23","status":"active"}],"selfMade":0.5,"emotion":0.8,"migrations":[],"quote":"なんかスキルが今日呼び出せてないけどなんなん","quoteDate":"2026-06-03","source":"jsonl","verified":true},{"text":"いけた","layer":"emotion","born":"2026-06-01","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":0,"W22":0,"W23":4,"W24":0},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W23","status":"active"}],"selfMade":0.3,"emotion":0.75,"migrations":[],"quote":"いけた","quoteDate":"2026-06-07","source":"jsonl","verified":true},{"text":"おもろい","layer":"emotion","born":"2026-05-19","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":1,"W22":0,"W23":1,"W24":0},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W21","status":"active"}],"selfMade":0.4,"emotion":0.8,"migrations":[],"quote":"これどっちもあるからおもろいなと思って","quoteDate":"2026-06-06","source":"both","verified":true},{"text":"浮いている","layer":"emotion","born":"2026-05-14","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":1,"W21":0,"W22":0,"W23":2,"W24":0},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W20","status":"active"},{"fromW":"W21","status":"dormant"},{"fromW":"W23","status":"active"}],"selfMade":0.6,"emotion":0.7,"migrations":[],"quote":"受講要項のデザインが浮いている","quoteDate":"2026-06-02","source":"jsonl","verified":true},{"text":"大好き","layer":"emotion","born":"2026-05-23","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":1,"W22":1,"W23":2,"W24":3},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W21","status":"active"}],"selfMade":0.3,"emotion":0.9,"migrations":[],"quote":"僕は人と話すのも大好きだから","quoteDate":"2026-06-10","source":"jsonl","verified":true},{"text":"最高","layer":"emotion","born":"2026-05-20","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":3,"W22":1,"W23":2,"W24":4},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W21","status":"active"}],"selfMade":0.2,"emotion":0.85,"migrations":[],"quote":"すぐ答えを出せるわけではなく、でもその問いを抱えて生きていく、そんな存在になれたら最高だね","quoteDate":"2026-06-10","source":"jsonl","verified":true},{"text":"情けない","layer":"emotion","born":"2026-06-11","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":0,"W22":0,"W23":0,"W24":1},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W24","status":"active"}],"selfMade":0.4,"emotion":0.9,"migrations":[],"quote":"全体としてはすごく情けないホームページになってるなって思ってます","quoteDate":"2026-06-11","source":"jsonl","verified":true},{"text":"睡眠","layer":"emotion","born":"2026-05-13","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":4,"W21":1,"W22":1,"W23":0,"W24":1},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W20","status":"active"}],"selfMade":0.2,"emotion":0.55,"migrations":[],"quote":"睡眠時間7.5+昼寝が欲しいところ","quoteDate":"2026-05-13","source":"jsonl","verified":true},{"text":"生徒","layer":"emotion","born":"2026-05-12","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":18,"W21":9,"W22":10,"W23":15,"W24":9},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W20","status":"active"}],"selfMade":0.2,"emotion":0.65,"migrations":[],"quote":"ほんとに全力で本気で生徒たちに1人の人として向き合ってような場所をイメージしてます","quoteDate":"2026-06-10","source":"jsonl","verified":true},{"text":"綺麗","layer":"emotion","born":"2026-05-20","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":3,"W22":0,"W23":1,"W24":6},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W21","status":"active"}],"selfMade":0.3,"emotion":0.7,"migrations":[],"quote":"「ホーホケキョ」と綺麗な声で鳴くウグイスを一目見ようと、耳を澄ませ近づいては木々の隙間を目を凝らす。","quoteDate":"2026-05-20","source":"jsonl","verified":true},{"text":"人疲れ","layer":"emotion","born":"2026-05-20","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":1,"W22":0,"W23":0,"W24":0},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W21","status":"active"},{"fromW":"W22","status":"dormant"}],"selfMade":0.6,"emotion":0.8,"migrations":[],"quote":"そして直近の予定の多さから人疲れ。","quoteDate":"2026-05-20","source":"jsonl","verified":true},{"text":"トークン数が最適化されるように","layer":"ops","born":null,"weeks":{"W14":1,"W15":1,"W16":2,"W17":2,"W18":3,"W19":0,"W20":3,"W21":5,"W22":2,"W23":1,"W24":27},"states":[{"fromW":"W14","status":"active"}],"selfMade":0.9,"emotion":0.7,"migrations":[{"atW":"W24","toLayer":"ritual"}],"quote":"指示はOpus、実装はSonnet、工程・トークン数が最適化されるように複数エージェント立ち上げても大丈夫","quoteDate":"2026-05-12","source":"both","verified":true},{"text":"マロンモード","layer":"ops","born":"2026-05-22","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":1,"W22":0,"W23":0,"W24":0},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W21","status":"active"},{"fromW":"W22","status":"dormant"}],"selfMade":0.35,"emotion":0.4,"migrations":[],"quote":"マロンモードじゃなくて普通にちょっと対応していきたいと思ってま。","quoteDate":"2026-05-22","source":"both","verified":true},{"text":"go","layer":"ops","born":"2026-05-12","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":4,"W21":2,"W22":0,"W23":5,"W24":8},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W20","status":"active"}],"selfMade":0.4,"emotion":0.3,"migrations":[],"quote":"それでゴーサイン出します","quoteDate":"2026-05-13","source":"both","verified":true},{"text":"引き継ぎ","layer":"ops","born":"2026-04-15","weeks":{"W14":0,"W15":0,"W16":1,"W17":1,"W18":2,"W19":0,"W20":5,"W21":2,"W22":4,"W23":7,"W24":9},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W16","status":"active"}],"selfMade":0.4,"emotion":0.15,"migrations":[],"quote":"おk 引き継ぎを","quoteDate":"2026-05-12","source":"both","verified":true},{"text":"spec.md","layer":"ops","born":"2026-05-09","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":1,"W20":2,"W21":1,"W22":2,"W23":7,"W24":2},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W19","status":"active"}],"selfMade":0.35,"emotion":0.1,"migrations":[],"quote":"spec.md を読んで実装して","quoteDate":"2026-05-09","source":"both","verified":true},{"text":"pending","layer":"ops","born":"2026-05-12","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":2,"W21":3,"W22":1,"W23":6,"W24":4},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W20","status":"active"}],"selfMade":0.25,"emotion":0.1,"migrations":[],"quote":"pending経由方式を採用するなら、pending承認UIをどうするか","quoteDate":"2026-05-12","source":"both","verified":true},{"text":"wrangler","layer":"ops","born":"2026-05-12","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":11,"W21":0,"W22":1,"W23":9,"W24":0},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W20","status":"active"}],"selfMade":0.2,"emotion":0.3,"migrations":[],"quote":"アカウントが繋がらない","quoteDate":"2026-05-12","source":"both","verified":true},{"text":"請求マトリックス","layer":"ops","born":"2026-05-13","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":3,"W21":0,"W22":0,"W23":0,"W24":0},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W20","status":"active"},{"fromW":"W21","status":"dormant"}],"selfMade":0.5,"emotion":0.1,"migrations":[],"quote":"請求マトリックス合計とか請求マトリックス内訳を見てみると","quoteDate":"2026-05-13","source":"jsonl","verified":true},{"text":"年額払い","layer":"ops","born":"2026-05-12","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":9,"W21":5,"W22":0,"W23":0,"W24":2},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W20","status":"active"},{"fromW":"W22","status":"dormant"},{"fromW":"W24","status":"active"}],"selfMade":0.2,"emotion":0.05,"migrations":[],"quote":null,"quoteDate":null,"source":"jsonl","verified":true},{"text":"教材費","layer":"ops","born":"2026-05-12","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":10,"W21":5,"W22":1,"W23":0,"W24":0},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W20","status":"active"},{"fromW":"W23","status":"dormant"}],"selfMade":0.2,"emotion":0.05,"migrations":[],"quote":"また、教材費に関しては202603など、入塾月に教材費trueになるようにしたい","quoteDate":"2026-05-12","source":"jsonl","verified":true},{"text":"税理士","layer":"ops","born":"2026-05-12","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":3,"W21":0,"W22":2,"W23":0,"W24":1},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W20","status":"active"}],"selfMade":0.2,"emotion":0.15,"migrations":[],"quote":"今日の目標はこのシートを税理士に渡すこと。","quoteDate":"2026-05-12","source":"jsonl","verified":true},{"text":"opusとsonnet","layer":"ops","born":"2026-05-12","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":6,"W21":7,"W22":4,"W23":17,"W24":22},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W20","status":"active"}],"selfMade":0.4,"emotion":0.2,"migrations":[],"quote":"大切なところはopusが。実装はsonnetに、工程を最適化","quoteDate":"2026-05-12","source":"both","verified":true},{"text":"工程","layer":"ops","born":"2026-05-09","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":4,"W21":16,"W22":12,"W23":22,"W24":29},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W19","status":"active"}],"selfMade":0.5,"emotion":0.2,"migrations":[],"quote":"工程を一回提示してください。","quoteDate":"2026-05-19","source":"both","verified":true},{"text":"請求メール","layer":"ops","born":"2026-05-12","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":4,"W21":8,"W22":0,"W23":1,"W24":2},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W20","status":"active"}],"selfMade":0.25,"emotion":0.1,"migrations":[],"quote":null,"quoteDate":null,"source":"jsonl","verified":true},{"text":"ブラッシュアップ","layer":"ops","born":"2026-05-26","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":0,"W22":4,"W23":5,"W24":3},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W22","status":"active"}],"selfMade":0.3,"emotion":0.1,"migrations":[],"quote":"批判的に見てみてブラッシュアップかけて","quoteDate":"2026-05-29","source":"jsonl","verified":true},{"text":"壁打ち","layer":"ops","born":"2026-05-19","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":2,"W22":6,"W23":6,"W24":1},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W21","status":"active"}],"selfMade":0.3,"emotion":0.15,"migrations":[],"quote":"壁打ちモードじゃなくてフラットに考えていきたいです","quoteDate":"2026-05-29","source":"jsonl","verified":true},{"text":"並列","layer":"ops","born":"2026-05-09","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":1,"W20":1,"W21":10,"W22":5,"W23":8,"W24":6},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W19","status":"active"}],"selfMade":0.4,"emotion":0.15,"migrations":[],"quote":"工程を提示するときは並列エージェント、使用モデルについても言及して","quoteDate":"2026-05-25","source":"both","verified":true},{"text":"で行こう","layer":"ops","born":"2026-05-23","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":1,"W22":9,"W23":3,"W24":6},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W21","status":"active"}],"selfMade":0.6,"emotion":0.3,"migrations":[],"quote":"じゃあ明日は棒ノ折西案で行くわ","quoteDate":"2026-05-29","source":"jsonl","verified":true},{"text":"凍結","layer":"ops","born":"2026-05-12","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":1,"W21":0,"W22":1,"W23":7,"W24":2},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W20","status":"active"}],"selfMade":0.6,"emotion":0.2,"migrations":[],"quote":"Blueskyでいこう　では凍結","quoteDate":"2026-06-07","source":"both","verified":true},{"text":"別角度","layer":"ops","born":"2026-06-03","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":0,"W22":0,"W23":4,"W24":0},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W23","status":"active"}],"selfMade":0.5,"emotion":0.1,"migrations":[],"quote":"もう一度この工程を精査、別角度から指摘してブラッシュアップして","quoteDate":"2026-06-06","source":"jsonl","verified":true},{"text":"休校日配信","layer":"ops","born":"2026-05-12","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":3,"W21":0,"W22":1,"W23":5,"W24":2},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W20","status":"active"}],"selfMade":0.45,"emotion":0.25,"migrations":[],"quote":"lineharness休校日自動配信が壊れてる。原因を調査して","quoteDate":"2026-06-01","source":"both","verified":true},{"text":"タグづけ","layer":"ops","born":"2026-05-12","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":2,"W21":0,"W22":1,"W23":6,"W24":5},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W20","status":"active"}],"selfMade":0.25,"emotion":0.1,"migrations":[],"quote":"最適なタグづけをしてほしい","quoteDate":"2026-06-03","source":"jsonl","verified":true},{"text":"fable","layer":"ops","born":"2026-06-10","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":0,"W22":0,"W23":0,"W24":28},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W24","status":"active"}],"selfMade":0.2,"emotion":0.5,"migrations":[],"quote":"ここでなぜかclaude fableが使えない、、原因を徹底的に調査して使えるようにして","quoteDate":"2026-06-10","source":"jsonl","verified":true},{"text":"リッチメニュー","layer":"ops","born":"2026-05-27","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":0,"W22":1,"W23":0,"W24":4},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W22","status":"active"}],"selfMade":0.2,"emotion":0.2,"migrations":[],"quote":"外部線の外部性用のリッチメニュー別で作ったんですよ。僕があのclaudeデザインと一緒に作ったやつがあって多分それなんだよね。","quoteDate":"2026-06-11","source":"jsonl","verified":true},{"text":"スコアリング","layer":"ops","born":"2026-05-24","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":1,"W22":0,"W23":0,"W24":4},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W21","status":"active"},{"fromW":"W22","status":"dormant"},{"fromW":"W24","status":"active"}],"selfMade":0.25,"emotion":0.3,"migrations":[],"quote":null,"quoteDate":null,"source":"jsonl","verified":true},{"text":"ハーネス","layer":"ops","born":"2026-05-12","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":9,"W21":3,"W22":1,"W23":22,"W24":4},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W20","status":"active"}],"selfMade":0.4,"emotion":0.2,"migrations":[],"quote":"harnessって何がすごいの？技術的に、僕が利用しているlineharness","quoteDate":"2026-06-08","source":"both","verified":true},{"text":"赤入れ","layer":"ops","born":"2026-06-11","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":0,"W22":0,"W23":0,"W24":2},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W24","status":"active"}],"selfMade":0.6,"emotion":0.3,"migrations":[],"quote":"赤入れができないようになっている。どうしたらいい？","quoteDate":"2026-06-11","source":"jsonl","verified":true},{"text":"八ヶ岳ワンデイ縦走","layer":"hobby","born":"2026-05-26","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":0,"W22":5,"W23":2,"W24":0},"states":[{"fromW":"W22","status":"active"}],"selfMade":0.6,"emotion":0.7,"migrations":[],"quote":"足には自信がある","quoteDate":"2026-05-24","source":"both","verified":true},{"text":"登山","layer":"hobby","born":"2026-05-20","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":5,"W22":10,"W23":0,"W24":2},"states":[{"fromW":"W21","status":"active"}],"selfMade":0.2,"emotion":0.8,"migrations":[],"quote":"圧倒的な変化があった1日。登山してよかった。歩いてよかった。","quoteDate":"2026-05-20","source":"both","verified":true},{"text":"スノボ","layer":"hobby","born":null,"weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":3,"W22":5,"W23":0,"W24":1},"states":[{"fromW":"W14","status":"absent"},{"fromW":"W21","status":"active"},{"fromW":"W23","status":"dormant"}],"selfMade":0.15,"emotion":0.5,"migrations":[],"quote":"3月スノボーとか言ってたけど、最近5月6月とかスノボ言わないじゃないですか","quoteDate":"2026-06-12","source":"jsonl","verified":true},{"text":"サウナ","layer":"hobby","born":"2026-05-13","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":2,"W21":1,"W22":0,"W23":0,"W24":3},"states":[{"fromW":"W20","status":"active"},{"fromW":"W22","status":"dormant"},{"fromW":"W24","status":"active"}],"selfMade":0.15,"emotion":0.6,"migrations":[],"quote":"夜はサウナにいって素早く寝たい","quoteDate":"2026-05-13","source":"jsonl","verified":true},{"text":"朝ラン","layer":"hobby","born":"2026-05-13","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":3,"W21":0,"W22":0,"W23":1,"W24":0},"states":[{"fromW":"W20","status":"active"},{"fromW":"W21","status":"dormant"},{"fromW":"W23","status":"active"}],"selfMade":0.3,"emotion":0.5,"migrations":[{"atW":"W23","toLayer":"ops"}],"quote":"ランは朝　理想は週５","quoteDate":"2026-05-13","source":"jsonl","verified":true},{"text":"読み耽る","layer":"hobby","born":"2026-05-14","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":1,"W21":0,"W22":0,"W23":0,"W24":0},"states":[{"fromW":"W20","status":"active"},{"fromW":"W21","status":"dormant"}],"selfMade":0.4,"emotion":0.5,"migrations":[],"quote":"最近は月に十数冊本を読み耽る日々です。","quoteDate":"2026-05-14","source":"jsonl","verified":true},{"text":"お手紙","layer":"hobby","born":"2026-05-14","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":1,"W21":0,"W22":0,"W23":0,"W24":0},"states":[{"fromW":"W20","status":"active"},{"fromW":"W21","status":"dormant"}],"selfMade":0.2,"emotion":0.7,"migrations":[],"quote":"お手紙ありがとうございます。","quoteDate":"2026-05-14","source":"jsonl","verified":true},{"text":"ニーチェ","layer":"hobby","born":"2026-05-20","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":1,"W22":0,"W23":0,"W24":0},"states":[{"fromW":"W21","status":"active"},{"fromW":"W22","status":"dormant"}],"selfMade":0.1,"emotion":0.6,"migrations":[],"quote":"ニーチェのツァラトゥストラはこういったを持っていたのだが、これがまた大正解","quoteDate":"2026-05-20","source":"jsonl","verified":true},{"text":"クマップ","layer":"hobby","born":"2026-05-23","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":1,"W22":0,"W23":0,"W24":1},"states":[{"fromW":"W21","status":"active"},{"fromW":"W22","status":"dormant"},{"fromW":"W24","status":"active"}],"selfMade":0.2,"emotion":0.6,"migrations":[],"quote":"クマップって言って、クマの出没の範囲を統計的に見て地図で","quoteDate":"2026-05-23","source":"jsonl","verified":true},{"text":"エスプレッソ","layer":"hobby","born":"2026-05-23","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":5,"W22":0,"W23":0,"W24":0},"states":[{"fromW":"W21","status":"active"},{"fromW":"W22","status":"dormant"}],"selfMade":0.1,"emotion":0.5,"migrations":[],"quote":"金属タンパーなんで買う必要あるんだっけ","quoteDate":"2026-05-23","source":"jsonl","verified":true},{"text":"温泉","layer":"hobby","born":"2026-05-20","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":2,"W22":0,"W23":0,"W24":0},"states":[{"fromW":"W21","status":"active"},{"fromW":"W22","status":"dormant"}],"selfMade":0.1,"emotion":0.5,"migrations":[],"quote":"汗を流すために近くの温泉に行ったはいいものの、めぼしい２つがなんと休館日。直接施設の前まで行ったのに、、。","quoteDate":"2026-05-20","source":"jsonl","verified":true},{"text":"棒ノ折","layer":"hobby","born":"2026-05-29","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":0,"W22":3,"W23":0,"W24":0},"states":[{"fromW":"W22","status":"active"},{"fromW":"W23","status":"dormant"}],"selfMade":0.1,"emotion":0.4,"migrations":[],"quote":"棒の折りさ。棒のり白谷沢で行く場合は","quoteDate":"2026-05-29","source":"jsonl","verified":true},{"text":"yamap","layer":"hobby","born":"2026-05-26","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":0,"W22":4,"W23":2,"W24":3},"states":[{"fromW":"W22","status":"active"}],"selfMade":0.1,"emotion":0.4,"migrations":[],"quote":"yamapあなたが作れる？","quoteDate":"2026-05-26","source":"jsonl","verified":true},{"text":"山と道","layer":"hobby","born":"2026-05-27","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":0,"W22":2,"W23":0,"W24":0},"states":[{"fromW":"W22","status":"active"},{"fromW":"W23","status":"dormant"}],"selfMade":0.25,"emotion":0.7,"migrations":[{"atW":"W22","toLayer":"thought"}],"quote":"自分がひとつのブランドの長になっているのが理想。山と道、みたいな","quoteDate":"2026-05-29","source":"jsonl","verified":true},{"text":"筋トレ","layer":"hobby","born":"2026-05-29","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":0,"W22":3,"W23":0,"W24":1},"states":[{"fromW":"W22","status":"active"}],"selfMade":0.1,"emotion":0.4,"migrations":[],"quote":"哲学も読んでるし、筋トレも多少はやってるし、ピアノを弾くし、AIも触っている。でも全部専門、特化というわけではない。","quoteDate":"2026-05-29","source":"jsonl","verified":true},{"text":"ヤビツ峠","layer":"hobby","born":"2026-06-06","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":0,"W22":0,"W23":2,"W24":0},"states":[{"fromW":"W23","status":"active"}],"selfMade":0.1,"emotion":0.5,"migrations":[],"quote":"ヤビツは外したくない","quoteDate":"2026-06-06","source":"both","verified":true},{"text":"タクシー","layer":"hobby","born":"2026-06-06","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":0,"W22":0,"W23":3,"W24":0},"states":[{"fromW":"W23","status":"active"}],"selfMade":0.1,"emotion":0.4,"migrations":[],"quote":"秦野駅だとさ、タクシーはすぐ捕まるかな？","quoteDate":"2026-06-06","source":"both","verified":true},{"text":"行動食","layer":"hobby","born":"2026-06-06","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":0,"W22":0,"W23":1,"W24":0},"states":[{"fromW":"W23","status":"active"}],"selfMade":0.15,"emotion":0.3,"migrations":[],"quote":"持ち物、食料、行動食、水の提案して","quoteDate":"2026-06-06","source":"both","verified":true},{"text":"Trango Alpine GTX","layer":"hobby","born":"2026-05-27","weeks":{"W14":0,"W15":0,"W16":0,"W17":0,"W18":0,"W19":0,"W20":0,"W21":0,"W22":1,"W23":0,"W24":1},"states":[{"fromW":"W22","status":"active"}],"selfMade":0.1,"emotion":0.7,"migrations":[],"quote":"Trango Alpine GTX　どこも痛くない最高","quoteDate":"2026-06-10","source":"both","verified":true}],"temperatures":[{"week":"W14","name":"設計興奮","warmth":0.55,"windSpeed":0.45,"note":"直接記録なし・W19レビューからの逆算で、L3アーカイブ物理化と配色議論に伴う設計興奮の活発期と推定。"},{"week":"W15","name":"整流決断","warmth":0.4,"windSpeed":0.4,"note":"X-english Phase A/B・LINE Harness G期の実務進行期で、go/択一番号の単語発火による冷側の整流決断が支配と推定。"},{"week":"W16","name":"技術的警戒","warmth":0.25,"windSpeed":0.35,"note":"4/17のX 403制限と4/19のG2一括送信テスト停止が同週に重なり、「ただ静かに動かない」冷えた谷に入った。"},{"week":"W17","name":"内省・留保","warmth":0.6,"windSpeed":0.5,"note":"30歳誕生日接近とともに質量・媒介者・創造主の哲学語彙が立ち上がり、内省が温まり始めた週。"},{"week":"W18","name":"哲学的実況","warmth":0.9,"windSpeed":0.8,"note":"30歳エッセイ（4月末）で哲学的実況が全期間ピークに達し、「質量にしてみせる」「30代の問い」が一斉誕生、4/30に法政二YouTube撮影も完了。"},{"week":"W19","name":"設計興奮","warmth":0.5,"windSpeed":0.55,"note":"哲学的実況が休眠し設計興奮+整流決断の二重支配へ移行、5/4卒業生MTG前後の構想熱は一時発生して鎮静した。"},{"week":"W20","name":"整流決断","warmth":0.2,"windSpeed":0.6,"note":"整流決断+技術的警戒が週全体の70%超を占めた全期間の最冷点で、例外は5/14祖父手紙の局所爆発のみ（請求シート構築では単独行go×7の最短決裁リズムが確立）。"},{"week":"W21","name":"構想熱","warmth":0.8,"windSpeed":0.75,"note":"W20で消失した構想熱が31本並列レポートとともに爆発的復活し、5/23-24「鋳造の夜」に深夜0:37「7/1スタート」と日付を刻んだ。"},{"week":"W22","name":"構想熱","warmth":0.85,"windSpeed":0.65,"note":"感情が制御を外れた3点（ウキウキ/直家で見てきた/大好きなんだよね）が噴出した本観測期間の最暖点で、許可探し温度も同時に観察された。"},{"week":"W23","name":"整流決断","warmth":0.3,"windSpeed":1.5,"note":"単独go20回（6/3に1日8発）の決裁連打で熱はLINE Harness実装へ完全沈降、ただし6/6夜〜6/7の風の谷構想からtanaka-kei spec凍結まで構想熱が一晩半だけ噴き上がった発話量最大の週。"},{"week":"W24","name":"整流決断","warmth":0.45,"windSpeed":0.9,"note":"感情発火語ゼロの整流基調（単独go約13回）ながら、6/11午後の参照サイト巡礼で色名が1日4転した設計興奮と6/10深夜の思想語彙点灯が底冷えに暖を差した。"}],"marginalia":[{"t0":16.4,"t1":18.7,"philosopher":null,"quote":null,"center":"質量・媒介者・創造主が頂点に達した30歳の宣言"},{"t0":18.8,"t1":20.95,"philosopher":"鶴見俊輔と、週次の鏡をめぐる対話","quote":"日常のふつうの会話の中に思想が流れていてはじめて、それは生きた思想となる","center":"思想語彙が休眠し、手紙の儀式フレームにのみ宿った"},{"t0":21.0,"t1":22.1,"philosopher":"大山山頂、ツァラトゥストラを読む（5/20）","quote":"ニーチェは自分の人生の生き方を世の中の様々な自然現象で例えることが多く、状況も相まってひどく共感","center":"内省の一人称から、関係の他動詞への置換"},{"t0":22.15,"t1":23.0,"philosopher":null,"quote":null,"center":"欲望が三角度から噴出し、許可探しと構想熱が同居した"},{"t0":23.0,"t1":24.0,"philosopher":null,"quote":null,"center":"欲望の余熱が実装に沈降し、温度が記号決断へ収束"},{"t0":24.0,"t1":25.3,"philosopher":"ブーバー『われ-なんじ』——採用した価値観","quote":"設計のどこかで『われ-なんじ』の瞬間が起きなければならない","center":"揺れを礎に再設計し、モデル序列が思想と共に逆転"}]};
+
+/* ============================================================
+   風送り engine — 全状態は p（スクロール進行）の純関数
+   赤ヒーロー文法移植: 速度適応lerp / 決定的rnd / sin-cos二層風
+   ============================================================ */
+(() => {
+const W = DATA.words, TEMPS = DATA.temperatures;
+const isMobile = matchMedia('(max-width:700px)').matches;
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---- 決定的乱数（リロード再現） ---- */
+const rnd = (i, s) => { const x = Math.sin(i * 127.1 + s * 311.7) * 43758.5453; return x - Math.floor(x); };
+const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
+const lerp = (a, b, k) => a + (b - a) * k;
+const smooth = x => { x = clamp(x, 0, 1); return x * x * (3 - 2 * x); };
+
+/* ---- 時間軸: p → t（週番号 連続値）。週アンカー区分線形 ---- */
+/* W10=3月頭 … W14=3/30 … W21=鋳造の夜(尺2倍) … W24=6月の岸 */
+const ANCHORS = [
+  [0.07, 9.6], [0.16, 16.2], [0.30, 18.6], [0.40, 20.6],
+  [0.60, 22.0], [0.80, 23.6], [0.97, 25.0], [1.001, 25.25]
+];
+function tOf(p) {
+  if (p <= ANCHORS[0][0]) return ANCHORS[0][1];
+  for (let i = 1; i < ANCHORS.length; i++) {
+    if (p <= ANCHORS[i][0]) {
+      const [p0, t0] = ANCHORS[i - 1], [p1, t1] = ANCHORS[i];
+      return lerp(t0, t1, (p - p0) / (p1 - p0));
+    }
+  }
+  return ANCHORS[ANCHORS.length - 1][1];
+}
+const dateToT = d => { // W14月曜 = 2026-03-30
+  const days = (new Date(d + 'T12:00:00') - new Date('2026-03-30T12:00:00')) / 864e5;
+  return 14 + days / 7;
+};
+
+/* ---- 語データ前処理 ---- */
+const wNum = s => +s.slice(1);
+W.forEach((w, i) => {
+  w.i = i;
+  w.vals = []; for (let k = 10; k <= 25; k++) w.vals[k] = (w.weeks && w.weeks['W' + k]) || 0;
+  w.first = 25; w.last = 10;
+  for (let k = 10; k <= 25; k++) if (w.vals[k] > 0) { if (k < w.first) w.first = k; if (k > w.last) w.last = k; }
+  w.alive = w.first <= 24;
+  w.bornT = w.born ? dateToT(w.born) : w.first;
+  w.total = w.vals.reduce((a, b) => a + (b || 0), 0);
+  w.st = (w.states || []).map(s => ({ t: wNum(s.fromW), s: s.status }));
+  w.mig = (w.migrations || []).map(m => ({ t: wNum(m.atW) + .5, layer: m.toLayer }));
+});
+let WORDS = W.filter(w => w.alive);
+if (isMobile) {
+  const keep = new Set(['配管', 'スノボ', '質量', '現場の善意を、AIで解放する', '僕や門野坂が', 'マロンモード', 'ウキウキ', '八ヶ岳ワンデイ縦走', '礎', 'トークン数が最適化されるように']);
+  WORDS = WORDS.sort((a, b) => (b.total + (keep.has(b.text) ? 99 : 0)) - (a.total + (keep.has(a.text) ? 99 : 0))).slice(0, 55);
+}
+
+/* ---- サイズ: 週ごとpercentile5段（離散・嘘をつかない） ---- */
+const STEPS = isMobile ? [12, 16, 21, 28, 38] : [14, 19, 26, 36, 50];
+const sizeAt = {}; // sizeAt[week] = Map(word.i -> px)
+for (let k = 10; k <= 25; k++) {
+  const live = WORDS.filter(w => w.vals[k] > 0).sort((a, b) => a.vals[k] - b.vals[k]);
+  const m = new Map();
+  live.forEach((w, idx) => m.set(w.i, STEPS[Math.min(4, Math.floor(idx / live.length * 5))]));
+  sizeAt[k] = m;
+}
+function sizeOf(w, t) {
+  const k = Math.floor(t), f = t - k;
+  const s0 = (sizeAt[k] && sizeAt[k].get(w.i)) || STEPS[0] * .82;
+  const s1 = (sizeAt[k + 1] && sizeAt[k + 1].get(w.i)) || STEPS[0] * .82;
+  return lerp(s0, s1, f);
+}
+const valAt = (w, t) => { const k = Math.floor(t); return lerp(w.vals[k] || 0, w.vals[k + 1] || 0, t - k); };
+const stateAt = (w, t) => { let s = 'absent'; for (const x of w.st) if (t >= x.t) s = x.s; return s; };
+const layerAt = (w, t) => { let l = w.layer; for (const m of w.mig) if (t >= m.t) l = m.layer; return l; };
+
+/* ---- 帯（レイヤー→y域%）。帯内yは黄金比で均等散布（衝突回避・決定的） ---- */
+const BAND = { hobby: [10, 18], thought: [22, 50], emotion: [53, 71], ops: [83, 93], ritual: [72, 78] };
+const bandY = {};
+for (const l of Object.keys(BAND)) {
+  const members = WORDS.filter(w => w.layer === l || w.mig.some(m => m.layer === l));
+  const [a, b] = BAND[l];
+  members.forEach((w, k) => { (bandY[w.i] = bandY[w.i] || {})[l] = a + ((k * 0.618034) % 1) * (b - a); });
+}
+const yOf = (w, l) => (bandY[w.i] && bandY[w.i][l] != null) ? bandY[w.i][l] : BAND[l][0];
+
+/* ---- 温度 → warmth / windSpeed（週次線形補間） ---- */
+const tempMap = {}; TEMPS.forEach(x => tempMap[wNum(x.week)] = x);
+function tempAt(t) {
+  const k = clamp(Math.floor(t), 14, 24), f = clamp(t - k, 0, 1);
+  const a = tempMap[clamp(k, 14, 24)] || { warmth: .4, windSpeed: .5 };
+  const b = tempMap[clamp(k + 1, 14, 24)] || a;
+  return { warmth: lerp(a.warmth, b.warmth, f), wind: lerp(a.windSpeed, b.windSpeed, f) };
+}
+
+/* ---- 月境界の風送り（風が止まり、向きが変わる） ---- */
+const MONTHS = [[10, 'Mar', '三月'], [14.15, 'Apr', '四月'], [18.55, 'May', '五月'], [23.0, 'Jun', '六月']];
+function windDir(t) { // 月ごとに反転、境界±0.18週で凪
+  let idx = 0; for (let i = 0; i < MONTHS.length; i++) if (t >= MONTHS[i][0]) idx = i;
+  let amp = 1;
+  for (const [mt] of MONTHS) { const d = Math.abs(t - mt); if (d < .18) amp = Math.min(amp, smooth(d / .18)); }
+  return { dir: idx % 2 ? -1 : 1, lull: amp };
+}
+
+/* ---- DOM生成 ---- */
+const stage = document.getElementById('words');
+const frag = document.createDocumentFragment();
+WORDS.forEach(w => {
+  const el = document.createElement('div');
+  el.className = 'w w-' + w.layer;
+  el.textContent = w.text;
+  if (w.quote && w.selfMade >= 0.85 && w.born) { // 鋳造演出: 生引用→blur→核語
+    const q = document.createElement('span'); q.className = 'quote-birth';
+    q.textContent = '「' + w.quote.slice(0, 42) + (w.quote.length > 42 ? '…' : '') + '」';
+    el.appendChild(q); w.qEl = q;
+  }
+  if (w.text === '現場の善意を、AIで解放する') { // 朱下線: 全ページ唯一
+    const u = document.createElement('span'); u.className = 'shu-line'; el.appendChild(u); w.uEl = u;
+  }
+  w.el = el;
+  el.addEventListener('mouseenter', () => showCard(w));
+  el.addEventListener('mouseleave', hideCard);
+  frag.appendChild(el);
+});
+stage.appendChild(frag);
+
+/* ---- 注記（朱手書き・1シーン1個の予算制） ---- */
+const ANNO = [/*ANNO_START*/
+  { t0: 9.7, t1: 13.6, x: 50, y: 44, c: 1, text: '三月——記録は、残っていない' },
+  { t0: 16.6, t1: 18.4, x: 22, y: 26, text: '三十歳。質量の季節' },
+  { t0: 18.9, t1: 19.9, x: 64, y: 78, text: 'ここから、定量観測' },
+  { t0: 21.0, t1: 22.0, x: 50, y: 14, c: 1, text: '鋳造の夜 5/23–24' },
+  { t0: 22.3, t1: 23.3, x: 56, y: 12, text: '滑る趣味は、事業の風景に転生した' },
+  { t0: 24.35, t1: 25.3, x: 50, y: 58, c: 1, text: 'まだ、変わりつづけている' },
+  { t0: 24.75, t1: 25.3, x: 50, y: 66, c: 1, small: 1, text: '観測は、観測されるものを変える——この風景も、もう語彙のひとつ' },
+/*ANNO_END*/];
+const annoBox = document.getElementById('annos');
+ANNO.forEach(a => {
+  const el = document.createElement('div'); el.className = 'anno';
+  el.textContent = a.text;
+  el.style.left = a.x + '%'; el.style.top = a.y + '%';
+  if (a.c) el.style.transform = 'translateX(-50%)';
+  if (a.small) el.style.fontSize = '12px';
+  annoBox.appendChild(el); a.el = el;
+});
+
+/* ---- 縦糸: 30代の問い 3変奏 ---- */
+const THREAD = [
+  [17.2, '他者と共に質量を生み出すとは、どういうことか？'],
+  [21.4, '——他者の中の質量を、解放する'],
+  [24.1, '他者と共に質量を生み出すとは、どういうことか？'],
+];
+const threadEl = document.getElementById('thread');
+
+/* ---- 月・温度・スクラバー ---- */
+const monthEn = document.getElementById('month-en');
+const monthJa = document.getElementById('month-ja');
+const tempName = document.getElementById('temp-name');
+const tempMeta = document.getElementById('temp-meta');
+const mTemp = document.getElementById('m-temp');
+const mQuote = document.getElementById('m-quote');
+const mSrc = document.getElementById('m-src');
+const mCenter = document.getElementById('m-center');
+const MARG = DATA.marginalia || [];
+let lastMarg = -1;
+const bar = document.querySelector('#bar i');
+const barBox = document.getElementById('bar');
+MONTHS.forEach(([mt]) => { const s = document.createElement('s');
+  // 月境界tをpへ逆引き（アンカー区分線形の逆）
+  let p = 0; for (let i = 1; i < ANCHORS.length; i++) { const [p0, t0] = ANCHORS[i - 1], [p1, t1] = ANCHORS[i];
+    if (mt >= t0 && mt <= t1) { p = p0 + (p1 - p0) * (mt - t0) / (t1 - t0); break; } }
+  s.style.left = (p * 100) + '%'; barBox.appendChild(s); });
+
+/* ---- hoverカード ---- */
+const card = document.getElementById('card');
+const cardQ = card.querySelector('.q'), cardM = card.querySelector('.meta');
+function showCard(w) {
+  cardQ.textContent = w.quote ? '「' + w.quote + '」' : w.text;
+  const span = w.first <= 13 ? '観測以前〜' : 'W' + w.first + (w.last > w.first ? '〜W' + w.last : '');
+  cardM.textContent = (w.quoteDate ? w.quoteDate + ' / ' : '') + span +
+    (w.source === 'memory' ? ' / 記憶からの再構成' : '');
+  card.style.opacity = 1;
+}
+function hideCard() { card.style.opacity = 0; }
+
+/* ---- スクロール → 速度適応lerp（赤ヒーロー移植） ---- */
+let pTarget = 0, pCur = 0, vel = 0;
+const params = new URLSearchParams(location.search);
+const pFix = params.has('p') ? +params.get('p') : null;
+function targetProgress() {
+  if (pFix !== null) return pFix;
+  const h = document.getElementById('track').offsetHeight - innerHeight;
+  return clamp(scrollY / h, 0, 1);
+}
+function adaptive(cur, target) {
+  const diff = target - cur;
+  const rate = Math.min(0.38, 0.085 + Math.abs(diff) * 1.0);
+  return cur + diff * rate;
+}
+
+/* ---- メインループ ---- */
+const fogEl = document.getElementById('fog');
+const warmEl = document.getElementById('bg-warm');
+const nightEl = document.getElementById('bg-night');
+const proEl = document.getElementById('prologue');
+const ffEl = document.getElementById('firefly');
+let lastThread = '';
+
+function frame(now) {
+  const clock = pFix !== null ? 7.3 : now * 0.001;
+  pTarget = targetProgress();
+  pCur = pFix !== null ? pFix : adaptive(pCur, pTarget);
+  vel = clamp((pTarget - pCur) * 18, -1, 1); // 逆走で逆風
+  const p = pCur, t = tOf(p);
+  const tp = tempAt(t), wd = windDir(t);
+  const windBase = (reduceMotion ? 0 : 1) * tp.wind * wd.lull;
+
+  /* 背景 */
+  warmEl.style.opacity = tp.warmth;
+  const night = smooth(clamp((0.95 - Math.abs(t - 21.6)) / 0.5, 0, 1));
+  nightEl.style.opacity = night * .96;
+  /* 月境界の霧 */
+  let fog = 0;
+  for (const [mt] of MONTHS) { const d = Math.abs(t - mt); if (d < .22) fog = Math.max(fog, 1 - d / .22); }
+  if (t < 13.6) fog = Math.max(fog, .55); // 三月=霧の岸
+  fogEl.style.opacity = fog;
+  fogEl.style.transform = `translateX(${(clock * 1.2 % 10) * 3 - 15}%)`;
+
+  /* プロローグ */
+  proEl.style.opacity = clamp(1 - p / 0.055, 0, 1);
+
+  /* 月ラベル */
+  let mi = 0; for (let i = 0; i < MONTHS.length; i++) if (t >= MONTHS[i][0]) mi = i;
+  if (p < .065) { monthEn.textContent = ''; monthJa.textContent = ''; }
+  else { monthEn.textContent = MONTHS[mi][1]; monthJa.textContent = MONTHS[mi][2]; }
+
+  /* 欄外の思想注: 哲学者の言葉 / 思想の中心（シーン単位） */
+  let mgi = -1;
+  for (let i = 0; i < MARG.length; i++) if (t >= MARG[i].t0 && t <= MARG[i].t1) { mgi = i; break; }
+  if (mgi >= 0 && mgi !== lastMarg) {
+    const m = MARG[mgi];
+    mQuote.textContent = m.quote ? '「' + m.quote + '」' : '';
+    mSrc.textContent = m.philosopher ? '—— ' + m.philosopher : '';
+    mCenter.textContent = m.center || '';
+    lastMarg = mgi;
+  }
+  const mv = mgi >= 0 ? smooth((t - MARG[mgi].t0) / .3) * smooth((MARG[mgi].t1 - t) / .3) : 0;
+  mQuote.style.opacity = mv; mSrc.style.opacity = mv * .9; mCenter.style.opacity = mv;
+
+  /* 温度名（週単位・思想注の4行目） */
+  const wk = Math.round(t - .5);
+  const tw = tempMap[wk];
+  if (tw && p > .08) {
+    tempName.textContent = tw.name;
+    tempMeta.textContent = 'W' + wk + ' · warmth ' + tw.warmth.toFixed(2);
+    mTemp.style.opacity = clamp(1 - Math.abs(t - .5 - wk) * 2.2, 0, .9);
+  } else mTemp.style.opacity = 0;
+
+  /* 縦糸 */
+  let th = ''; for (const [tt, s] of THREAD) if (t >= tt) th = s;
+  if (th !== lastThread) { threadEl.textContent = th; lastThread = th; }
+  threadEl.style.opacity = th ? clamp((t - 17.2) * 2, 0, 1) * .9 : 0;
+
+  /* 注記 */
+  for (const a of ANNO) {
+    const vis = t > a.t0 && t < a.t1 ? smooth((t - a.t0) / .25) * smooth((a.t1 - t) / .25) : 0;
+    a.el.style.opacity = vis * .95;
+  }
+
+  /* ホタル（マロンモード: Δt≈0.1 のみ・ゆっくり戻ると見つかる） */
+  const ff = smooth(1 - Math.abs(t - 21.62) / .1);
+  ffEl.style.opacity = ff;
+  if (ff > 0) ffEl.style.transform =
+    `translate(${(42 + Math.sin(clock * .9) * 6) * innerWidth / 100}px, ${(30 + Math.cos(clock * .7) * 5) * innerHeight / 100}px)`;
+
+  /* ===== 語 ===== */
+  for (const w of WORDS) {
+    const el = w.el;
+    const v = valAt(w, t);
+    const st = stateAt(w, t);
+    const preEcho = t < w.first && t > w.first - 2.6 && w.first <= 16; // 霧の岸の輪郭
+    const ghostWin = t > w.last + 2.4;
+    const isFrozen = st === 'frozen';
+    /* 可視判定（カリング: visibility切替のみ） */
+    let alphaState;
+    if (v > 0.04) alphaState = .85;
+    else if (preEcho) alphaState = .3;
+    else if (isFrozen) alphaState = .3;
+    else if (st === 'dormant' && !ghostWin) alphaState = .34;
+    else { if (el.classList.contains('on')) el.classList.remove('on'); continue; }
+    if (!el.classList.contains('on')) el.classList.add('on');
+
+    /* 層（移動語は帯クロス） */
+    const l = layerAt(w, t);
+    if (el._l !== l) { el.className = 'w on w-' + l; el._l = l; }
+    el.classList.toggle('frozen', isFrozen);
+    el.classList.toggle('pre', preEcho && v <= 0.04);
+
+    /* 位置: 右から流入 → 帯内をゆっくり左へ → 死後は左上へ抜ける */
+    const span = Math.max(1, w.last - w.first + 1);
+    const lifeF = clamp((t - w.first + .6) / (span + 1.2), 0, 1);
+    let x;
+    if (preEcho) x = Math.min(90, 78 + (w.first - t) * 5);   // 霧の中、右奥
+    else if (t < w.first) x = 104;
+    else x = lerp(80, 18, lifeF) + (rnd(w.i, 7) - .5) * (l === 'ops' ? 46 : 30);
+    if (isMobile && t >= w.first) { // SP右端クリップ回避: 語幅(字数×サイズ)ぶん引き込む
+      const wpct = Math.min(60, w.text.length * sizeOf(w, t) / innerWidth * 100);
+      x = Math.min(x, 94 - wpct);
+    }
+    let y = yOf(w, l);
+    let fade = 1;
+    if (t > w.last + .6 && !isFrozen && st !== 'active') { // 死後: 上空へ薄れる
+      const d = clamp((t - w.last - .6) / 1.8, 0, 1);
+      y -= d * 9; x -= d * 12; fade = 1 - d * .8;
+    }
+    if (isFrozen) { x = 8 + rnd(w.i, 9) * 7; } // 冷凍語: 左端の記念碑
+
+    /* 風（事務語=無風 / 冷凍=風応答停止） */
+    const noWind = l === 'ops' || isFrozen || preEcho;
+    const amp = noWind ? 0 : windBase * (4 + w.emotion * 7);
+    const ph = rnd(w.i, 1) * 6.283, f1 = .5 + rnd(w.i, 2) * .5;
+    const gust = Math.sin(clock * .13 + ph) * .5 + .5;
+    const wx = amp * (Math.sin(clock * f1 + ph) + .4 * Math.sin(clock * f1 * 2.7 + ph * 2)) * (1 + gust) * wd.dir
+             + vel * (noWind ? 0 : -7);
+    const wy = amp * .45 * Math.cos(clock * f1 * .8 + ph);
+    const breathe = noWind ? 1 : 1 + Math.sin(clock * .8 + ph) * .08; // ±8% scale=肌理
+    let size = sizeOf(w, t);
+    if (l === 'ops') size = Math.min(size, STEPS[2]); // 事務語=通奏低音、声を張らない
+    const rot = l === 'emotion' ? -1.5 - rnd(w.i, 4) * 1.5 : 0;
+    const weight = 300 + Math.round(w.selfMade * 300);
+
+    el.style.transform = `translate(${x * innerWidth / 100 + wx}px, ${y * innerHeight / 100 + wy}px)`
+      + ` rotate(${rot}deg) scale(${breathe})`;
+    el.style.fontSize = size + 'px';
+    if (el._wt !== weight) { el.style.fontWeight = weight; el._wt = weight; }
+    el.style.opacity = alphaState * fade * (l === 'ops' ? .62 : 1);
+
+    /* 鋳造演出: 生引用→blur→核語 */
+    if (w.qEl) {
+      const bq = smooth(1 - Math.abs(t - w.bornT) / .4);
+      w.qEl.style.opacity = bq * .85;
+      w.qEl.style.filter = `blur(${(1 - bq) * 4}px)`;
+    }
+    /* 朱下線 draw-in（pの純関数=逆走で巻き戻る） */
+    if (w.uEl) w.uEl.style.transform = `scaleX(${clamp((t - w.bornT) * 2.2, 0, 1)})`;
+  }
+
+  /* スクラバー */
+  bar.style.width = (p * 100) + '%';
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
